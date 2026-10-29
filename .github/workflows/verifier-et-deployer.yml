@@ -114,16 +114,23 @@ jobs:
           HOTE=${HOTE#ssh}
           PORT=$(tr -d '[:space:]' <<<"${PORT:-22}")
           PORT=${PORT:-22}
-          cle_serveur=$(grep -oE 'ssh-ed25519 [A-Za-z0-9+/=]+' <<<"$EMPREINTE" | head -n1)
-          if [ -z "$cle_serveur" ]; then
-            echo "::error::VPS_EMPREINTE_SSH ne contient pas de clé « ssh-ed25519 AAAA… »."
+          # Clé publique du serveur : 68 caractères après « ssh-ed25519 ». Les retours à la ligne ajoutés
+          # au copier-coller depuis la console web sont retirés avant lecture.
+          b64=$(tr -d '[:space:]' <<<"$EMPREINTE" | grep -oE 'ssh-ed25519AAAAC3NzaC1lZDI1NTE5[A-Za-z0-9+/]{48}' | head -n1 || true)
+          if [ -z "$b64" ]; then
+            echo "::error::VPS_EMPREINTE_SSH ne contient pas de clé ssh-ed25519 complète (68 caractères). Recopier la sortie de la commande echo sur le VPS."
             exit 1
           fi
+          cle_serveur="ssh-ed25519 ${b64#ssh-ed25519}"
           # Alias fixe : la vérification de l'identité du VPS ne dépend pas de la façon d'écrire l'hôte.
           printf 'kivien-vps %s\n' "$cle_serveur" > ~/.ssh/known_hosts
+          # Empreintes publiques (non secrètes), à comparer avec le VPS en cas d'échec :
+          #   ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+          echo "Empreinte attendue du VPS : $(ssh-keygen -lf ~/.ssh/known_hosts | cut -d' ' -f2)"
+          echo "Clé de déploiement : $(ssh-keygen -y -f ~/.ssh/kivien | ssh-keygen -lf - | cut -d' ' -f2)"
           # La clé ne peut lancer que kivien-mise-a-jour sur le VPS (commande forcée).
           ssh -i ~/.ssh/kivien -p "$PORT" \
-            -o HostKeyAlias=kivien-vps -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o HostKeyAlias=kivien-vps -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
             -o ConnectTimeout=20 -o ServerAliveInterval=30 \
             "root@$HOTE" "deployer $GITHUB_SHA"
 
