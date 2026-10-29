@@ -35,7 +35,7 @@ Le script est relançable : il conserve `.env` et les données, et n'applique qu
 Dans hPanel : VPS, puis Terminal du navigateur (connecté en root).
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Emmanueltaochy/koudmin/claude/adoring-mendel-u8wzbb/deploy/vps/installer.sh -o installer.sh
+curl -fsSL https://raw.githubusercontent.com/Emmanueltaochy/koudmin/main/deploy/vps/installer.sh -o installer.sh
 ```
 
 ```bash

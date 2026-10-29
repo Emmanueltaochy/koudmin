@@ -18,7 +18,7 @@ set -euo pipefail
 DOMAINE=${KIVIEN_DOMAINE_API:-api.kivien.re}
 SITE=${KIVIEN_SITE:-https://kivien.re}
 DEPOT=${KIVIEN_DEPOT:-https://github.com/Emmanueltaochy/koudmin.git}
-REF=${KIVIEN_REF:-claude/adoring-mendel-u8wzbb}
+REF=${KIVIEN_REF:-main}
 EMAIL=${KIVIEN_EMAIL:-}
 RACINE=/opt/kivien
 SOURCE=$RACINE/source
