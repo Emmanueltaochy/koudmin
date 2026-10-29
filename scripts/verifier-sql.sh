@@ -17,4 +17,18 @@ $P -d k -f "$RACINE/supabase/tests/stub-supabase.sql" 2>/dev/null
 for f in "$RACINE"/supabase/migrations/*.sql; do $P -d k -f "$f"; done
 $P -d k -c "grant select, insert, update, delete on all tables in schema public to authenticated"
 $P -d k -f "$RACINE/supabase/seed.sql"
-psql -h "$DIR" -p $PORT -U postgres -d k -f "$RACINE/supabase/tests/scenario.sql"
+psql -h "$DIR" -p $PORT -U postgres -d k -f "$RACINE/supabase/tests/scenario.sql" > "$DIR/scenario.log" 2>&1 || true
+cat "$DIR/scenario.log"
+
+# Le scénario provoque exactement ces refus ; toute autre erreur (ou un refus manquant) fait échouer.
+attendues='Informations du contrat manquantes
+Mission pas encore commencée
+Taux horaire sous le minimum légal
+new row violates row-level security policy for table "extras"'
+obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
+if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
+  echo "ÉCHEC : erreurs SQL inattendues" >&2
+  diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
+  exit 1
+fi
+echo "Scénario SQL conforme (4 refus attendus)."

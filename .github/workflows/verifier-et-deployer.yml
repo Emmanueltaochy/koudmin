@@ -1,0 +1,118 @@
+# À chaque push : vérifications complètes. Sur main seulement : mise à jour du VPS ensuite.
+# Secrets à créer dans GitHub (deploy/vps/autoriser-github.sh les affiche sur le VPS) :
+#   VPS_HOTE, VPS_PORT, VPS_EMPREINTE_SSH, VPS_CLE_SSH
+name: Vérifier et déployer
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Un seul déploiement à la fois ; une version plus récente remplace celle qui attend.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  verifier:
+    name: Vérifications
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Dépendances
+        run: pnpm install --frozen-lockfile
+
+      - name: Types
+        run: pnpm typecheck
+
+      - name: Tests unitaires (calculs, textes, règles)
+        run: pnpm test
+
+      - name: Base de données (migrations, règles d'accès, scénario)
+        run: |
+          [ -x /usr/lib/postgresql/16/bin/initdb ] || { sudo apt-get update -q && sudo apt-get install -y -q postgresql-16; }
+          scripts/verifier-sql.sh
+
+      - name: Scripts du serveur
+        run: |
+          for f in deploy/vps/*.sh; do bash -n "$f"; done
+          shellcheck -S warning deploy/vps/*.sh
+
+      - name: Build du site restaurateur
+        run: pnpm --filter @kivien/resto build
+
+      - name: Build web de l'app extra
+        run: pnpm --filter @kivien/extra export:web
+
+      - name: Navigateur pour les parcours
+        run: |
+          npm install -g playwright@1.63.0
+          npx -y playwright@1.63.0 install --with-deps chromium
+
+      - name: Parcours de bout en bout (données fictives)
+        run: |
+          export NODE_PATH=$(npm root -g)
+          npx -y serve@14 -s apps/extra/dist -l 8090 > /tmp/serve.log 2>&1 &
+          pnpm --filter @kivien/resto start > /tmp/resto.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8090 > /dev/null && curl -sf http://localhost:3000/connexion > /dev/null && break
+            sleep 1
+          done
+          node apps/extra/e2e/parcours.cjs
+          node apps/resto/e2e/parcours.cjs
+
+  deployer:
+    name: Mise à jour du VPS
+    needs: verifier
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - name: Secrets présents
+        env:
+          HOTE: ${{ secrets.VPS_HOTE }}
+          EMPREINTE: ${{ secrets.VPS_EMPREINTE_SSH }}
+          CLE: ${{ secrets.VPS_CLE_SSH }}
+        run: |
+          manque=
+          [ -n "$HOTE" ] || manque="$manque VPS_HOTE"
+          [ -n "$EMPREINTE" ] || manque="$manque VPS_EMPREINTE_SSH"
+          [ -n "$CLE" ] || manque="$manque VPS_CLE_SSH"
+          if [ -n "$manque" ]; then
+            echo "::error::Secrets manquants :$manque (voir deploy/vps/README.md, « Déploiement automatique »)."
+            exit 1
+          fi
+
+      - name: Mise à jour
+        env:
+          HOTE: ${{ secrets.VPS_HOTE }}
+          PORT: ${{ secrets.VPS_PORT }}
+          EMPREINTE: ${{ secrets.VPS_EMPREINTE_SSH }}
+          CLE: ${{ secrets.VPS_CLE_SSH }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$CLE" > ~/.ssh/kivien
+          chmod 600 ~/.ssh/kivien
+          printf '%s\n' "$EMPREINTE" > ~/.ssh/known_hosts
+          # La clé ne peut lancer que kivien-mise-a-jour sur le VPS (commande forcée).
+          ssh -i ~/.ssh/kivien -p "${PORT:-22}" \
+            -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
+            -o ConnectTimeout=20 -o ServerAliveInterval=30 \
+            "root@$HOTE" "deployer $GITHUB_SHA"
+
+      - name: Nettoyage de la clé
+        if: always()
+        run: rm -f ~/.ssh/kivien

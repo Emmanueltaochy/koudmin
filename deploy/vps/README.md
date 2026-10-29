@@ -112,6 +112,32 @@ ssh -L 18000:127.0.0.1:18000 root@187.124.33.84
 puis ouvrir `http://localhost:18000` (identifiant `kivien`, mot de passe : `DASHBOARD_PASSWORD` dans le `.env` du VPS).
 Le port réel est `KIVIEN_PORT_API` dans le `.env` (18000 sauf s'il était déjà pris).
 
+## Déploiement automatique (push sur main)
+
+À chaque push, GitHub Actions vérifie tout : types, tests unitaires, migrations et règles d'accès sur
+un Postgres jetable, scripts du serveur, builds, parcours de bout en bout des deux applications.
+Sur `main`, si tout est vert, GitHub se connecte au VPS et lance la mise à jour :
+
+- seulement la dernière version de `main` (une version plus ancienne est ignorée) ;
+- sauvegarde de la base avant toute nouvelle migration ;
+- migrations appliquées une seule fois ; installeur complet si la configuration du serveur a changé ;
+- vérification finale : le déploiement apparaît en rouge dans GitHub si un point échoue.
+
+Mise en place, une seule fois, dans le terminal du VPS :
+
+```bash
+sudo /opt/kivien/source/deploy/vps/autoriser-github.sh
+```
+
+Le script crée une clé SSH réservée à GitHub, qui ne peut lancer que la mise à jour, et affiche les
+4 secrets à créer dans GitHub (dépôt, Settings, Secrets and variables, Actions) : `VPS_HOTE`, `VPS_PORT`,
+`VPS_EMPREINTE_SSH`, `VPS_CLE_SSH`. La clé privée n'est gardée que par GitHub.
+
+Si un pare-feu Hostinger filtre le port SSH, il doit accepter les connexions de GitHub Actions.
+
+Journal des mises à jour sur le VPS : `/var/log/kivien-mises-a-jour.log`. Mise à jour à la main :
+`sudo kivien-mise-a-jour deployer <sha complet du dernier commit de main>`.
+
 ## Exploitation
 
 | Besoin | Commande (en root) |

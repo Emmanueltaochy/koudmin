@@ -43,8 +43,13 @@ etape "1/9 Vérifications"
 dispo_go=$(( $(awk '/MemAvailable/ {print $2}' /proc/meminfo) / 1024 / 1024 ))
 disque_go=$(( $(df -Pk / | awk 'NR==2 {print $4}') / 1024 / 1024 ))
 info "mémoire disponible : ${dispo_go} Go, disque libre : ${disque_go} Go"
-[ "$dispo_go" -ge 3 ] || arret "moins de 3 Go de mémoire disponible."
-[ "$disque_go" -ge 15 ] || arret "moins de 15 Go libres sur le disque."
+# Seuils pour la première installation ; ensuite Supabase occupe déjà sa part de mémoire.
+if [ ! -f "$ICI/.env" ]; then
+  [ "$dispo_go" -ge 3 ] || arret "moins de 3 Go de mémoire disponible."
+  [ "$disque_go" -ge 15 ] || arret "moins de 15 Go libres sur le disque."
+else
+  [ "$disque_go" -ge 3 ] || arret "moins de 3 Go libres sur le disque."
+fi
 command -v nginx >/dev/null || arret "nginx absent : ce script s'appuie sur le nginx déjà en place."
 for cmd in git curl openssl python3 ss; do command -v "$cmd" >/dev/null || apt-get install -y -q "$cmd" >> "$JOURNAL" 2>&1; done
 
@@ -223,8 +228,10 @@ fi
 [ -n "$ancien" ] && rm -f "$ancien"
 
 # ---------------------------------------------------------------------------
-etape "8/9 Sauvegarde quotidienne"
+etape "8/9 Sauvegarde quotidienne et mise à jour automatique"
 install -m 0700 "$SOURCE/deploy/vps/sauvegarde.sh" /usr/local/sbin/kivien-sauvegarde
+# Mise à jour lancée par GitHub Actions (clé autorisée par autoriser-github.sh).
+install -m 0700 "$SOURCE/deploy/vps/mettre-a-jour.sh" /usr/local/sbin/kivien-mise-a-jour
 # Minuteur systemd à l'heure de La Réunion, quel que soit le fuseau du VPS.
 cat > /etc/systemd/system/kivien-sauvegarde.service <<'UNIT'
 [Unit]
