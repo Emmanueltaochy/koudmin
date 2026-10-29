@@ -61,7 +61,7 @@ export default function SuiviDemande() {
   if (!demande) {
     return (
       <div className={p.etroite}>
-        <Link href="/" className={p.retour}>
+        <Link href="/espace" className={p.retour}>
           <ChevronLeft size={20} strokeWidth={2} aria-hidden />
           {ts.retour}
         </Link>
@@ -95,7 +95,7 @@ export default function SuiviDemande() {
 
   return (
     <div className={p.etroite}>
-      <Link href="/" className={p.retour}>
+      <Link href="/espace" className={p.retour}>
         <ChevronLeft size={20} strokeWidth={2} aria-hidden />
         {ts.retour}
       </Link>

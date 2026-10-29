@@ -16,3 +16,4 @@ export * from './textesEcrans';
 export * from './contrat';
 export * from './communes';
 export * from './inscription';
+export * from './textesVitrine';

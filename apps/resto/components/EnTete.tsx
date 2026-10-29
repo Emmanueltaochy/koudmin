@@ -10,7 +10,7 @@ import { donneesFictives } from '@/lib/donnees';
 import s from './EnTete.module.css';
 
 const LIENS = [
-  { href: '/', libelle: 'Accueil' },
+  { href: '/espace', libelle: 'Accueil' },
   { href: '/demande', libelle: 'Trouver un extra' },
   { href: '/historique', libelle: 'Historique' },
   { href: '/historique?onglet=factures', libelle: 'Factures' },
@@ -46,7 +46,7 @@ export function EnTete() {
 
   return (
     <header className={s.entete}>
-      <Link href="/" className={s.marque} aria-label="Kivien, accueil">
+      <Link href="/espace" className={s.marque} aria-label="Kivien, accueil">
         {/* Logo pilule basalte : version de l'application (le bouton d'action reste le seul piment). */}
         <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" className={s.logo} />
       </Link>

@@ -28,7 +28,7 @@ export default function Connexion() {
     try {
       const r = await connecter(telephone, motDePasse);
       if (r === 'ok') {
-        router.replace('/');
+        router.replace('/espace');
         return;
       }
       setErreur(

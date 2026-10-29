@@ -77,12 +77,15 @@ L'app extra et le site restaurateur lisent et écrivent la même base Supabase. 
 
 ## Écrans
 
-- **Restaurateur** : accueil, demande d'extra, suivi en temps réel, contrat + signature + rappel DPAE, notation, historique, factures, favoris, connexion par mobile et mot de passe.
+- **Page d'accueil publique** (`/`, maquette « Landing page v3 ») : promesse, étapes, app extras, contrat, témoignages, garanties, tarif, lettre d'information. Montants calculés depuis la table `parametres` (lecture publique), textes dans `packages/core/src/textesVitrine.ts`, liens et photos dans `apps/resto/lib/vitrine/liens.ts`.
+- **Restaurateur** (`/espace`) : accueil, demande d'extra, suivi en temps réel, contrat + signature + rappel DPAE, notation, historique, factures, favoris, connexion par mobile et mot de passe.
 - **Extra** : inscription (5 champs), connexion, missions disponibles et confirmées, détail + « Mi lé la », désistement, contrat (infos DPAE demandées une seule fois), disponibilités, profil.
 
 Captures et comparaisons avec les maquettes : `docs/captures/`.
 
 ## À valider avant la production
+
+- **Page d'accueil** : remplacer les photos de travail (4 sur 6 hors restauration, droits inconnus) par des photos sous licence ou prises sur place ; vrais témoignages avec accord écrit (ou retirer la section) ; logos partenaires avec autorisation ; pages légales (mentions légales, CGV, confidentialité, cookies), liens des stores et adresse bonjour@kivien.re à créer ; la lettre d'information collecte des e-mails : à déclarer dans la politique de confidentialité, avec un vrai lien de désinscription dans chaque envoi.
 
 - **Contrat** (`packages/core/src/contrat.ts`) : modèle de CDD d'usage à faire relire par un juriste en droit du travail.
 - **Signature électronique** : tracé + horodatage + compte du signataire (numéro à vérifier par SMS une fois le fournisseur branché). Pour une valeur probante renforcée, brancher un prestataire (eIDAS).

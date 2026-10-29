@@ -24,14 +24,16 @@ psql -h "$DIR" -p $PORT -U postgres -d k -f "$RACINE/supabase/tests/scenario.sql
 cat "$DIR/scenario.log"
 
 # Le scénario provoque exactement ces refus ; toute autre erreur (ou un refus manquant) fait échouer.
-attendues='Informations du contrat manquantes
+attendues='Adresse e-mail invalide
+Informations du contrat manquantes
 Mission pas encore commencée
 Taux horaire sous le minimum légal
-new row violates row-level security policy for table "extras"'
+new row violates row-level security policy for table "extras"
+permission denied for table abonnes_lettre'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   echo "ÉCHEC : erreurs SQL inattendues" >&2
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (4 refus attendus)."
+echo "Scénario SQL conforme (6 refus attendus)."

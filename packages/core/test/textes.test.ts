@@ -14,6 +14,8 @@ import {
   textes,
   LIBELLES_POSTE,
   textesEcrans,
+  textesVitrine,
+  montantsVitrine,
 } from '../src';
 import { FRAIS, l, SMIC } from './aide';
 
@@ -38,14 +40,22 @@ const generes = [
   textePrise(1),
   questionDesistement('ce soir'),
 ];
-const corpus = [...tousLesTextes(textes), ...tousLesTextes(textesEcrans), ...tousLesTextes(LIBELLES_POSTE), ...generes];
+const corpus = [
+  ...tousLesTextes(textes),
+  ...tousLesTextes(textesEcrans),
+  ...tousLesTextes(textesVitrine),
+  ...tousLesTextes(montantsVitrine(1231, 2500)),
+  ...tousLesTextes(LIBELLES_POSTE),
+  ...generes,
+];
 
 describe('règles d’écriture', () => {
   it('aucun point d’exclamation', () => {
     for (const t of corpus) expect(t, t).not.toContain('!');
   });
   it('aucun émoji', () => {
-    for (const t of corpus) expect(t, t).not.toMatch(/\p{Extended_Pictographic}/u);
+    // ©, ® et ™ sont « pictographiques » pour Unicode mais s'affichent en texte : ce ne sont pas des émojis.
+    for (const t of corpus) expect(t, t).not.toMatch(/(?![©®™])\p{Extended_Pictographic}/u);
   });
   it('aucune mention d’âge', () => {
     for (const t of corpus) expect(t, t).not.toMatch(/\bjeunes?\b|étudiant|\d+\s*ans\b|\d+-\d+ ans/i);
@@ -55,7 +65,8 @@ describe('règles d’écriture', () => {
   });
   it('aucun accord au masculin sur la personne (venu, absent, inscrit, prêt…)', () => {
     // « Extra absent et non remplacé » : texte validé de la maquette, « un extra » y désigne le poste.
-    const corpusPersonne = corpus.map((t) => t.replace('Extra absent et non remplacé', ''));
+    // « Le contrat est prêt » : c'est le contrat qui est prêt, pas une personne.
+    const corpusPersonne = corpus.map((t) => t.replace('Extra absent et non remplacé', '').replace('Le contrat est prêt', ''));
     for (const t of corpusPersonne)
       expect(t, t).not.toMatch(/(?<!\p{L})(venu|absent|inscrit|prêt|connecté|déclaré|payé par toi)(?!\p{L})/iu);
   });
@@ -110,5 +121,25 @@ describe('textes selon le jour de la mission', () => {
   it('accès', () => {
     expect(legendeAcces('2,1 km', 'entrée du personnel côté cuisine')).toBe('2,1 km · entrée du personnel côté cuisine');
     expect(legendeAcces('2,1 km', null)).toBe('2,1 km');
+  });
+});
+
+describe('page d’accueil', () => {
+  it('calcule les montants depuis les paramètres (6 h au SMIC 2026)', () => {
+    const m = montantsVitrine(SMIC, FRAIS);
+    expect(l(m.taux)).toBe('12,31 €');
+    expect(l(m.brut)).toBe('81,25 €');
+    expect(l(m.net)).toBe('63 €');
+    expect(l(m.fraisCourt)).toBe('25 € HT');
+    expect(l(m.fraisDetail)).toBe('25,00 € HT');
+    expect(l(m.detailSalaire)).toBe('6 h × 12,31 € + 10 % de congés payés. Versé par vous, hors charges patronales.');
+  });
+  it('suit le taux en vigueur', () => {
+    expect(l(montantsVitrine(1300, 2500).brut)).toBe('85,80 €');
+  });
+  it('reprend les textes de la maquette', () => {
+    expect(textesVitrine.promesse.titre).toBe('Un extra en 2 heures.');
+    expect(l(textesVitrine.promesse.confirmation)).toBe('Kévin a dit mi lé la. Arrivée prévue à 18 h.');
+    expect(textesVitrine.pied.signature).toBe('Les extras péi, en 2 heures.');
   });
 });

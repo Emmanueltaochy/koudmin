@@ -166,3 +166,15 @@ insert into extras (id, prenom, nom, telephone, commune, lat, lng) values
   ('00000000-0000-0000-0000-0000000000e3', 'Johan', 'Grondin', '+262693000099', 'Le Port', -20.93, 55.29);
 select prenom, telephone from extras;
 reset role;
+\echo '--- Page d''accueil : taux et frais lisibles sans compte'
+set role anon;
+select taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes from parametres order by date_effet desc limit 1;
+\echo '--- Lettre d''information : inscription sans compte, doublon sans erreur, adresse invalide refusée'
+select inscrire_lettre('  Lucette.Hoarau@Exemple.re ');
+select inscrire_lettre('lucette.hoarau@exemple.re');
+\set ON_ERROR_STOP 0
+select inscrire_lettre('pas-une-adresse');
+select count(*) from abonnes_lettre;
+\set ON_ERROR_STOP 1
+reset role;
+select email from abonnes_lettre;

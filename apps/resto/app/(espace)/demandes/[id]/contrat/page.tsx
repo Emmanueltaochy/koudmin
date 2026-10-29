@@ -35,7 +35,7 @@ function Contrat() {
   if (!d || !extra) {
     return (
       <div className={p.etroite}>
-        <Link href={d ? `/demandes/${d.id}` : '/'} className={p.retour}>
+        <Link href={d ? `/demandes/${d.id}` : '/espace'} className={p.retour}>
           <ChevronLeft size={20} strokeWidth={2} aria-hidden />
           {textesEcrans.resto.suivi.retour}
         </Link>

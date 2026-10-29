@@ -3,7 +3,6 @@ import {
   aujourdhuiReunion,
   bornesMission,
   miseEnRelationFacturee,
-  type ParametresTarifaires,
 } from '@kivien/core';
 import type {
   DemandeSuivi,
@@ -15,18 +14,14 @@ import type {
   SourceResto,
 } from './source';
 import { agregerFavoris } from './favoris';
+import { PARAMETRES_FICTIFS } from './parametresFictifs';
 
 /**
  * Données fictives du restaurateur de démo (Le Boucan Grillé), gardées dans le sessionStorage
  * de l'onglet : une demande publiée reste visible d'une page à l'autre.
  */
 
-const PARAMETRES: ParametresTarifaires = {
-  dateEffet: '2026-01-01',
-  tauxHoraireBrutCentimes: 1231,
-  fraisMiseEnRelationHTCentimes: 2500,
-  tvaPourMille: 85,
-};
+const PARAMETRES = PARAMETRES_FICTIFS;
 
 const RESTAURANT: Restaurant = {
   id: 'r001',

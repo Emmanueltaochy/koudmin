@@ -20,7 +20,28 @@ const CAPTURES = process.env.CAPTURES;
   const ok = (t) => console.log('OK  ' + t);
   const capture = async (nom) => CAPTURES && p.screenshot({ path: `${CAPTURES}/${nom}.png`, fullPage: true });
 
+  // Page d'accueil publique : montants tirés des paramètres, témoignages, lettre, accès à l'espace.
   await p.goto(URL_SITE + '/');
+  await p.getByRole('heading', { name: 'Un extra en 2 heures.' }).waitFor(); ok('accueil public : promesse');
+  await p.getByText(/81,25\s€\sbrut, congés payés compris/).waitFor();
+  await p.getByText(/≈\s63\s€\snet/).waitFor();
+  await p.getByText(/^25,00\s€\sHT$/).waitFor(); ok('accueil public : 6 h au SMIC = 81,25 € brut, ≈ 63 € net, frais 25 € HT');
+  if (await p.getByText(/Serveur|Barman|s'il ne vient pas|embauché/).count()) throw new Error('texte genré sur la page d’accueil');
+  await p.getByRole('button', { name: 'Témoignage suivant' }).click();
+  await p.locator('[aria-hidden="false"]', { hasText: 'Je coche mes soirées libres' }).waitFor(); ok('accueil public : témoignage suivant');
+  await p.getByRole('button', { name: 'Témoignage précédent' }).click();
+  await p.locator('[aria-hidden="false"]', { hasText: 'il me manquait un commis' }).waitFor(); ok('accueil public : témoignage précédent');
+  await p.getByLabel('Votre e-mail').fill('pas-une-adresse');
+  await p.getByRole('button', { name: "S'inscrire" }).click();
+  await p.getByText('Indiquez une adresse e-mail valide.').waitFor(); ok('lettre : adresse invalide refusée');
+  await p.getByLabel('Votre e-mail').fill('lucette.hoarau@exemple.re');
+  await p.getByRole('button', { name: "S'inscrire" }).click();
+  await p.getByText('Inscription enregistrée.', { exact: false }).waitFor(); ok('lettre : inscription enregistrée');
+  await capture('vitrine');
+  await p.getByRole('link', { name: 'Se connecter' }).first().click();
+  await p.waitForURL(URL_SITE + '/connexion'); ok('accueil public : lien Se connecter');
+
+  await p.goto(URL_SITE + '/espace');
   await p.getByRole('heading', { name: 'Le Boucan Grillé' }).waitFor();
   await p.getByText('Contrat à signer · Kévin').waitFor(); ok('accueil : demande de ce soir, contrat à signer');
   await p.getByText('Missions à noter').waitFor(); ok('accueil : mission à noter');
@@ -81,7 +102,7 @@ const CAPTURES = process.env.CAPTURES;
   await capture('contrat-signe');
 
   // Notation de la mission d'hier
-  await p.goto(URL_SITE + '/');
+  await p.goto(URL_SITE + '/espace');
   await p.getByRole('link', { name: /Maëlle Payet/ }).click();
   await p.getByRole('heading', { name: 'Noter la mission' }).waitFor();
   await p.getByRole('radio', { name: 'Oui' }).click();
@@ -124,7 +145,7 @@ const CAPTURES = process.env.CAPTURES;
   await capture('connexion');
   await p.locator('#mot-de-passe').fill('kivien974');
   await p.getByRole('button', { name: 'Se connecter' }).click();
-  await p.waitForURL(URL_SITE + '/'); ok('connexion par mot de passe (démo)');
+  await p.waitForURL(URL_SITE + '/espace'); ok('connexion par mot de passe (démo)');
 
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
