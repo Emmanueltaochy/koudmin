@@ -10,11 +10,13 @@ values
   ('00000000-0000-0000-0000-0000000000e1', '262692000001', 'authenticated', 'authenticated'),
   ('00000000-0000-0000-0000-0000000000a1', '262693000001', 'authenticated', 'authenticated');
 
-insert into extras (id, prenom, telephone, commune, lat, lng, a_voiture)
-values ('00000000-0000-0000-0000-0000000000e1', 'Kévin', '+262692000001', 'Saint-Paul', -21.03, 55.255, false);
+insert into extras (id, prenom, nom, telephone, commune, lat, lng, a_voiture)
+values ('00000000-0000-0000-0000-0000000000e1', 'Kévin', 'Hoarau', '+262692000001', 'Saint-Paul', -21.03, 55.255, false);
 
+insert into restaurants (id, proprietaire, nom, telephone, adresse, code_postal, commune, lat, lng) values
+  ('00000000-0000-0000-0000-00000000b001', '00000000-0000-0000-0000-0000000000a1', 'Le Boucan Grillé', '+262262000001',
+   '14 rue du Général de Gaulle', '97434', 'Saint-Gilles-les-Bains', -21.039442, 55.237476);
 insert into restaurants (id, proprietaire, nom, telephone) values
-  ('00000000-0000-0000-0000-00000000b001', '00000000-0000-0000-0000-0000000000a1', 'Le Boucan Grillé', '+262262000001'),
   ('00000000-0000-0000-0000-00000000b002', null, 'Ti Kaz Bar', '+262262000002'),
   ('00000000-0000-0000-0000-00000000b003', null, 'Chez Tatie Lucette', '+262262000003'),
   ('00000000-0000-0000-0000-00000000b004', null, 'Hôtel Les Filaos', '+262262000004');

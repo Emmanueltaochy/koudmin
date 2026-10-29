@@ -1,0 +1,18 @@
+.page {
+  padding-top: 24px;
+  max-width: 480px;
+}
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+.bloc > button {
+  align-self: flex-start;
+}

@@ -13,11 +13,13 @@ import {
   textePrise,
   textes,
   LIBELLES_POSTE,
+  textesEcrans,
 } from '../src';
 import { FRAIS, l, SMIC } from './aide';
 
 function tousLesTextes(o: unknown): string[] {
   if (typeof o === 'string') return [o];
+  if (typeof o === 'function') return [o(1), o(2)];
   if (o && typeof o === 'object') return Object.values(o).flatMap(tousLesTextes);
   return [];
 }
@@ -36,7 +38,7 @@ const generes = [
   textePrise(1),
   questionDesistement('ce soir'),
 ];
-const corpus = [...tousLesTextes(textes), ...tousLesTextes(LIBELLES_POSTE), ...generes];
+const corpus = [...tousLesTextes(textes), ...tousLesTextes(textesEcrans), ...tousLesTextes(LIBELLES_POSTE), ...generes];
 
 describe('règles d’écriture', () => {
   it('aucun point d’exclamation', () => {
@@ -50,6 +52,12 @@ describe('règles d’écriture', () => {
   });
   it('aucune forme genrée retirée', () => {
     for (const t of corpus) expect(t, t).not.toMatch(/Empêché|prévenu dès|Il arrive|Serveur|Barman/);
+  });
+  it('aucun accord au masculin sur la personne (venu, absent, inscrit, prêt…)', () => {
+    // « Extra absent et non remplacé » : texte validé de la maquette, « un extra » y désigne le poste.
+    const corpusPersonne = corpus.map((t) => t.replace('Extra absent et non remplacé', ''));
+    for (const t of corpusPersonne)
+      expect(t, t).not.toMatch(/(?<!\p{L})(venu|absent|inscrit|prêt|connecté|déclaré|payé par toi)(?!\p{L})/iu);
   });
 });
 

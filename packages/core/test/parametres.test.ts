@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { parametresEnVigueur, type ParametresTarifaires } from '../src';
 
 const liste: ParametresTarifaires[] = [
-  { dateEffet: '2026-01-01', tauxHoraireBrutCentimes: 1231, fraisMiseEnRelationHTCentimes: 2500 },
-  { dateEffet: '2027-01-01', tauxHoraireBrutCentimes: 1260, fraisMiseEnRelationHTCentimes: 2500 },
-  { dateEffet: '2025-01-01', tauxHoraireBrutCentimes: 1183, fraisMiseEnRelationHTCentimes: 2500 },
+  { dateEffet: '2026-01-01', tauxHoraireBrutCentimes: 1231, fraisMiseEnRelationHTCentimes: 2500, tvaPourMille: 85 },
+  { dateEffet: '2027-01-01', tauxHoraireBrutCentimes: 1260, fraisMiseEnRelationHTCentimes: 2500, tvaPourMille: 85 },
+  { dateEffet: '2025-01-01', tauxHoraireBrutCentimes: 1183, fraisMiseEnRelationHTCentimes: 2500, tvaPourMille: 85 },
 ];
 
 describe('paramètres tarifaires', () => {

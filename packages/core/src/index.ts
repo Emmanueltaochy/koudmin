@@ -10,3 +10,7 @@ export * from './machineMission';
 export * from './telephone';
 export * from './domaine';
 export * from './textes';
+export * from './demande';
+export * from './facturation';
+export * from './textesEcrans';
+export * from './contrat';

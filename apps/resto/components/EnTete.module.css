@@ -1,0 +1,95 @@
+.entete {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 16px 16px;
+}
+
+.marque {
+  font: var(--k-horaire-font);
+  color: var(--k-basalte);
+  text-decoration: none;
+}
+
+.boutonMenu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.navLarge {
+  display: none;
+}
+
+.panneau {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px 16px;
+  background: var(--k-creme);
+  border-bottom: 1px solid var(--k-trait);
+}
+
+.lienPanneau {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font: var(--k-sous-titre-font);
+  color: var(--k-basalte);
+  text-decoration: none;
+}
+.lienPanneau[aria-current='page'] {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+@media (min-width: 1024px) {
+  .entete {
+    padding: 24px 32px;
+  }
+  .boutonMenu,
+  .panneau {
+    display: none;
+  }
+  .navLarge {
+    display: flex;
+    gap: 32px;
+  }
+  .lien {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font: var(--k-corps-font);
+    color: var(--k-galet);
+    text-decoration: none;
+  }
+  .lien:hover {
+    color: var(--k-basalte);
+  }
+  .lien[aria-current='page'] {
+    font: var(--k-corps-fort-font);
+    color: var(--k-basalte);
+  }
+}
+
+button.lien,
+button.lienPanneau {
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}

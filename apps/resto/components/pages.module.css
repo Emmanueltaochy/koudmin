@@ -1,0 +1,147 @@
+/* Mise en page commune des écrans restaurateur (même langage que la maquette 390 px). */
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.etroite {
+  composes: page;
+  max-width: 720px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.liste {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Carte de demande cliquable */
+.carteLien {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+  color: inherit;
+  text-decoration: none;
+}
+.carteLien:hover {
+  box-shadow: 0 1px 0 var(--k-trait), 0 0 0 1px var(--k-trait);
+}
+
+.ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.entreDeux {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pied {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--k-trait);
+}
+
+.vide {
+  padding: 24px 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  color: var(--k-galet);
+  font: var(--k-corps-font);
+}
+
+.carteAppel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+}
+
+.squelette {
+  height: 120px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  animation: k-pulse var(--k-squelette) ease-in-out infinite;
+}
+
+.pilule {
+  align-self: flex-start;
+  padding: 8px 24px;
+  border: 1px solid var(--k-basalte);
+  border-radius: var(--k-rayon-pilule);
+  background: var(--k-blanc);
+  font: var(--k-titre-font);
+  letter-spacing: var(--k-titre-ls);
+}
+
+.retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  align-self: flex-start;
+  color: var(--k-basalte);
+  font: var(--k-corps-font);
+  text-decoration: none;
+}
+
+.deuxColonnes {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+/* Sur mobile, l'action principale passe en premier. */
+.deuxColonnes > aside {
+  order: -1;
+}
+
+@media (min-width: 1024px) {
+  .deuxColonnes > aside {
+    order: 0;
+    position: sticky;
+    top: 24px;
+  }
+  .page {
+    padding: 0 32px 64px;
+  }
+  .deuxColonnes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 384px;
+    gap: 64px;
+    align-items: start;
+  }
+  .grilleCartes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}

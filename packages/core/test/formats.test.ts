@@ -106,3 +106,30 @@ describe('quand a lieu la mission', () => {
     expect(quandMission(jour, debut, jeudi)).toBe(attendu);
   });
 });
+
+describe('bornes d’une mission', () => {
+  it('18 h – minuit le 30 octobre à La Réunion = 14 h – 20 h UTC', async () => {
+    const { bornesMission } = await import('../src');
+    const b = bornesMission('2026-10-30', 1080, 0);
+    expect(new Date(b.debut).toISOString()).toBe('2026-10-30T14:00:00.000Z');
+    expect(new Date(b.fin).toISOString()).toBe('2026-10-30T20:00:00.000Z');
+  });
+});
+
+describe('heure tapée', () => {
+  it.each([
+    ['18:00', '18:00'],
+    ['18h', '18:00'],
+    ['18h30', '18:30'],
+    ['1830', '18:30'],
+    ['930', '09:30'],
+    ['9:15', '09:15'],
+    ['00:00', '00:00'],
+    ['18', '18:00'],
+    ['25:00', '25:00'],
+    ['abc', 'abc'],
+  ])('« %s » → « %s »', async (saisie, attendu) => {
+    const { normaliserHeure } = await import('../src');
+    expect(normaliserHeure(saisie)).toBe(attendu);
+  });
+});

@@ -1,0 +1,62 @@
+.contrat {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+}
+.article {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.signature,
+.dpae {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dpae {
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+}
+.case {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 44px;
+  cursor: pointer;
+}
+.case input {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--k-basalte);
+  cursor: pointer;
+}
+
+.infos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--k-trait);
+}
+.liste {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.paire dd {
+  margin: 0;
+}
+@media (min-width: 640px) {
+  .liste {
+    grid-template-columns: 1fr 1fr;
+  }
+}

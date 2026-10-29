@@ -51,3 +51,16 @@ export function phraseDuree(minutes: number): string {
   }
   return `${formatDuree(minutes)} de service.`;
 }
+
+/**
+ * Normalise une heure tapée : « 1800 », « 18h », « 18h30 », « 9:15 » → « 18:00 », « 18:30 », « 09:15 ».
+ * Renvoie la saisie telle quelle si elle reste illisible (la validation la signalera).
+ */
+export function normaliserHeure(saisie: string): string {
+  const s = saisie.trim().toLowerCase().replace('h', ':').replace(/\s/g, '');
+  let m = /^(\d{1,2}):?(\d{2})?$/.exec(s.endsWith(':') ? s.slice(0, -1) : s);
+  if (!m && /^\d{3,4}$/.test(s)) m = /^(\d{1,2})(\d{2})$/.exec(s);
+  if (!m) return saisie;
+  const r = `${m[1]!.padStart(2, '0')}:${(m[2] ?? '00').padStart(2, '0')}`;
+  return lireHeure(r) === null ? saisie : r;
+}

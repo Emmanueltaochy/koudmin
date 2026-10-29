@@ -11,6 +11,8 @@ export interface ParametresTarifaires {
   tauxHoraireBrutCentimes: number;
   /** Frais Koudmin par extra, en centimes HT. */
   fraisMiseEnRelationHTCentimes: number;
+  /** TVA sur les frais Koudmin, en pour mille (La Réunion : 85, soit 8,5 %). */
+  tvaPourMille: number;
 }
 
 /** Paramètres applicables à un jour donné : la dernière ligne dont la date d'effet est passée. */

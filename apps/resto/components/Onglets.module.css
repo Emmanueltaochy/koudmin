@@ -1,0 +1,22 @@
+.onglets {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--k-trait);
+  overflow-x: auto;
+}
+.onglet {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font: var(--k-corps-font);
+  color: var(--k-galet);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.onglet[aria-current='page'] {
+  border-bottom-color: var(--k-basalte);
+  color: var(--k-basalte);
+  font: var(--k-corps-fort-font);
+}

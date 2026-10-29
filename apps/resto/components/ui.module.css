@@ -1,0 +1,243 @@
+/* Composants de base de la charte, partagés par toutes les pages. */
+
+.titre {
+  font: var(--k-titre-font);
+  letter-spacing: var(--k-titre-ls);
+}
+.sousTitre {
+  font: var(--k-sous-titre-font);
+}
+.horaire {
+  font: var(--k-horaire-font);
+}
+.corps {
+  font: var(--k-corps-font);
+}
+.corpsFort {
+  font: var(--k-corps-fort-font);
+}
+.legende {
+  font: var(--k-legende-font);
+  color: var(--k-galet);
+}
+.legendeForte {
+  font: var(--k-legende-forte-font);
+}
+.galet {
+  color: var(--k-galet);
+}
+.braise {
+  color: var(--k-braise);
+}
+.vacoa {
+  color: var(--k-vacoa);
+}
+
+/* Bouton principal piment : un seul par écran. */
+.boutonPrincipal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: var(--k-bouton-principal);
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-piment);
+  color: var(--k-blanc);
+  font: var(--k-bouton-font);
+  text-decoration: none;
+  cursor: pointer;
+}
+.boutonPrincipal:hover,
+.boutonPrincipal[aria-busy='true'] {
+  background: var(--k-piment-fonce);
+}
+.boutonPrincipal[aria-busy='true'] {
+  cursor: progress;
+}
+.boutonPrincipal:disabled:not([aria-busy='true']) {
+  background: var(--k-creme);
+  color: var(--k-galet);
+  cursor: not-allowed;
+}
+
+/* Bouton secondaire : contour basalte, fond transparent. */
+.boutonSecondaire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--k-bouton-secondaire);
+  padding: 4px 16px;
+  border: 1px solid var(--k-basalte);
+  border-radius: var(--k-rayon-carte);
+  background: transparent;
+  color: var(--k-basalte);
+  font: var(--k-bouton-font);
+  text-decoration: none;
+  cursor: pointer;
+}
+.boutonSecondaire:hover {
+  background: var(--k-blanc);
+}
+.boutonSecondaire:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Lien d'action : piment foncé, souligné. */
+.lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--k-piment-fonce);
+  font: var(--k-bouton-font);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.lienDiscret {
+  composes: lien;
+  color: var(--k-galet);
+  font: var(--k-legende-font);
+}
+
+/* Carte blanche. */
+.carte {
+  background: var(--k-blanc);
+  border-radius: var(--k-rayon-carte);
+  padding: 16px;
+  box-shadow: var(--k-ombre-carte);
+}
+
+/* Champ de saisie : bordure galet, erreur en braise 2 px. */
+.champ {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--k-champ-hauteur);
+  padding: 0 16px;
+  border: 1px solid var(--k-galet);
+  border-radius: var(--k-rayon-champ);
+  background: var(--k-blanc);
+}
+.champ:focus-within {
+  outline: 2px solid var(--k-basalte);
+  outline-offset: 1px;
+}
+.champ[data-erreur='true'] {
+  border: 2px solid var(--k-braise);
+  padding: 0 15px;
+}
+.champ input,
+.champ textarea {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: var(--k-corps-fort-font);
+}
+.champ input::placeholder,
+.champ textarea::placeholder {
+  color: var(--k-galet);
+  font: var(--k-corps-font);
+}
+.messageErreur {
+  font: var(--k-legende-forte-font);
+  color: var(--k-braise);
+}
+
+/* Séparateur : seule utilisation du trait. */
+.separateur {
+  border: 0;
+  border-top: 1px solid var(--k-trait);
+  margin: 0;
+}
+
+/* Pilule de créneau horaire. */
+.pilule {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border: 1px solid var(--k-galet);
+  border-radius: var(--k-rayon-pilule);
+  background: var(--k-blanc);
+  font: var(--k-corps-font);
+  cursor: pointer;
+}
+.pilule[aria-pressed='true'],
+.pilule[aria-checked='true'] {
+  border-color: var(--k-basalte);
+  background: var(--k-basalte);
+  color: var(--k-blanc);
+  font: var(--k-corps-fort-font);
+}
+
+/* Badge curcuma « Ce soir » : toujours texte basalte. */
+.badgeCurcuma {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--k-rayon-champ);
+  background: var(--k-curcuma);
+  color: var(--k-basalte);
+  font: var(--k-badge-font);
+}
+.badgeVacoa {
+  composes: badgeCurcuma;
+  background: var(--k-vacoa);
+  color: var(--k-blanc);
+}
+.badgeNeutre {
+  composes: badgeCurcuma;
+  background: var(--k-creme);
+  color: var(--k-basalte);
+}
+
+/* Encadré d'erreur (résumé en haut de formulaire). */
+.encadreErreur {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 16px;
+  border: 2px solid var(--k-braise);
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  color: var(--k-braise);
+  font: var(--k-corps-fort-font);
+}
+
+/* Bandeau succès vacoa. */
+.bandeauVacoa {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-vacoa);
+  color: var(--k-blanc);
+  font: var(--k-corps-fort-font);
+}
+
+.spinner {
+  animation: k-spin var(--k-spinner) linear infinite;
+  flex: none;
+}
+
+.squelette {
+  border-radius: var(--k-rayon-champ);
+  background: var(--k-creme);
+}
+.pulse {
+  animation: k-pulse var(--k-squelette) ease-in-out infinite;
+}
+
+.icone {
+  flex: none;
+}

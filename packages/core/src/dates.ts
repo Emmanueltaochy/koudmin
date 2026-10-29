@@ -105,3 +105,11 @@ export function quandMission(jour: JourISO, debut: number, aujourdhui: JourISO):
   const d = enUTC(jour);
   return `le ${quantieme(d.getUTCDate())} ${MOIS[d.getUTCMonth()]}`;
 }
+
+/** Début et fin d'une mission en millisecondes (horodatage absolu). La fin peut passer minuit. */
+export function bornesMission(jour: JourISO, debut: number, fin: number): { debut: number; fin: number } {
+  const minuit = enUTC(jour).getTime() - DECALAGE_REUNION_MS;
+  const d = minuit + debut * 60_000;
+  const f = minuit + (fin > debut ? fin : fin + 24 * 60) * 60_000;
+  return { debut: d, fin: f };
+}

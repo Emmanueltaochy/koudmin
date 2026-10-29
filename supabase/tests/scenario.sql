@@ -80,3 +80,55 @@ select accepter_mission('00000000-0000-0000-0000-00000000d0aa');
 select count(*) as visible from missions_disponibles() where id = '00000000-0000-0000-0000-00000000d0aa';
 select disponible from detail_mission('00000000-0000-0000-0000-00000000d0aa');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Étape e : contrat, DPAE, notation, favoris, factures, disponibilités
+-- ---------------------------------------------------------------------------
+\echo '--- Kévin reprend le Boucan (mission de ce soir) après Maëlle : place prise, il reste déjà_prise'
+reset role;
+-- On rend la mission du Boucan à Kévin pour la suite du scénario.
+update affectations set statut = 'desistee' where demande_id = '00000000-0000-0000-0000-00000000d001';
+update demandes set statut = 'publiee' where id = '00000000-0000-0000-0000-00000000d001';
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select accepter_mission('00000000-0000-0000-0000-00000000d001');
+\echo '--- Kévin ne peut pas signer sans ses informations de contrat'
+\set ON_ERROR_STOP 0
+select signer_contrat((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'confirmee'), repeat('x', 200));
+\set ON_ERROR_STOP 1
+insert into infos_contrat (extra_id, date_naissance, lieu_naissance, nir, adresse)
+values ('00000000-0000-0000-0000-0000000000e1', '2001-05-12', 'Saint-Paul (974)', '101059741512345', '5 chemin des Vacoas, 97460 Saint-Paul');
+select signer_contrat((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'confirmee'), repeat('x', 200));
+\echo '--- Maëlle ne voit ni le contrat ni les informations de Kévin'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e2';
+select count(*) as contrats_visibles from contrats;
+select count(*) as infos_visibles from infos_contrat;
+\echo '--- Le restaurateur signe et lit les informations DPAE'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select signer_contrat((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'confirmee'), repeat('y', 200));
+select signe_restaurant_le is not null as resto, signe_extra_le is not null as extra from contrats;
+select prenom, nom, nir from infos_dpae((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'confirmee'));
+\echo '--- Notation impossible avant le début de la mission'
+\set ON_ERROR_STOP 0
+select noter_mission((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'confirmee'), true, 5::smallint, true, null);
+\set ON_ERROR_STOP 1
+\echo '--- Mission passée : notée, Kévin en favori, facturée'
+reset role;
+update demandes set jour = jour_reunion() - 2 where id = '00000000-0000-0000-0000-00000000d001';
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select noter_mission((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'confirmee'), true, 5::smallint, true, 'Très bien');
+select count(*) as favoris from favoris;
+select mois = to_char(jour_reunion() - 2, 'YYYY-MM') as bon_mois, mises_en_relation, montant_ht_centimes, tva_pour_mille from factures_restaurant();
+\echo '--- Absent : non facturé, retiré des favoris'
+select noter_mission((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'terminee'), false, null, true, null);
+select count(*) as favoris from favoris;
+select count(*) as lignes_facture from factures_restaurant();
+\echo '--- Disponibilités de Kévin, invisibles pour Maëlle'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+insert into disponibilites (extra_id, jour, creneau) values ('00000000-0000-0000-0000-0000000000e1', jour_reunion() + 1, 'soir');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e2';
+select count(*) as dispos_visibles from disponibilites;
+reset role;
+\echo '--- Clôture des missions terminées'
+select cloturer_missions() >= 0 as cloture_ok;

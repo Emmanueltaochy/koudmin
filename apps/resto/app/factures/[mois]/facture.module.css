@@ -1,0 +1,80 @@
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+.facture {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px 24px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+}
+.entete {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+.droite {
+  text-align: right;
+}
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--k-corps-font);
+}
+.tableau th {
+  font: var(--k-legende-forte-font);
+  color: var(--k-galet);
+  text-align: left;
+  padding: 8px 8px 8px 0;
+  border-bottom: 1px solid var(--k-trait);
+}
+.tableau td {
+  padding: 12px 8px 12px 0;
+  border-bottom: 1px solid var(--k-trait);
+  vertical-align: top;
+}
+.tableau th:not(:first-child),
+.tableau td:not(:first-child) {
+  text-align: right;
+  white-space: nowrap;
+}
+.totaux {
+  align-self: flex-end;
+  min-width: 260px;
+  margin: 0;
+  font: var(--k-corps-font);
+}
+.totaux div {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 4px 0;
+}
+.totaux dd {
+  margin: 0;
+}
+.ttc {
+  font: var(--k-corps-fort-font);
+  border-top: 1px solid var(--k-trait);
+  padding-top: 8px !important;
+}
+@media print {
+  .actions {
+    display: none;
+  }
+  .page {
+    padding: 0;
+  }
+  .facture {
+    padding: 0;
+  }
+}
