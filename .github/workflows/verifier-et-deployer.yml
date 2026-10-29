@@ -1,6 +1,7 @@
 # À chaque push : vérifications complètes. Sur main seulement : mise à jour du VPS ensuite.
 # Secrets à créer dans GitHub (deploy/vps/autoriser-github.sh les affiche sur le VPS) :
-#   VPS_HOTE, VPS_PORT, VPS_EMPREINTE_SSH, VPS_CLE_SSH
+#   VPS_HOTE, VPS_PORT, VPS_CLE_SSH
+# La clé publique du VPS (non secrète) est dans deploy/vps/cle-hote-vps.pub.
 name: Vérifier et déployer
 
 on:
@@ -84,44 +85,38 @@ jobs:
       - name: Secrets présents
         env:
           HOTE: ${{ secrets.VPS_HOTE }}
-          EMPREINTE: ${{ secrets.VPS_EMPREINTE_SSH }}
           CLE: ${{ secrets.VPS_CLE_SSH }}
         run: |
           manque=
           [ -n "$HOTE" ] || manque="$manque VPS_HOTE"
-          [ -n "$EMPREINTE" ] || manque="$manque VPS_EMPREINTE_SSH"
           [ -n "$CLE" ] || manque="$manque VPS_CLE_SSH"
           if [ -n "$manque" ]; then
             echo "::error::Secrets manquants :$manque (voir deploy/vps/README.md, « Déploiement automatique »)."
             exit 1
           fi
 
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: deploy/vps/cle-hote-vps.pub
+          sparse-checkout-cone-mode: false
+
       - name: Mise à jour
         env:
           HOTE: ${{ secrets.VPS_HOTE }}
           PORT: ${{ secrets.VPS_PORT }}
-          EMPREINTE: ${{ secrets.VPS_EMPREINTE_SSH }}
           CLE: ${{ secrets.VPS_CLE_SSH }}
         run: |
           install -d -m 700 ~/.ssh
           printf '%s\n' "$CLE" | tr -d '\r' > ~/.ssh/kivien
           chmod 600 ~/.ssh/kivien
-          # Seule la clé publique du serveur compte : on reconstruit la ligne avec l'hôte et le port,
-          # quel que soit le format collé dans le secret (ligne complète ou clé seule).
           # Tolère « ssh root@IP » ou « root@IP » copiés depuis hPanel : on garde ce qui suit le dernier @.
           HOTE=$(tr -d '[:space:]' <<<"$HOTE")
           HOTE=${HOTE##*@}
           HOTE=${HOTE#ssh}
           PORT=$(tr -d '[:space:]' <<<"${PORT:-22}")
           PORT=${PORT:-22}
-          # Clé publique du serveur : 68 caractères après « ssh-ed25519 ». Les retours à la ligne ajoutés
-          # au copier-coller depuis la console web sont retirés avant lecture.
-          b64=$(tr -d '[:space:]' <<<"$EMPREINTE" | grep -oE 'ssh-ed25519AAAAC3NzaC1lZDI1NTE5[A-Za-z0-9+/]{48}' | head -n1 || true)
-          if [ -z "$b64" ]; then
-            echo "::error::VPS_EMPREINTE_SSH ne contient pas de clé ssh-ed25519 complète (68 caractères). Recopier la sortie de la commande echo sur le VPS."
-            exit 1
-          fi
-          cle_serveur="ssh-ed25519 ${b64#ssh-ed25519}"
+          # Clé publique du VPS, versionnée (empreinte vérifiée sur le VPS : ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub).
+          cle_serveur=$(cut -d' ' -f1,2 deploy/vps/cle-hote-vps.pub)
           # Alias fixe : la vérification de l'identité du VPS ne dépend pas de la façon d'écrire l'hôte.
           printf 'kivien-vps %s\n' "$cle_serveur" > ~/.ssh/known_hosts
           # Empreintes publiques (non secrètes), à comparer avec le VPS en cas d'échec :

@@ -130,8 +130,12 @@ sudo /opt/kivien/source/deploy/vps/autoriser-github.sh
 ```
 
 Le script crée une clé SSH réservée à GitHub, qui ne peut lancer que la mise à jour, et affiche les
-4 secrets à créer dans GitHub (dépôt, Settings, Secrets and variables, Actions) : `VPS_HOTE`, `VPS_PORT`,
-`VPS_EMPREINTE_SSH`, `VPS_CLE_SSH`. La clé privée n'est gardée que par GitHub.
+3 secrets à créer dans GitHub (dépôt, Settings, Secrets and variables, Actions) : `VPS_HOTE`, `VPS_PORT`,
+`VPS_CLE_SSH`. La clé privée n'est gardée que par GitHub.
+
+L'identité du VPS (sa clé publique SSH, non secrète) est versionnée dans `deploy/vps/cle-hote-vps.pub` :
+GitHub refuse de se connecter à un serveur qui présenterait une autre clé. Si le VPS est réinstallé,
+remplacer ce fichier par la sortie de `cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub`.
 
 Si un pare-feu Hostinger filtre le port SSH, il doit accepter les connexions de GitHub Actions.
 

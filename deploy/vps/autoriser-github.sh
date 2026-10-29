@@ -36,14 +36,12 @@ printf 'restrict,command="/usr/local/sbin/kivien-mise-a-jour" %s\n' "$(cat "$tmp
 cat "$tmp/autorisees" > /root/.ssh/authorized_keys
 
 ip=$(ip -4 -o route get 1.1.1.1 | grep -oP 'src \K\S+')
-hote=$ip
-[ "$port" = 22 ] || hote="[$ip]:$port"
-empreinte="$hote $(cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub)"
+cle_hote=$(cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub)
 
 cat <<FIN
 
 Clé de déploiement installée. Dans GitHub : dépôt, Settings, Secrets and variables, Actions,
-bouton « New repository secret ». Créer ces 4 secrets (nom exact, valeur entre les lignes) :
+bouton « New repository secret ». Créer ces 3 secrets (nom exact, valeur entre les lignes) :
 
 VPS_HOTE
 $ip
@@ -51,12 +49,13 @@ $ip
 VPS_PORT
 $port
 
-VPS_EMPREINTE_SSH
-$empreinte
-
 VPS_CLE_SSH   (copier tout le bloc, lignes BEGIN et END comprises)
 $(cat "$tmp/cle")
 
 La clé privée ci-dessus n'est conservée nulle part sur le VPS : ne la colle que dans GitHub.
+
+Clé publique de ce VPS, attendue dans deploy/vps/cle-hote-vps.pub du dépôt (à mettre à jour seulement
+si le VPS est réinstallé) :
+$cle_hote
 Pour la révoquer : relancer ce script, ou retirer la ligne « $ETIQUETTE » de /root/.ssh/authorized_keys.
 FIN
