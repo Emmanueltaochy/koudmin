@@ -8,6 +8,10 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
 (async () => {
   const b = await chromium.launch();
   const p = (globalThis.__page = await b.newPage({ viewport: { width: 390, height: 800 } }));
+  // Heure figée à 14 h (La Réunion), date du jour : les missions « ce soir » restent à venir,
+  // le parcours donne le même résultat quelle que soit l'heure du lancement.
+  const jourReunion = new Date(Date.now() + 4 * 3600e3).toISOString().slice(0, 10);
+  await p.clock.setFixedTime(new Date(`${jourReunion}T14:00:00+04:00`));
   const logs = [];
   p.on('pageerror', (e) => logs.push('PAGEERROR ' + e.message));
   p.on('console', (m) => { if (m.type() === 'error') logs.push('CONSOLE ' + m.text().slice(0, 200)); });

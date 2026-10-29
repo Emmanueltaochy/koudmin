@@ -119,7 +119,7 @@ jobs:
           } > ~/.ssh/kivien
           chmod 600 ~/.ssh/kivien
           if ! ssh-keygen -y -f ~/.ssh/kivien > /dev/null 2>&1; then
-            echo "::error::VPS_CLE_SSH n'est pas une clé privée valide (${#corps} caractères utiles lus, environ 324 attendus). Relancer autoriser-github.sh sur le VPS et recopier tout le bloc BEGIN … END."
+            echo "::error::VPS_CLE_SSH n'est pas une clé privée valide (${#corps} caractères utiles lus, 344 attendus). Relancer autoriser-github.sh sur le VPS et recopier tout le bloc BEGIN … END."
             exit 1
           fi
           # Tolère « ssh root@IP » ou « root@IP » copiés depuis hPanel : on garde ce qui suit le dernier @.

@@ -17,6 +17,9 @@ $P -d k -f "$RACINE/supabase/tests/stub-supabase.sql" 2>/dev/null
 for f in "$RACINE"/supabase/migrations/*.sql; do $P -d k -f "$f"; done
 $P -d k -c "grant select, insert, update, delete on all tables in schema public to authenticated"
 $P -d k -f "$RACINE/supabase/seed.sql"
+# Les données fictives placent des missions « ce soir » : décalées de 2 jours pour que le scénario
+# donne le même résultat à toute heure (sinon, passé 18 h à La Réunion, elles ont déjà commencé).
+$P -d k -c "update demandes set jour = jour + 2"
 psql -h "$DIR" -p $PORT -U postgres -d k -f "$RACINE/supabase/tests/scenario.sql" > "$DIR/scenario.log" 2>&1 || true
 cat "$DIR/scenario.log"
 
