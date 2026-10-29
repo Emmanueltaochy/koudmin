@@ -1,0 +1,14 @@
+# Kivien : envoi des SMS de connexion. Ajouté à COMPOSE_FILE par installer.sh
+# uniquement quand SMS_PROVIDER est renseigné dans .env.
+
+services:
+  auth:
+    environment:
+      GOTRUE_SMS_PROVIDER: ${SMS_PROVIDER:?SMS_PROVIDER manquant dans .env}
+      GOTRUE_SMS_TWILIO_ACCOUNT_SID: ${SMS_TWILIO_ACCOUNT_SID:?SMS_TWILIO_ACCOUNT_SID manquant}
+      GOTRUE_SMS_TWILIO_AUTH_TOKEN: ${SMS_TWILIO_AUTH_TOKEN:?SMS_TWILIO_AUTH_TOKEN manquant}
+      GOTRUE_SMS_TWILIO_MESSAGE_SERVICE_SID: ${SMS_TWILIO_MESSAGE_SERVICE_SID:?SMS_TWILIO_MESSAGE_SERVICE_SID manquant}
+      GOTRUE_SMS_OTP_EXP: "300"
+      GOTRUE_SMS_OTP_LENGTH: "6"
+      GOTRUE_SMS_MAX_FREQUENCY: "60s"
+      GOTRUE_SMS_TEMPLATE: "Code Kivien : {{ .Code }}"

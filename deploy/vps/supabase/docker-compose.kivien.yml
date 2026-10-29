@@ -1,0 +1,17 @@
+# Kivien : surcharge de la configuration officielle (docker-compose.yml, non modifié).
+#
+# 1. Rien n'est publié hors de la machine : la passerelle n'écoute que sur 127.0.0.1,
+#    nginx (déjà présent sur le VPS) fait le lien avec https://api.kivien.re.
+#    Le pooler Postgres n'est pas publié du tout (la base reste interne à Docker).
+# 2. L'envoi des SMS est dans docker-compose.kivien-sms.yml, ajouté seulement une fois
+#    le fournisseur configuré (installer.sh s'en charge).
+#
+# Nécessite docker compose >= 2.24.4 (étiquettes !override et !reset).
+
+services:
+  api-gw:
+    ports: !override
+      - "127.0.0.1:${KIVIEN_PORT_API:-18000}:8000/tcp"
+
+  supavisor:
+    ports: !reset []
