@@ -10,7 +10,10 @@
     "backgroundColor": "#FBF6EE",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "re.kivien.extra"
+      "bundleIdentifier": "re.kivien.extra",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "re.kivien.extra",

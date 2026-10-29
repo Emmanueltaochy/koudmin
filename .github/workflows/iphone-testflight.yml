@@ -1,0 +1,117 @@
+# App extra sur iPhone : construction par Expo (EAS) puis envoi sur TestFlight.
+# Lancement manuel : onglet Actions, « iPhone (TestFlight) », bouton « Run workflow ».
+#
+# Secrets GitHub (Settings, Secrets and variables, Actions) :
+#   EXPO_TOKEN     jeton d'accès Expo (expo.dev, Account settings, Access tokens)
+#   ASC_KEY_ID     identifiant de la clé API App Store Connect (10 caractères)
+#   ASC_ISSUER_ID  « Issuer ID » affiché au-dessus de la liste des clés API
+#   ASC_KEY_P8     contenu du fichier AuthKey_XXXX.p8 (BEGIN … END compris)
+#   APPLE_TEAM_ID  identifiant d'équipe Apple (10 caractères, developer.apple.com, Membership)
+#   ASC_APP_ID     « Apple ID » de l'app dans App Store Connect (nombre), si absent de apps/extra/eas.json
+#   APPLE_TEAM_TYPE  facultatif : INDIVIDUAL (compte personnel, par défaut) ou COMPANY_OR_ORGANIZATION
+name: iPhone (TestFlight)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iphone-testflight
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    name: Construction et envoi sur TestFlight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    environment: production
+    defaults:
+      run:
+        working-directory: apps/extra
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Dépendances
+        run: pnpm install --frozen-lockfile
+
+      - name: Secrets présents
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+        run: |
+          manque=
+          for v in EXPO_TOKEN ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8 APPLE_TEAM_ID; do
+            [ -n "${!v}" ] || manque="$manque $v"
+          done
+          if [ -z "$ASC_APP_ID" ] && grep -q A_RENSEIGNER eas.json; then manque="$manque ASC_APP_ID"; fi
+          if [ -n "$manque" ]; then
+            echo "::error::Secrets manquants :$manque (voir l'en-tête de .github/workflows/iphone-testflight.yml)."
+            exit 1
+          fi
+
+      - name: Clé App Store Connect
+        run: |
+          # Clé reconstruite depuis son contenu : un collage sur iPad remplace souvent les retours à la ligne.
+          corps=$(printf '%s' "$ASC_KEY_P8" | tr -d '\r' \
+            | sed -e 's/-----BEGIN PRIVATE KEY-----//g' -e 's/-----END PRIVATE KEY-----//g' \
+            | tr -cd 'A-Za-z0-9+/=')
+          cle="$RUNNER_TEMP/asc-api-key.p8"
+          {
+            echo "-----BEGIN PRIVATE KEY-----"
+            fold -w 64 <<<"$corps"
+            echo "-----END PRIVATE KEY-----"
+          } > "$cle"
+          chmod 600 "$cle"
+          if ! openssl pkey -in "$cle" -noout 2>/dev/null; then
+            echo "::error::ASC_KEY_P8 n'est pas une clé valide (${#corps} caractères utiles lus, environ 200 attendus). Recopier tout le fichier .p8."
+            exit 1
+          fi
+          echo "EXPO_ASC_API_KEY_PATH=$cle" >> "$GITHUB_ENV"
+          # Envoi sur TestFlight avec la même clé ; numéro de l'app depuis le secret s'il est fourni.
+          jq --arg cle "$cle" --arg id "${ASC_APP_ID:-}" '
+            .submit.production.ios.ascApiKeyPath = $cle
+            | .submit.production.ios.ascApiKeyId = env.ASC_KEY_ID
+            | .submit.production.ios.ascApiKeyIssuerId = env.ASC_ISSUER_ID
+            | if $id != "" then .submit.production.ios.ascAppId = $id else . end
+          ' eas.json > eas.tmp && mv eas.tmp eas.json
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Projet Expo
+        run: eas init --non-interactive --force
+
+      - name: Construction iPhone (Expo, 15 à 40 min selon la file d'attente)
+        env:
+          EXPO_ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          EXPO_ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          EXPO_APPLE_TEAM_TYPE: ${{ secrets.APPLE_TEAM_TYPE || 'INDIVIDUAL' }}
+        run: eas build --platform ios --profile production --non-interactive --wait
+
+      - name: Envoi sur TestFlight
+        run: eas submit --platform ios --profile production --latest --non-interactive --wait
+
+      - name: Nettoyage de la clé
+        if: always()
+        run: rm -f "$RUNNER_TEMP/asc-api-key.p8"

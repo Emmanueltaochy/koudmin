@@ -83,6 +83,12 @@ L'app extra et le site restaurateur lisent et écrivent la même base Supabase. 
 
 Captures et comparaisons avec les maquettes : `docs/captures/`.
 
+## App iPhone (TestFlight)
+
+Construction par Expo (EAS) puis envoi sur TestFlight, depuis GitHub : onglet Actions, « iPhone (TestFlight) »,
+« Run workflow ». Secrets et étapes décrits en tête de `.github/workflows/iphone-testflight.yml`.
+Profil de construction : `apps/extra/eas.json` (API de production, numéro de build incrémenté par Expo).
+
 ## À valider avant la production
 
 - **Page d'accueil** : remplacer les photos de travail (4 sur 6 hors restauration, droits inconnus) par des photos sous licence ou prises sur place ; vrais témoignages avec accord écrit (ou retirer la section) ; logos partenaires avec autorisation ; pages légales (mentions légales, CGV, confidentialité, cookies), liens des stores et adresse bonjour@kivien.re à créer ; la lettre d'information collecte des e-mails : à déclarer dans la politique de confidentialité, avec un vrai lien de désinscription dans chaque envoi.
