@@ -77,7 +77,7 @@ function verifier<T>(r: { data: T | null; error: { message: string } | null }): 
 export function sourceSupabase(url: string, cle: string): SourceDonnees {
   const client: SupabaseClient = createClient(url, cle, {
     auth: {
-      // Session gardée sur le téléphone : pas de nouveau code SMS à chaque ouverture.
+      // Session gardée sur le téléphone : pas de mot de passe à chaque ouverture.
       storage: Platform.OS === 'web' ? undefined : AsyncStorage,
       autoRefreshToken: true,
       persistSession: true,
@@ -200,13 +200,23 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       const { count } = await client.from('extras').select('id', { count: 'exact', head: true });
       return count ? 'ok' : 'sansProfil';
     },
-    async envoyerCode(telephone) {
-      const { error } = await client.auth.signInWithOtp({ phone: telephone });
-      if (error) throw /network|fetch/i.test(error.message) ? new ErreurReseau(error.message) : error;
+    async connecter(telephone, motDePasse) {
+      const { error } = await client.auth.signInWithPassword({ phone: telephone, password: motDePasse });
+      if (!error) return 'ok';
+      if (error.status === 400 || error.code === 'invalid_credentials') return 'identifiants';
+      if (error.status === 429) return 'attente';
+      throw /network|fetch/i.test(error.message) ? new ErreurReseau(error.message) : error;
     },
-    async verifierCode(telephone, code) {
-      const { error } = await client.auth.verifyOtp({ phone: telephone, token: code.trim(), type: 'sms' });
-      return !error;
+    async creerCompte(telephone, motDePasse) {
+      const { data, error } = await client.auth.signUp({ phone: telephone, password: motDePasse });
+      if (error) {
+        if (error.code === 'phone_exists' || error.code === 'user_already_exists') return 'dejaInscrit';
+        if (error.status === 429) return 'attente';
+        throw /network|fetch/i.test(error.message) ? new ErreurReseau(error.message) : error;
+      }
+      // Sans session, le serveur attend une vérification par SMS (fournisseur configuré) : non géré ici.
+      if (!data.session) throw new Error('Compte créé sans session : vérification du numéro requise');
+      return 'ok';
     },
     async inscrire(i) {
       const c = trouverCommune(i.commune);

@@ -4,8 +4,8 @@ import { normaliserMobileReunion } from '@kivien/core';
 import { donneesFictives, source } from './donnees';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-/** Code accepté en démonstration, comme les numéros de test de supabase/config.toml. */
-const CODE_DEMO = '123456';
+/** Mot de passe accepté en démonstration (données fictives). */
+const MOT_DE_PASSE_DEMO = 'kivien974';
 
 function client(): SupabaseClient | null {
   const s = source() as unknown as { client?: SupabaseClient };
@@ -18,21 +18,16 @@ export async function connecte(): Promise<boolean> {
   return !!data.session;
 }
 
-export async function envoyerCode(telephone: string): Promise<'ok' | 'numero'> {
+/** Connexion par mobile et mot de passe. Lève une erreur en cas de coupure réseau. */
+export async function connecter(telephone: string, motDePasse: string): Promise<'ok' | 'numero' | 'identifiants' | 'attente'> {
   const e164 = normaliserMobileReunion(telephone);
   if (!e164) return 'numero';
-  if (donneesFictives) return 'ok';
-  const { error } = await client()!.auth.signInWithOtp({ phone: e164 });
-  if (error) throw error;
-  return 'ok';
-}
-
-export async function verifierCode(telephone: string, code: string): Promise<boolean> {
-  const e164 = normaliserMobileReunion(telephone);
-  if (!e164) return false;
-  if (donneesFictives) return code.trim() === CODE_DEMO;
-  const { error } = await client()!.auth.verifyOtp({ phone: e164, token: code.trim(), type: 'sms' });
-  return !error;
+  if (donneesFictives) return motDePasse === MOT_DE_PASSE_DEMO ? 'ok' : 'identifiants';
+  const { error } = await client()!.auth.signInWithPassword({ phone: e164, password: motDePasse });
+  if (!error) return 'ok';
+  if (error.status === 400 || error.code === 'invalid_credentials') return 'identifiants';
+  if (error.status === 429) return 'attente';
+  throw error;
 }
 
 export async function deconnecter(): Promise<void> {

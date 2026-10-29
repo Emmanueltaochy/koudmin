@@ -12,8 +12,8 @@ import type {
 
 /** Mêmes données que supabase/seed.sql. Le taux vient des paramètres fictifs, pas du code métier. */
 const TAUX_FICTIF = 1231;
-/** Code accepté en démonstration, comme les numéros de test de supabase/config.toml. */
-const CODE_DEMO = '123456';
+/** Mot de passe accepté en démonstration. Un numéro se terminant par 01 a déjà un compte. */
+const MOT_DE_PASSE_DEMO = 'kivien974';
 
 function missionsFictives(): MissionResume[] {
   const ceSoir = aujourdhuiReunion();
@@ -125,12 +125,13 @@ export function sourceFictive(): SourceDonnees {
     async session() {
       return 'ok';
     },
-    async envoyerCode() {
+    async connecter(_tel, motDePasse) {
       await attendre(600);
+      return motDePasse === MOT_DE_PASSE_DEMO ? 'ok' : 'identifiants';
     },
-    async verifierCode(_tel, code) {
+    async creerCompte(tel) {
       await attendre(600);
-      return code.trim() === CODE_DEMO;
+      return tel.endsWith('01') ? 'dejaInscrit' : 'ok';
     },
     async inscrire(i) {
       profil = { prenom: i.prenom, nom: i.nom, telephone: i.telephone, commune: i.commune, aVoiture: i.aVoiture };

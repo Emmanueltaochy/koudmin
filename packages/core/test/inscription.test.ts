@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { COMMUNES_REUNION, lireDate, validerInfosContrat, validerInscription } from '../src';
+import { COMMUNES_REUNION, lireDate, validerInfosContrat, validerInscription, validerMotDePasse } from '../src';
 
 describe('inscription extra', () => {
+  it('exige un mot de passe de 8 caractères minimum', () => {
+    expect(validerMotDePasse('1234567')).toBe('Choisis un mot de passe de 8 caractères minimum.');
+    expect(validerMotDePasse('')).not.toBeNull();
+    expect(validerMotDePasse('kivien97')).toBeNull();
+    expect(validerMotDePasse('péi lé la')).toBeNull();
+  });
   it('compte 24 communes, toutes à La Réunion', () => {
     expect(COMMUNES_REUNION).toHaveLength(24);
     for (const c of COMMUNES_REUNION) {

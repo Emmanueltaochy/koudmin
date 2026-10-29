@@ -6,6 +6,8 @@
 # 2. L'envoi des SMS est dans docker-compose.kivien-sms.yml, ajouté seulement une fois
 #    le fournisseur configuré (installer.sh s'en charge).
 #
+# 3. Connexion par téléphone et mot de passe : 8 caractères minimum.
+#
 # Nécessite docker compose >= 2.24.4 (étiquettes !override et !reset).
 
 services:
@@ -15,3 +17,7 @@ services:
 
   supavisor:
     ports: !reset []
+
+  auth:
+    environment:
+      GOTRUE_PASSWORD_MIN_LENGTH: "8"

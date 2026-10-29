@@ -6,95 +6,95 @@ import { textesEcrans } from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
-import { envoyerCode, verifierCode } from '@/lib/auth';
+import { connecter } from '@/lib/auth';
 import s from './connexion.module.css';
 
 const tc = textesEcrans.connexion;
 
+type Erreur = { champ: 'telephone' | 'motDePasse'; message: string };
+
 export default function Connexion() {
   const router = useRouter();
-  const [etape, setEtape] = useState<'numero' | 'code'>('numero');
   const [telephone, setTelephone] = useState('');
-  const [code, setCode] = useState('');
-  const [erreur, setErreur] = useState<string | null>(null);
+  const [motDePasse, setMotDePasse] = useState('');
+  const [erreur, setErreur] = useState<Erreur | null>(null);
   const [envoi, setEnvoi] = useState(false);
 
   async function soumettre(e: FormEvent) {
     e.preventDefault();
     setErreur(null);
+    if (!motDePasse) return setErreur({ champ: 'motDePasse', message: tc.erreurMotDePasseVide });
     setEnvoi(true);
     try {
-      if (etape === 'numero') {
-        if ((await envoyerCode(telephone)) === 'numero') setErreur(tc.erreurTelephone);
-        else setEtape('code');
-      } else if (await verifierCode(telephone, code)) {
+      const r = await connecter(telephone, motDePasse);
+      if (r === 'ok') {
         router.replace('/');
         return;
-      } else {
-        setErreur(tc.erreurCode);
       }
+      setErreur(
+        r === 'numero'
+          ? { champ: 'telephone', message: tc.erreurTelephone }
+          : { champ: 'motDePasse', message: r === 'attente' ? tc.tropDEssais : tc.erreurIdentifiants },
+      );
     } catch {
-      setErreur("Le SMS n'est pas parti. Vérifiez la connexion et réessayez.");
+      setErreur({ champ: 'motDePasse', message: tc.pasDeReseau });
     }
     setEnvoi(false);
   }
+
+  const erreurTel = erreur?.champ === 'telephone' ? erreur.message : null;
+  const erreurMdp = erreur?.champ === 'motDePasse' ? erreur.message : null;
 
   return (
     <main className={`${p.etroite} ${s.page}`}>
       <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" width={96} style={{ height: "auto" }} />
       <h1 className={ui.titre}>{tc.titreResto}</h1>
       <form onSubmit={soumettre} className={s.formulaire} noValidate>
-        {etape === 'numero' ? (
-          <div className={s.bloc}>
-            <label htmlFor="telephone" className={ui.corpsFort}>
-              {tc.telephone}
-            </label>
-            <span className={ui.champ} data-erreur={!!erreur}>
-              <input
-                id="telephone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="0692 12 34 56"
-                value={telephone}
-                onChange={(e) => setTelephone(e.target.value)}
-                aria-invalid={!!erreur}
-              />
-            </span>
-            <p className={erreur ? ui.messageErreur : ui.legende} role={erreur ? 'alert' : undefined}>
-              {erreur ?? tc.telephoneAide}
+        <div className={s.bloc}>
+          <label htmlFor="telephone" className={ui.corpsFort}>
+            {tc.telephone}
+          </label>
+          <span className={ui.champ} data-erreur={!!erreurTel}>
+            <input
+              id="telephone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="username"
+              placeholder="0692 12 34 56"
+              value={telephone}
+              onChange={(e) => setTelephone(e.target.value)}
+              aria-invalid={!!erreurTel}
+              aria-describedby="telephone-aide"
+            />
+          </span>
+          <p id="telephone-aide" className={erreurTel ? ui.messageErreur : ui.legende} role={erreurTel ? 'alert' : undefined}>
+            {erreurTel ?? tc.telephoneAide}
+          </p>
+        </div>
+        <div className={s.bloc}>
+          <label htmlFor="mot-de-passe" className={ui.corpsFort}>
+            {tc.motDePasse}
+          </label>
+          <span className={ui.champ} data-erreur={!!erreurMdp}>
+            <input
+              id="mot-de-passe"
+              type="password"
+              autoComplete="current-password"
+              value={motDePasse}
+              onChange={(e) => setMotDePasse(e.target.value)}
+              aria-invalid={!!erreurMdp}
+              aria-describedby={erreurMdp ? 'mot-de-passe-erreur' : undefined}
+            />
+          </span>
+          {erreurMdp && (
+            <p id="mot-de-passe-erreur" className={ui.messageErreur} role="alert">
+              {erreurMdp}
             </p>
-          </div>
-        ) : (
-          <div className={s.bloc}>
-            <label htmlFor="code" className={ui.corpsFort}>
-              {tc.code}
-            </label>
-            <span className={ui.champ} data-erreur={!!erreur}>
-              <input
-                id="code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={6}
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                aria-invalid={!!erreur}
-                autoFocus
-              />
-            </span>
-            {erreur && (
-              <p className={ui.messageErreur} role="alert">
-                {erreur}
-              </p>
-            )}
-            <button type="button" className={ui.lienDiscret} onClick={() => { setEtape('numero'); setCode(''); setErreur(null); }}>
-              {tc.autreNumero}
-            </button>
-          </div>
-        )}
+          )}
+        </div>
         <button type="submit" className={ui.boutonPrincipal} aria-busy={envoi} disabled={envoi}>
           {envoi && <Spinner />}
-          {etape === 'numero' ? tc.envoyerCode : tc.valider}
+          {tc.seConnecter}
         </button>
       </form>
     </main>

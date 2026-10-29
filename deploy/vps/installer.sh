@@ -146,7 +146,9 @@ regler ADDITIONAL_REDIRECT_URLS ""
 regler ENABLE_EMAIL_SIGNUP false
 regler ENABLE_ANONYMOUS_USERS false
 regler ENABLE_PHONE_SIGNUP true
-regler ENABLE_PHONE_AUTOCONFIRM false
+# Sans fournisseur SMS, le numéro ne peut pas être vérifié : connexion par téléphone et mot de passe,
+# compte actif dès l'inscription. Avec SMS_PROVIDER, la vérification par code reprend.
+if [ -n "$(lire SMS_PROVIDER || true)" ]; then regler ENABLE_PHONE_AUTOCONFIRM false; else regler ENABLE_PHONE_AUTOCONFIRM true; fi
 regler OPENAI_API_KEY ""
 regler STUDIO_DEFAULT_ORGANIZATION Kivien
 regler STUDIO_DEFAULT_PROJECT Kivien
@@ -188,17 +190,20 @@ else
   conf=/etc/nginx/conf.d/kivien-api.conf
   lien=
 fi
-if [ ! -f "$conf" ] || ! grep -q "ssl_certificate" "$conf"; then
-  sed -e "s/__DOMAINE__/$DOMAINE/g" -e "s/__PORT__/$port/g" "$SOURCE/deploy/vps/nginx-api.conf.modele" > "$conf"
-else
-  # Certificat déjà posé par certbot : on ne met à jour que le port.
-  sed -i -E "s#proxy_pass http://127\.0\.0\.1:[0-9]+;#proxy_pass http://127.0.0.1:$port;#" "$conf"
-fi
+# Le fichier est régénéré à chaque passage depuis le modèle ; certbot y repose ensuite le certificat existant.
+# L'ancienne version est gardée pour la remettre si quelque chose échoue.
+ancien=
+if [ -f "$conf" ]; then ancien=$(mktemp); cp "$conf" "$ancien"; fi
+restaurer() {
+  if [ -n "$ancien" ]; then cp "$ancien" "$conf"; else rm -f "$conf" ${lien:+"$lien"}; fi
+  nginx -t >> "$JOURNAL" 2>&1 && systemctl reload nginx
+}
+sed -e "s/__DOMAINE__/$DOMAINE/g" -e "s/__PORT__/$port/g" "$SOURCE/deploy/vps/nginx-api.conf.modele" > "$conf"
 [ -n "$lien" ] && ln -sf "$conf" "$lien"
 if ! nginx -t >> "$JOURNAL" 2>&1; then
-  rm -f "$conf" ${lien:+"$lien"}
   nginx -t 2>&1 | tail -5
-  arret "nginx -t a échoué : fichier Kivien retiré, nginx laissé tel quel."
+  restaurer
+  arret "nginx -t a échoué : configuration Kivien précédente remise, nginx laissé tel quel."
 fi
 systemctl reload nginx
 
@@ -208,11 +213,14 @@ if [ -z "$ip_dns" ] || ! hostname -I | tr ' ' '\n' | grep -qx "$ip_dns"; then
   info "  certbot --nginx -d $DOMAINE -m $EMAIL --agree-tos --redirect --non-interactive"
 else
   command -v certbot >/dev/null || apt-get install -y -q certbot python3-certbot-nginx >> "$JOURNAL" 2>&1
-  certbot --nginx -d "$DOMAINE" -m "$EMAIL" --agree-tos --redirect --non-interactive --keep-until-expiring >> "$JOURNAL" 2>&1 \
-    || arret "certbot a échoué (détail dans $JOURNAL). nginx sert $DOMAINE en HTTP en attendant."
+  if ! certbot --nginx -d "$DOMAINE" -m "$EMAIL" --agree-tos --redirect --non-interactive --keep-until-expiring >> "$JOURNAL" 2>&1; then
+    restaurer
+    arret "certbot a échoué (détail dans $JOURNAL). Configuration nginx précédente remise."
+  fi
   nginx -t >> "$JOURNAL" 2>&1 && systemctl reload nginx
   info "certificat HTTPS en place."
 fi
+[ -n "$ancien" ] && rm -f "$ancien"
 
 # ---------------------------------------------------------------------------
 etape "8/9 Sauvegarde quotidienne"

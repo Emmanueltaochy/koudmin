@@ -2,6 +2,11 @@
 # Seules l'authentification, l'API REST et le temps réel sont publics.
 # Le tableau de bord (Studio) n'est accessible que par tunnel SSH.
 
+# Contre les essais de mots de passe en série, par adresse IP. Large, car beaucoup de mobiles
+# réunionnais sortent par la même adresse chez leur opérateur.
+limit_req_zone $binary_remote_addr zone=kivien_connexion:10m rate=30r/m;
+limit_req_zone $binary_remote_addr zone=kivien_inscription:10m rate=10r/m;
+
 server {
     listen 80;
     listen [::]:80;
@@ -18,10 +23,36 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 3600s;
         proxy_send_timeout 3600s;
+    }
+
+    location = /auth/v1/token {
+        limit_req zone=kivien_connexion burst=30 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:__PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    location = /auth/v1/signup {
+        limit_req zone=kivien_inscription burst=10 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:__PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
     }
 
     location ~ ^/(auth|rest)/v1/ {
@@ -30,7 +61,7 @@ server {
         proxy_set_header Connection "";
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 60s;
     }

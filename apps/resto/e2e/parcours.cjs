@@ -104,19 +104,23 @@ const CAPTURES = process.env.CAPTURES;
   await p.getByText('Le', { exact: false }).first().waitFor();
   await capture('historique');
 
-  // Connexion (démo : code 123456)
+  // Connexion (démo : mot de passe kivien974)
   await p.goto(URL_SITE + '/connexion');
   await p.locator('#telephone').fill('0612345678');
-  await p.getByRole('button', { name: 'Recevoir le code' }).click();
+  await p.locator('#mot-de-passe').fill('kivien974');
+  await p.getByRole('button', { name: 'Se connecter' }).click();
   await p.getByText('Indiquez un mobile réunionnais', { exact: false }).waitFor(); ok('connexion : numéro hors Réunion refusé');
   await p.locator('#telephone').fill('0692 00 00 01');
-  await p.getByRole('button', { name: 'Recevoir le code' }).click();
-  await p.locator('#code').fill('000000');
-  await p.getByRole('button', { name: 'Valider' }).click();
-  await p.getByText('Code incorrect', { exact: false }).waitFor(); ok('mauvais code refusé');
-  await p.locator('#code').fill('123456');
-  await p.getByRole('button', { name: 'Valider' }).click();
-  await p.waitForURL(URL_SITE + '/'); ok('connexion par SMS (démo)');
+  await p.locator('#mot-de-passe').fill('');
+  await p.getByRole('button', { name: 'Se connecter' }).click();
+  await p.getByText('Indiquez votre mot de passe.').waitFor(); ok('connexion : mot de passe obligatoire');
+  await p.locator('#mot-de-passe').fill('mauvais-mdp');
+  await p.getByRole('button', { name: 'Se connecter' }).click();
+  await p.getByText('Numéro ou mot de passe incorrect.').waitFor(); ok('mauvais mot de passe refusé');
+  await capture('connexion');
+  await p.locator('#mot-de-passe').fill('kivien974');
+  await p.getByRole('button', { name: 'Se connecter' }).click();
+  await p.waitForURL(URL_SITE + '/'); ok('connexion par mot de passe (démo)');
 
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {

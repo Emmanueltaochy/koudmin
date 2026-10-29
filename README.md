@@ -63,7 +63,7 @@ cp supabase/.env.example supabase/.env
 npx supabase start   # nécessite Docker
 ```
 
-Comptes de test (code SMS `123456`) : extra `0692 00 00 01` (Kévin), restaurateur `0693 00 00 01` (Le Boucan Grillé).
+Comptes de test (mot de passe `kivien974`) : extra `0692 00 00 01` (Kévin), restaurateur `0693 00 00 01` (Le Boucan Grillé).
 
 ## Règles
 
@@ -77,7 +77,7 @@ L'app extra et le site restaurateur lisent et écrivent la même base Supabase. 
 
 ## Écrans
 
-- **Restaurateur** : accueil, demande d'extra, suivi en temps réel, contrat + signature + rappel DPAE, notation, historique, factures, favoris, connexion par SMS.
+- **Restaurateur** : accueil, demande d'extra, suivi en temps réel, contrat + signature + rappel DPAE, notation, historique, factures, favoris, connexion par mobile et mot de passe.
 - **Extra** : inscription (5 champs), connexion, missions disponibles et confirmées, détail + « Mi lé la », désistement, contrat (infos DPAE demandées une seule fois), disponibilités, profil.
 
 Captures et comparaisons avec les maquettes : `docs/captures/`.
@@ -85,8 +85,8 @@ Captures et comparaisons avec les maquettes : `docs/captures/`.
 ## À valider avant la production
 
 - **Contrat** (`packages/core/src/contrat.ts`) : modèle de CDD d'usage à faire relire par un juriste en droit du travail.
-- **Signature électronique** : tracé + horodatage + identité vérifiée par SMS. Pour une valeur probante renforcée, brancher un prestataire (eIDAS).
+- **Signature électronique** : tracé + horodatage + compte du signataire (numéro à vérifier par SMS une fois le fournisseur branché). Pour une valeur probante renforcée, brancher un prestataire (eIDAS).
 - **Factures** (`apps/resto/lib/identite.ts`) : raison sociale, adresse, SIREN et TVA de Kivien à compléter ; numérotation à générer côté serveur.
 - **Données sensibles** : le numéro de sécurité sociale est stocké en base (RLS stricte) ; prévoir un chiffrement au repos dédié.
 - **Clôture des missions** : planifier `cloturer_missions()` (pg_cron).
-- **SMS** : brancher un fournisseur (Twilio ou autre) dans `supabase/config.toml`.
+- **SMS** : brancher un fournisseur (Twilio ou autre) pour vérifier les numéros ; d'ici là, connexion par mot de passe (voir `deploy/vps/README.md`).

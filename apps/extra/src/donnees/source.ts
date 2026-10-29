@@ -87,9 +87,11 @@ export interface SourceDonnees {
   majProfil(p: { aVoiture?: boolean }): Promise<void>;
 
   session(): Promise<EtatSession>;
-  envoyerCode(telephoneE164: string): Promise<void>;
-  verifierCode(telephoneE164: string, code: string): Promise<boolean>;
-  /** Crée le profil après vérification du numéro. */
+  /** Connexion par mobile et mot de passe. */
+  connecter(telephoneE164: string, motDePasse: string): Promise<'ok' | 'identifiants' | 'attente'>;
+  /** Crée le compte (mobile et mot de passe) et ouvre la session. */
+  creerCompte(telephoneE164: string, motDePasse: string): Promise<'ok' | 'dejaInscrit' | 'attente'>;
+  /** Crée le profil, une fois la session ouverte. */
   inscrire(i: Inscription): Promise<void>;
   deconnecter(): Promise<void>;
 }

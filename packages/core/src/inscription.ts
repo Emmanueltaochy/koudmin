@@ -26,6 +26,14 @@ export function validerInscription(s: SaisieInscription): Partial<Record<keyof S
   return e;
 }
 
+/** Longueur minimale, identique à GOTRUE_PASSWORD_MIN_LENGTH sur le serveur. */
+export const MOT_DE_PASSE_MIN = 8;
+
+/** Mot de passe choisi à l'inscription : null s'il convient. */
+export function validerMotDePasse(m: string): string | null {
+  return [...m].length >= MOT_DE_PASSE_MIN ? null : textesEcrans.connexion.erreurMotDePasseCourtExtra;
+}
+
 /** « 12/05/2001 » → « 2001-05-12 », null si la date n'existe pas. */
 export function lireDate(saisie: string): JourISO | null {
   const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(saisie.trim());

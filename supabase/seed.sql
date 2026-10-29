@@ -4,11 +4,16 @@
 insert into parametres (date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes)
 values ('2026-01-01', 1231, 2500);
 
--- Comptes de test (connexion par SMS avec les numéros de config.toml, code 123456).
-insert into auth.users (id, phone, aud, role)
-values
-  ('00000000-0000-0000-0000-0000000000e1', '262692000001', 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-0000000000a1', '262693000001', 'authenticated', 'authenticated');
+-- Comptes de test : mobile et mot de passe kivien974 (comme les données fictives des apps).
+-- Les jetons vides (et non nuls) sont attendus par le service d'authentification.
+insert into auth.users (id, phone, aud, role, encrypted_password, phone_confirmed_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change, phone_change, phone_change_token,
+  email_change_token_current, reauthentication_token)
+select id::uuid, phone, 'authenticated', 'authenticated', extensions.crypt('kivien974', extensions.gen_salt('bf')), now(),
+  '', '', '', '', '', '', '', ''
+from (values
+  ('00000000-0000-0000-0000-0000000000e1', '262692000001'),
+  ('00000000-0000-0000-0000-0000000000a1', '262693000001')) as c(id, phone);
 
 insert into extras (id, prenom, nom, telephone, commune, lat, lng, a_voiture)
 values ('00000000-0000-0000-0000-0000000000e1', 'Kévin', 'Hoarau', '+262692000001', 'Saint-Paul', -21.03, 55.255, false);

@@ -1,6 +1,6 @@
 # Base de données Kivien sur le VPS
 
-Supabase auto-hébergé (Postgres, authentification par SMS, API, temps réel) sur le VPS Hostinger,
+Supabase auto-hébergé (Postgres, authentification par téléphone et mot de passe, API, temps réel) sur le VPS Hostinger,
 servi sur `https://api.kivien.re`. Le site et l'app s'y connectent avec l'URL et la clé publique.
 
 ## Ce que fait `installer.sh`
@@ -57,9 +57,27 @@ Variables à donner aux applications (valeurs affichées à la fin de l'installa
 La clé `ANON_KEY` est publique par nature (protégée par les règles RLS). `SERVICE_ROLE_KEY` et les mots de
 passe restent dans `/opt/kivien/supabase/.env` et ne doivent jamais quitter le VPS.
 
-### SMS de connexion
+### Connexion
 
-Sans fournisseur SMS, personne ne peut se connecter. Une fois le compte Twilio créé, ajouter dans
+Pour l'instant, connexion par mobile et mot de passe (8 caractères minimum), sans SMS : le compte est actif
+dès l'inscription. Conséquence à connaître : le numéro n'est pas vérifié, n'importe qui peut s'inscrire avec
+n'importe quel numéro. Les restaurants ne sont rattachés à un compte que par `ajouter-restaurant.sh`, qui
+refuse un numéro déjà inscrit.
+
+Mot de passe oublié (extra ou restaurateur), en attendant la réinitialisation par SMS :
+
+```bash
+sudo /opt/kivien/source/deploy/vps/reinitialiser-mot-de-passe.sh "+262692123456"
+```
+
+Un nouveau mot de passe s'affiche une fois, les appareils connectés sont déconnectés.
+
+Contre les essais de mots de passe en série, nginx limite par adresse IP la connexion (30 par minute)
+et l'inscription (10 par minute).
+
+### SMS de vérification (plus tard)
+
+Une fois le compte Twilio créé, ajouter dans
 `/opt/kivien/supabase/.env` :
 
 ```
@@ -69,7 +87,8 @@ SMS_TWILIO_AUTH_TOKEN=…
 SMS_TWILIO_MESSAGE_SERVICE_SID=…
 ```
 
-puis relancer `bash installer.sh` avec la même commande : la configuration SMS est ajoutée automatiquement.
+puis relancer `bash installer.sh` avec la même commande : la configuration SMS est ajoutée automatiquement
+et les nouveaux comptes devront confirmer leur numéro (écran de code à rebrancher dans les apps).
 
 ### Comptes restaurateurs
 
@@ -79,7 +98,8 @@ En attendant l'écran d'inscription restaurateur :
 sudo /opt/kivien/source/deploy/vps/ajouter-restaurant.sh "+262692123456" "Le Boucan Grillé" "14 rue du Général de Gaulle, Saint-Gilles-les-Bains"
 ```
 
-L'adresse est géolocalisée (Géoplateforme IGN, codes postaux 974 uniquement).
+L'adresse est géolocalisée (Géoplateforme IGN, codes postaux 974 uniquement). Le mot de passe du restaurateur
+s'affiche une seule fois : le lui transmettre directement.
 
 ### Studio (administration)
 
@@ -114,7 +134,7 @@ Une migration déjà appliquée ne se modifie jamais : on écrit une nouvelle mi
 ## Reste à faire avant l'ouverture
 
 - Copie des sauvegardes hors du VPS, chiffrée (aujourd'hui elles sont sur le même disque).
-- Fournisseur SMS (voir plus haut).
+- Fournisseur SMS pour vérifier les numéros (voir plus haut).
 - Mises à jour de Supabase : la configuration est figée sur la version relue ; une mise à jour se fait
   en remplaçant `supabase/` dans le dépôt, après relecture et sauvegarde.
 - Mise à jour de la configuration : les fichiers `supabase/` viennent de

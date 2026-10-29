@@ -93,23 +93,38 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Missions', { exact: true }).last().click();
   await p.getByText('Saint-Paul · avec voiture').waitFor(); await etape('liste : profil avec voiture pris en compte');
 
+  // Connexion par mot de passe (démo : kivien974)
+  await p.goto(URL_APP + '/connexion');
+  await p.getByLabel('Numéro de téléphone').fill('0692 00 00 01');
+  await p.getByText('Se connecter').click();
+  await p.getByText('Indique ton mot de passe.').waitFor(); await etape('connexion : mot de passe obligatoire');
+  await p.getByLabel('Mot de passe').fill('mauvais-mdp');
+  await p.getByText('Se connecter').click();
+  await p.getByText('Numéro ou mot de passe incorrect.').waitFor(); await etape('connexion : mauvais mot de passe refusé');
+  if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/connexion.png`, fullPage: true });
+  await p.getByLabel('Mot de passe').fill('kivien974');
+  await p.getByText('Se connecter').click();
+  await p.getByText('missions près de toi', { exact: false }).waitFor({ timeout: 8000 }); await etape('connexion réussie');
+
   // Inscription
   await p.goto(URL_APP + '/bienvenue');
   await p.getByText('Bienvenue sur Kivien').waitFor();
-  await p.getByText('Continuer').click();
-  await p.getByText('Indique ton prénom.').waitFor(); await etape('inscription : 5 champs obligatoires');
+  await p.getByText('Créer mon compte').click();
+  await p.getByText('Indique ton prénom.').waitFor(); await etape('inscription : champs obligatoires');
+  await p.getByText('Choisis un mot de passe de 8 caractères minimum.').waitFor(); await etape('inscription : mot de passe obligatoire');
   await p.getByLabel('Prénom').fill('Johan');
   await p.getByLabel('Nom', { exact: true }).fill('Grondin');
-  await p.getByLabel('Téléphone').fill('0693 00 00 02');
+  await p.getByLabel('Téléphone').fill('0693 00 00 01');
+  await p.getByLabel('Mot de passe').fill('1234567');
   await p.getByLabel(/Commune/).click();
   await p.getByRole('radio', { name: 'Le Port' }).click();
   await p.getByRole('radio', { name: 'Non' }).last().click();
+  await p.getByText('Choisis un mot de passe de 8 caractères minimum.').waitFor(); await etape('inscription : mot de passe trop court refusé');
+  await p.getByLabel('Mot de passe').fill('mi lé la 974');
   if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/inscription.png`, fullPage: true });
-  await p.getByText('Continuer').click();
-  await p.getByLabel('Code reçu par SMS').fill('000000');
   await p.getByText('Créer mon compte').click();
-  await p.getByText('Code incorrect. Vérifie le SMS.').waitFor(); await etape('inscription : mauvais code refusé');
-  await p.getByLabel('Code reçu par SMS').fill('123456');
+  await p.getByText('Ce numéro a déjà un compte. Connecte-toi.').waitFor(); await etape('inscription : numéro déjà inscrit signalé');
+  await p.getByLabel('Téléphone').fill('0693 00 00 02');
   await p.getByText('Créer mon compte').click();
   await p.getByText('Le Port · sans voiture').waitFor({ timeout: 8000 }); await etape('inscription terminée : profil Le Port, sans voiture');
 
