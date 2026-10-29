@@ -42,7 +42,18 @@ export function sourceFictive(): SourceDonnees {
   const signes = new Set<string>();
   const dispos = new Set<CleDispo>([`${ajouterJours(aujourdhuiReunion(), 1)}:soir` as CleDispo]);
   let infos: InfosContrat | null = null;
-  let profil: Profil = { prenom: 'Kévin', nom: 'Hoarau', telephone: '+262692000001', commune: 'Saint-Paul', aVoiture: false };
+  let profil: Profil = {
+    prenom: 'Kévin',
+    nom: 'Hoarau',
+    telephone: '+262692000001',
+    commune: 'Saint-Paul',
+    aVoiture: false,
+    competences: ['serveur'],
+    experience: '1_3_ans',
+    langues: ['francais', 'creole'],
+    presentation: 'Deux saisons en salle à Saint-Gilles.',
+  };
+  let photo: string | null = null;
   const ecouteurs = new Set<() => void>();
   const prevenir = () => ecouteurs.forEach((f) => f());
 
@@ -119,8 +130,20 @@ export function sourceFictive(): SourceDonnees {
       else dispos.delete(cle);
     },
     async majProfil(p) {
+      await attendre(300);
       profil = { ...profil, ...p };
       prevenir();
+    },
+    async maPhoto() {
+      return photo;
+    },
+    async enregistrerPhoto(jpeg) {
+      await attendre(600);
+      photo = jpeg;
+    },
+    async supprimerPhoto() {
+      await attendre(300);
+      photo = null;
     },
     async session() {
       return 'ok';
@@ -134,7 +157,8 @@ export function sourceFictive(): SourceDonnees {
       return tel.endsWith('01') ? 'dejaInscrit' : 'ok';
     },
     async inscrire(i) {
-      profil = { prenom: i.prenom, nom: i.nom, telephone: i.telephone, commune: i.commune, aVoiture: i.aVoiture };
+      profil = { prenom: i.prenom, nom: i.nom, telephone: i.telephone, commune: i.commune, aVoiture: i.aVoiture, competences: [], experience: null, langues: [], presentation: '' };
+      photo = null;
     },
     async deconnecter() {},
   };

@@ -1,6 +1,6 @@
-import type { MissionResume, ProfilExtra } from '@kivien/core';
+import type { MissionResume, ProfilExtra, ProfilPublic } from '@kivien/core';
 
-export interface Profil extends ProfilExtra {
+export interface Profil extends ProfilExtra, ProfilPublic {
   prenom: string;
   nom: string;
   telephone: string;
@@ -84,7 +84,11 @@ export interface SourceDonnees {
 
   dispos(): Promise<CleDispo[]>;
   basculerDispo(jour: string, creneau: Creneau, actif: boolean): Promise<void>;
-  majProfil(p: { aVoiture?: boolean }): Promise<void>;
+  majProfil(p: Partial<ProfilExtra & ProfilPublic>): Promise<void>;
+  /** Photo de profil en JPEG base64, null sans photo. */
+  maPhoto(): Promise<string | null>;
+  enregistrerPhoto(jpegBase64: string): Promise<void>;
+  supprimerPhoto(): Promise<void>;
 
   session(): Promise<EtatSession>;
   /** Connexion par mobile et mot de passe. */

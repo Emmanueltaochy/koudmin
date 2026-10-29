@@ -34,7 +34,15 @@ interface LigneDemande {
     extra_id: string;
     statut: StatutAffectation;
     created_at: string;
-    extras: UnOuPlusieurs<{ prenom: string; nom: string; telephone: string }>;
+    extras: UnOuPlusieurs<{
+      prenom: string;
+      nom: string;
+      telephone: string;
+      competences: ExtraAffecte['competences'];
+      experience: ExtraAffecte['experience'];
+      langues: ExtraAffecte['langues'];
+      presentation: string;
+    }>;
     contrats: UnOuPlusieurs<{ signe_restaurant_le: string | null; signe_extra_le: string | null }>;
     notations: UnOuPlusieurs<{ present: boolean; note: number | null }>;
   }[];
@@ -43,7 +51,7 @@ interface LigneDemande {
 const SELECTION = `id, poste, jour, debut, fin, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes,
   adresse, code_postal, commune, retour_assure, nb_extras, consignes, statut, created_at,
   affectations ( id, extra_id, statut, created_at,
-    extras ( prenom, nom, telephone ),
+    extras ( prenom, nom, telephone, competences, experience, langues, presentation ),
     contrats ( signe_restaurant_le, signe_extra_le ),
     notations ( present, note ) )`;
 
@@ -82,6 +90,10 @@ function versDemande(l: LigneDemande, favoris: Set<string>): DemandeSuivi {
         prenom: e?.prenom ?? '',
         nom: e?.nom ?? '',
         telephone: e?.telephone ?? '',
+        competences: e?.competences ?? [],
+        experience: e?.experience ?? null,
+        langues: e?.langues ?? [],
+        presentation: e?.presentation ?? '',
         statut: a.statut,
         confirmeLe: a.created_at,
         contratSigneRestaurant: !!c?.signe_restaurant_le,
@@ -103,6 +115,9 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
 
   const source = {
     client,
+    async photoExtra(extraId: string) {
+      return verifier(await client.rpc('photo_extra', { p_extra: extraId })) as string | null;
+    },
     async restaurant() {
       const r = verifier(
         await client

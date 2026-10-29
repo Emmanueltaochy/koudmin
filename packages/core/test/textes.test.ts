@@ -16,6 +16,8 @@ import {
   textesEcrans,
   textesVitrine,
   montantsVitrine,
+  LIBELLES_EXPERIENCE,
+  LIBELLES_LANGUE,
 } from '../src';
 import { FRAIS, l, SMIC } from './aide';
 
@@ -46,6 +48,8 @@ const corpus = [
   ...tousLesTextes(textesVitrine),
   ...tousLesTextes(montantsVitrine(1231, 2500)),
   ...tousLesTextes(LIBELLES_POSTE),
+  ...tousLesTextes(LIBELLES_EXPERIENCE),
+  ...tousLesTextes(LIBELLES_LANGUE),
   ...generes,
 ];
 
@@ -58,7 +62,8 @@ describe('règles d’écriture', () => {
     for (const t of corpus) expect(t, t).not.toMatch(/(?![©®™])\p{Extended_Pictographic}/u);
   });
   it('aucune mention d’âge', () => {
-    for (const t of corpus) expect(t, t).not.toMatch(/\bjeunes?\b|étudiant|\d+\s*ans\b|\d+-\d+ ans/i);
+    // « ans de métier » : durée d'expérience, écrite ainsi pour ne jamais se lire comme un âge.
+    for (const t of corpus) expect(t, t).not.toMatch(/\bjeunes?\b|étudiant|\d+\s*ans\b(?! de métier)|\d+-\d+ ans/i);
   });
   it('aucune forme genrée retirée', () => {
     for (const t of corpus) expect(t, t).not.toMatch(/Empêché|prévenu dès|Il arrive|Serveur|Barman/);

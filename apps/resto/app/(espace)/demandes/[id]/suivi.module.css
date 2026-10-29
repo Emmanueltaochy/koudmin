@@ -25,6 +25,16 @@
   display: flex;
   flex-direction: column;
 }
+.nomExtra {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.presentation {
+  margin-top: 4px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
 .contenuSeul {
   display: flex;
   flex-direction: column;

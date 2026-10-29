@@ -3,6 +3,7 @@ import {
   aujourdhuiReunion,
   bornesMission,
   miseEnRelationFacturee,
+  type ProfilPublic,
 } from '@kivien/core';
 import type {
   DemandeSuivi,
@@ -39,6 +40,13 @@ const RESTAURANT: Restaurant = {
 
 const CLE = 'kivien-resto-demo-v1';
 
+/** Profils publics de démonstration (mêmes personnes que l'app extra). */
+const PROFILS: Record<string, ProfilPublic> = {
+  e1: { competences: ['serveur'], experience: '1_3_ans', langues: ['francais', 'creole'], presentation: 'Deux saisons en salle à Saint-Gilles.' },
+  e2: { competences: ['plonge', 'commis'], experience: 'moins_1_an', langues: ['francais', 'creole', 'anglais'], presentation: "Rapide en plonge, à l'aise en cuisine." },
+  e3: { competences: ['barman', 'serveur'], experience: 'plus_3_ans', langues: ['francais', 'anglais'], presentation: 'Bar à cocktails depuis 2021, service rapide.' },
+};
+
 function extra(
   id: string,
   prenom: string,
@@ -52,6 +60,7 @@ function extra(
     prenom,
     nom,
     telephone: tel,
+    ...(PROFILS[id] ?? { competences: [], experience: null, langues: [], presentation: '' }),
     statut: 'confirmee',
     confirmeLe: new Date().toISOString(),
     contratSigneRestaurant: false,
@@ -118,6 +127,16 @@ export function sourceFictive(): SourceResto {
   return {
     async restaurant() {
       return RESTAURANT;
+    },
+    async photoExtra(extraId) {
+      // Démonstration : seul Kévin a une photo (visuel de la page d'accueil).
+      if (extraId !== 'e1') return null;
+      const blob = await (await fetch('/vitrine/salle.jpg')).blob();
+      return await new Promise<string>((ok) => {
+        const lecteur = new FileReader();
+        lecteur.onload = () => ok(String(lecteur.result).replace(/^data:image\/\w+;base64,/, ''));
+        lecteur.readAsDataURL(blob);
+      });
     },
     async parametres() {
       return PARAMETRES;

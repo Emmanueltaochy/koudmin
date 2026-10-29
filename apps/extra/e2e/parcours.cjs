@@ -93,6 +93,37 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByRole('radio', { name: 'Oui' }).click();
   await p.getByText('Enregistré.').last().waitFor(); await etape('profil : voiture enregistrée');
   await p.getByText('Infos enregistrées.').waitFor(); await etape('profil : infos du contrat enregistrées');
+
+  // Profil public : compétences, expérience, langues, présentation, photo.
+  const enregistres = async () => p.getByText('Enregistré.').count();
+  let avant = await enregistres();
+  await p.getByRole('checkbox', { name: 'Service au bar' }).click();
+  await p.waitForFunction((n) => document.body.innerText.split('Enregistré.').length - 1 > n, avant);
+  if ((await p.getByRole('checkbox', { name: 'Service au bar' }).getAttribute('aria-checked')) !== 'true') throw new Error('compétence non cochée');
+  await etape('profil : compétence ajoutée');
+  await p.getByRole('radio', { name: 'Plus de 3 ans de métier' }).click();
+  await p.getByRole('checkbox', { name: 'Anglais' }).click();
+  if ((await p.getByRole('radio', { name: 'Plus de 3 ans de métier' }).getAttribute('aria-checked')) !== 'true') throw new Error('expérience non choisie');
+  await etape('profil : expérience et langue enregistrées');
+  await p.getByLabel('En quelques mots').fill('x'.repeat(281));
+  await p.getByRole('button', { name: 'Enregistrer' }).click();
+  await p.getByText('Raccourcis ton texte : 280 caractères maximum.').waitFor(); await etape('profil : présentation trop longue refusée');
+  await p.getByLabel('En quelques mots').fill('  Trois saisons au bar   à Saint-Pierre.  ');
+  await p.getByRole('button', { name: 'Enregistrer' }).click();
+  await p.waitForFunction(() => document.querySelector('textarea')?.value === 'Trois saisons au bar à Saint-Pierre.');
+  await etape('profil : présentation nettoyée et enregistrée');
+  const [choix] = await Promise.all([p.waitForEvent('filechooser'), p.getByText('Ajouter une photo').click()]);
+  await choix.setFiles(require('path').join(__dirname, '../../resto/public/vitrine/salle.jpg'));
+  await p.getByText('Changer la photo').waitFor({ timeout: 15000 });
+  const taille = await p.getByRole('img', { name: 'Ta photo de profil' }).first().evaluate((e) => {
+    const img = e.tagName === 'IMG' ? e : e.querySelector('img');
+    return img ? [img.naturalWidth, img.naturalHeight] : null;
+  });
+  if (!taille || taille[0] !== 400 || taille[1] !== 400) throw new Error('photo non recadrée en 400 × 400 : ' + JSON.stringify(taille));
+  await etape('profil : photo ajoutée, recadrée au carré (400 × 400)');
+  if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/profil-public.png`, fullPage: true });
+  await p.getByText('Retirer la photo').click();
+  await p.getByText('Ajouter une photo').waitFor(); await etape('profil : photo retirée');
   if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/profil.png`, fullPage: true });
   await p.getByText('Missions', { exact: true }).last().click();
   await p.getByText('Saint-Paul · avec voiture').waitFor(); await etape('liste : profil avec voiture pris en compte');

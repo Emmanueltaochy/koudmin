@@ -1,0 +1,17 @@
+.photo {
+  flex: none;
+  border-radius: 999px;
+  object-fit: cover;
+  background: var(--k-trait);
+}
+
+.initiales {
+  flex: none;
+  border-radius: 999px;
+  background: var(--k-galet);
+  color: var(--k-blanc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--k-sous-titre-font);
+}

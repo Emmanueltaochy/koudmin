@@ -18,10 +18,12 @@ import {
   minuteReunion,
   notificationConfirmation,
   recapDemande,
+  resumeProfil,
   textes as t,
   textesEcrans,
 } from '@kivien/core';
 import p from '@/components/pages.module.css';
+import { AvatarExtra } from '@/components/AvatarExtra';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import { source, type DemandeSuivi } from '@/lib/donnees';
@@ -121,11 +123,14 @@ export default function SuiviDemande() {
       <section className={s.carte} aria-label={ts.trouve}>
         {actifs.map((e) => (
           <div key={e.affectationId} className={s.ligne}>
-            <Check size={20} strokeWidth={2.5} className={ui.vacoa} aria-hidden />
+            <AvatarExtra extraId={e.extraId} prenom={e.prenom} nom={e.nom} alt={`${ts.photoDe} ${e.prenom}`} />
             <div className={s.contenu}>
-              <span className={ui.corpsFort}>
+              <span className={`${ui.corpsFort} ${s.nomExtra}`}>
+                <Check size={18} strokeWidth={2.5} className={ui.vacoa} aria-hidden />
                 {e.prenom} {e.nom}
               </span>
+              {resumeProfil(e) && <span className={ui.legende}>{resumeProfil(e)}</span>}
+              {e.presentation && <span className={`${ui.corps} ${s.presentation}`}>« {e.presentation} »</span>}
               <span className={ui.legende}>
                 {e.contratSigneRestaurant && e.contratSigneExtra
                   ? ts.contratSigne

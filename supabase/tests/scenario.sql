@@ -178,3 +178,28 @@ select count(*) from abonnes_lettre;
 \set ON_ERROR_STOP 1
 reset role;
 select email from abonnes_lettre;
+\echo '--- Profil de Kévin : compétences, expérience, langues, présentation'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+update extras set competences = '{serveur,barman}', experience = '1_3_ans', langues = '{francais,creole}',
+  presentation = 'Deux saisons en salle à Saint-Gilles.' where id = auth.uid();
+select competences, experience, langues, presentation from extras where id = auth.uid();
+\set ON_ERROR_STOP 0
+update extras set presentation = repeat('x', 281) where id = auth.uid();
+\set ON_ERROR_STOP 1
+\echo '--- Photo de Kévin : enregistrée, relue ; une image non JPEG est refusée'
+select enregistrer_photo(encode('\xffd8ffe0'::bytea || convert_to(repeat('a', 200), 'UTF8'), 'base64')) is not null as photo_enregistree;
+select left(photo_extra(auth.uid()), 8) as debut_photo;
+\set ON_ERROR_STOP 0
+select enregistrer_photo(encode(convert_to(repeat('a', 200), 'UTF8'), 'base64'));
+\set ON_ERROR_STOP 1
+\echo '--- Le restaurateur du Boucan voit le profil et la photo de Kévin ; Maëlle non'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select prenom, competences, experience from extras where id = '00000000-0000-0000-0000-0000000000e1';
+select photo_extra('00000000-0000-0000-0000-0000000000e1') is not null as photo_visible_restaurateur;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e2';
+select photo_extra('00000000-0000-0000-0000-0000000000e1') is null as photo_cachee_autre_extra;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select supprimer_photo();
+select photo_extra(auth.uid()) is null as photo_retiree;
+reset role;

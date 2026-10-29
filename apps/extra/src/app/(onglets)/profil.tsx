@@ -8,6 +8,7 @@ import { aujourdhuiReunion, formatMobileReunion, textesEcrans } from '@kivien/co
 import { FormInfosContrat } from '../../contrat/FormInfosContrat';
 import { donneesFictives, source, type InfosContrat, type MissionConfirmee, type Profil } from '../../donnees';
 import { CarteConfirmee } from '../../missions/CarteConfirmee';
+import { SectionPhoto, SectionsProfilPublic } from '../../profil/SectionsProfil';
 import { Lien } from '../../ui/Bouton';
 import { Choix } from '../../ui/Choix';
 import { couleurs, rayons } from '../../ui/theme';
@@ -64,6 +65,9 @@ export default function ProfilEcran() {
           <Texte variante="corpsFort">{profil.commune}</Texte>
         </View>
       </View>
+
+      <SectionPhoto profil={profil} />
+      <SectionsProfilPublic profil={profil} onChange={setProfil} />
 
       <View style={styles.section}>
         <Texte variante="corpsFort">{tp.voiture}</Texte>

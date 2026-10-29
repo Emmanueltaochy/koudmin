@@ -53,6 +53,14 @@
         {
           "backgroundColor": "#FBF6EE"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kivien utilise une de tes photos pour ton profil, visible par les restaurants où tu as une mission.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {

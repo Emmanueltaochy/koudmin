@@ -2,6 +2,7 @@ import type {
   JourISO,
   ParametresTarifaires,
   Poste,
+  ProfilPublic,
   StatutAffectation,
   StatutDemande,
 } from '@kivien/core';
@@ -27,7 +28,8 @@ export interface NouvelleDemande {
   consignes: string | null;
 }
 
-export interface ExtraAffecte {
+/** Extra sur une demande, avec son profil public (compétences, expérience, langues, présentation). */
+export interface ExtraAffecte extends ProfilPublic {
   affectationId: string;
   extraId: string;
   prenom: string;
@@ -99,6 +101,8 @@ export interface InfosDPAE {
 /** Accès aux données côté restaurateur. Deux implémentations : fictive (démo) et Supabase. */
 export interface SourceResto {
   restaurant(): Promise<Restaurant>;
+  /** Photo de profil d'un extra affecté à une de vos demandes (JPEG base64), null sans photo. */
+  photoExtra(extraId: string): Promise<string | null>;
   parametres(): Promise<ParametresTarifaires>;
   publier(d: NouvelleDemande): Promise<{ id: string }>;
   demandes(): Promise<DemandeSuivi[]>;

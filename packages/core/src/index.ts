@@ -17,3 +17,4 @@ export * from './contrat';
 export * from './communes';
 export * from './inscription';
 export * from './textesVitrine';
+export * from './profilExtra';

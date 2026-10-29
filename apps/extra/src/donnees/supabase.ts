@@ -101,15 +101,33 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
   return {
     async profil(): Promise<Profil> {
       const p = verifier(
-        await client.from('extras').select('prenom, nom, telephone, commune, a_voiture').single<{
-          prenom: string;
-          nom: string;
-          telephone: string;
-          commune: string;
-          a_voiture: boolean;
-        }>(),
+        await client
+          .from('extras')
+          .select('prenom, nom, telephone, commune, a_voiture, competences, experience, langues, presentation')
+          .eq('id', await moi())
+          .single<{
+            prenom: string;
+            nom: string;
+            telephone: string;
+            commune: string;
+            a_voiture: boolean;
+            competences: Profil['competences'];
+            experience: Profil['experience'];
+            langues: Profil['langues'];
+            presentation: string;
+          }>(),
       );
-      return { prenom: p.prenom, nom: p.nom, telephone: p.telephone, commune: p.commune, aVoiture: p.a_voiture };
+      return {
+        prenom: p.prenom,
+        nom: p.nom,
+        telephone: p.telephone,
+        commune: p.commune,
+        aVoiture: p.a_voiture,
+        competences: p.competences,
+        experience: p.experience,
+        langues: p.langues,
+        presentation: p.presentation,
+      };
     },
     async missions() {
       return (verifier(await client.rpc('missions_disponibles')) as LigneMission[]).map(versMission);
@@ -192,7 +210,22 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       else verifier(await client.from('disponibilites').delete().match({ extra_id, jour, creneau }));
     },
     async majProfil(p) {
-      if (p.aVoiture !== undefined) verifier(await client.from('extras').update({ a_voiture: p.aVoiture }).eq('id', await moi()));
+      const maj: Record<string, unknown> = {};
+      if (p.aVoiture !== undefined) maj.a_voiture = p.aVoiture;
+      if (p.competences !== undefined) maj.competences = p.competences;
+      if (p.experience !== undefined) maj.experience = p.experience;
+      if (p.langues !== undefined) maj.langues = p.langues;
+      if (p.presentation !== undefined) maj.presentation = p.presentation;
+      if (Object.keys(maj).length) verifier(await client.from('extras').update(maj).eq('id', await moi()));
+    },
+    async maPhoto() {
+      return verifier(await client.rpc('photo_extra', { p_extra: await moi() })) as string | null;
+    },
+    async enregistrerPhoto(jpeg) {
+      verifier(await client.rpc('enregistrer_photo', { p_jpeg_base64: jpeg }));
+    },
+    async supprimerPhoto() {
+      verifier(await client.rpc('supprimer_photo'));
     },
     async session() {
       const { data } = await client.auth.getSession();

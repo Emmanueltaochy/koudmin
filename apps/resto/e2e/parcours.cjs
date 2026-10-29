@@ -80,6 +80,9 @@ const CAPTURES = process.env.CAPTURES;
   await p.getByText('Recherche en cours').first().waitFor(); ok('suivi : recherche en cours');
   await capture('suivi-recherche');
   await p.getByText('Maëlle a dit mi lé la. Arrivée prévue à 20 h.').waitFor({ timeout: 12000 }); ok('temps réel : « Maëlle a dit mi lé la. Arrivée prévue à 20 h. »');
+  await p.getByText("Plonge, Commis · Moins d'un an de métier · Français, Créole, Anglais").waitFor();
+  await p.getByText("« Rapide en plonge, à l'aise en cuisine. »").waitFor();
+  await p.getByRole('img', { name: 'Photo de Maëlle' }).waitFor(); ok('suivi : profil de Maëlle (postes, expérience, langues, présentation, initiales)');
   await capture('suivi-trouve');
 
   // Contrat
@@ -128,6 +131,13 @@ const CAPTURES = process.env.CAPTURES;
   await p.goto(URL_SITE + '/historique');
   await p.getByText('Le', { exact: false }).first().waitFor();
   await capture('historique');
+
+  // Photo de l'extra côté restaurateur
+  await p.goto(URL_SITE + '/demandes/d001');
+  const photoKevin = p.getByRole('img', { name: 'Photo de Kévin' });
+  await photoKevin.waitFor();
+  await p.waitForFunction(() => { const i = document.querySelector('img[alt="Photo de Kévin"]'); return i && i.complete && i.naturalWidth > 0; });
+  ok('suivi : photo de Kévin affichée');
 
   // Connexion (démo : mot de passe kivien974)
   await p.goto(URL_SITE + '/connexion');

@@ -28,6 +28,8 @@ attendues='Adresse e-mail invalide
 Informations du contrat manquantes
 Mission pas encore commencée
 Taux horaire sous le minimum légal
+new row for relation "extras" violates check constraint "extras_presentation_check"
+new row for relation "photos_extras" violates check constraint "photos_extras_image_check"
 new row violates row-level security policy for table "extras"
 permission denied for table abonnes_lettre'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
@@ -36,4 +38,4 @@ if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (6 refus attendus)."
+echo "Scénario SQL conforme (8 refus attendus)."
