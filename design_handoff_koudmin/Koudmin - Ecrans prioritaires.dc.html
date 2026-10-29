@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF6EE;color:#211C18;font-family:Figtree,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#9E3215}a:hover{color:#211C18}
+@keyframes kspin{to{transform:rotate(360deg)}}
+@keyframes kpulse{0%,100%{opacity:1}50%{opacity:.45}}
+</style>
+</helmet>
+
+<div style="padding:64px 64px 32px;display:flex;flex-direction:column;gap:8px;max-width:1200px">
+  <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Koudmin</div>
+  <div style="font-size:16px;line-height:24px;color:#6B6157">Les extras péi, en 2 heures. · 3 écrans prioritaires, avec leurs états. Mobile 390 px.</div>
+</div>
+
+<section id="1" style="padding:32px 64px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-top:1px solid #E6DCCF;padding-top:32px">
+    <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px">1 · Demande d'extra</div>
+    <div style="font-size:16px;line-height:24px;color:#6B6157">Restaurateur · mobile · vouvoiement</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+    <sc-for list="{{ formStates }}" as="fs" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;line-height:18px;font-weight:600;background:#211C18;color:#FFFFFF;padding:4px 8px;border-radius:6px">{{ fs.id }}</span>
+          <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">{{ fs.label }}</span>
+        </div>
+        <div style="width:390px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:32px;overflow:hidden;box-shadow:0 24px 48px -24px rgba(33,28,24,.25)">
+          <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600">
+            <span>18:42</span><span style="display:flex;gap:4px;align-items:center"><span style="width:16px;height:8px;border:1.5px solid #211C18;border-radius:2px"></span></span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 16px">
+            <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;line-height:28px">Koudmin</div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          </div>
+          <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px;letter-spacing:-0.01em">Trouver un extra</div>
+            <div style="font-size:16px;line-height:24px;color:#6B6157">Un extra trouvé en 2 heures maximum.</div>
+          </div>
+
+          <sc-if value="{{ fs.isError }}" hint-placeholder-val="{{ false }}">
+            <div style="margin:0 16px 16px;padding:16px;background:#FFFFFF;border:2px solid #8A1C12;border-radius:12px;display:flex;gap:8px;align-items:flex-start">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+              <div style="font-size:16px;line-height:24px;color:#8A1C12;font-weight:600">2 champs à compléter.</div>
+            </div>
+          </sc-if>
+
+          <div style="padding:0 16px;display:flex;flex-direction:column;gap:32px;opacity:{{ fs.formOpacity }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:16px;line-height:24px;font-weight:600">Poste</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <span style="padding:8px 16px;border-radius:6px;background:#211C18;color:#FFFFFF;font-size:16px;line-height:24px;font-weight:600;display:flex;align-items:center;gap:4px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"></path></svg>Serveur</span>
+                <span style="padding:8px 16px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px">Plonge</span>
+                <span style="padding:8px 16px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px">Commis</span>
+                <span style="padding:8px 16px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px">Barman</span>
+                <span style="padding:8px 16px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px">Réception</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:16px;line-height:24px;font-weight:600">Date</div>
+              <div style="display:flex;gap:8px">
+                <span style="flex:1;padding:8px;border-radius:6px;background:#211C18;color:#FFFFFF;text-align:center;display:flex;flex-direction:column"><span style="font-size:13px;line-height:18px;font-weight:500">Ce soir</span><span style="font-size:16px;line-height:24px;font-weight:600">ven. 30</span></span>
+                <span style="flex:1;padding:8px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;text-align:center;display:flex;flex-direction:column"><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Demain</span><span style="font-size:16px;line-height:24px;font-weight:600">sam. 31</span></span>
+                <span style="flex:1;padding:8px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;text-align:center;display:flex;flex-direction:column"><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Dimanche</span><span style="font-size:16px;line-height:24px;font-weight:600">1er nov.</span></span>
+                <span style="flex:none;width:48px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg></span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:16px;line-height:24px;font-weight:600">Horaires</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <span style="padding:8px 16px;border-radius:999px;background:#211C18;color:#FFFFFF;font-size:16px;line-height:24px;font-weight:600">18 h – minuit</span>
+                <span style="padding:8px 16px;border-radius:999px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px;font-weight:600">11 h 30 – 15 h</span>
+                <span style="padding:8px 16px;border-radius:999px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px">Autre</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+                <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Début</span>
+                  <div style="height:48px;border:1px solid #6B6157;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;padding:0 16px;font-size:16px;font-weight:600">18:00</div>
+                </div>
+                <span style="margin-top:22px;color:#6B6157">–</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Fin</span>
+                  <div style="height:48px;border:1px solid #6B6157;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;padding:0 16px;font-size:16px;font-weight:600">00:00</div>
+                </div>
+              </div>
+              <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">6 heures de service.</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:16px;line-height:24px;font-weight:600">Taux horaire brut</div>
+              <div style="height:48px;border:1px solid #6B6157;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:16px">
+                <span style="font-weight:600">12,31 €</span><span style="color:#6B6157">/ heure</span>
+              </div>
+              <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Minimum légal. Vous pouvez le monter, pas le baisser.</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:16px;line-height:24px;font-weight:600">Adresse du service</div>
+              <sc-if value="{{ fs.notError }}" hint-placeholder-val="{{ true }}">
+                <div style="min-height:48px;border:1px solid #6B6157;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:8px;padding:12px 16px;box-sizing:border-box">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span style="font-size:16px;line-height:24px;font-weight:600">14 rue du Général de Gaulle, Saint-Gilles-les-Bains</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ fs.isError }}" hint-placeholder-val="{{ false }}">
+                <div style="height:48px;border:2px solid #8A1C12;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:8px;padding:0 16px">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span style="font-size:16px;line-height:24px;color:#6B6157">Numéro, rue, commune</span>
+                </div>
+                <div style="font-size:13px;line-height:18px;font-weight:600;color:#8A1C12">Indiquez l'adresse du service.</div>
+              </sc-if>
+              <div style="display:flex;gap:12px;align-items:flex-start;padding-top:8px">
+                <span style="flex:none;width:24px;height:24px;border-radius:6px;background:#FFFFFF;border:1px solid #6B6157;box-sizing:border-box"></span>
+                <div style="display:flex;flex-direction:column">
+                  <span style="font-size:16px;line-height:24px">Je peux raccompagner ou payer le taxi du retour</span>
+                  <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Facultatif. Votre demande passe en tête pour les extras sans voiture.</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+              <div style="display:flex;flex-direction:column">
+                <span style="font-size:16px;line-height:24px;font-weight:600">Nombre d'extras</span>
+                <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">25 € HT par extra</span>
+              </div>
+              <div style="display:flex;align-items:center;border:1px solid #6B6157;border-radius:12px;background:#FFFFFF">
+                <span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg></span>
+                <span style="width:32px;text-align:center;font-size:16px;font-weight:700">2</span>
+                <span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"></path></svg></span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:16px;line-height:24px;font-weight:600">Consignes</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Facultatif</span></div>
+              <sc-if value="{{ fs.notError }}" hint-placeholder-val="{{ true }}">
+                <div style="min-height:96px;border:1px solid #6B6157;border-radius:6px;background:#FFFFFF;padding:12px 16px;box-sizing:border-box;font-size:16px;line-height:24px">Tenue noire. Parking derrière le restaurant, entrée par la cuisine.</div>
+              </sc-if>
+              <sc-if value="{{ fs.isError }}" hint-placeholder-val="{{ false }}">
+                <div style="min-height:96px;border:1px solid #6B6157;border-radius:6px;background:#FFFFFF;padding:12px 16px;box-sizing:border-box;font-size:16px;line-height:24px;color:#6B6157">Tenue, parking, entrée du personnel</div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="margin-top:32px;background:#FFFFFF;border-top:1px solid #E6DCCF;padding:16px 16px 32px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px">
+                <span style="font-size:16px;line-height:24px">Salaires bruts estimés</span>
+                <span style="font-size:16px;line-height:24px;font-weight:600">162,50 €</span>
+              </div>
+              <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">2 × 6 h × 12,31 €, + 10 % de congés payés. Versés par vous aux extras, hors charges patronales.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;padding-top:16px;border-top:1px solid #E6DCCF">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px">
+                <span style="font-size:16px;line-height:24px">Frais Koudmin</span>
+                <span style="font-size:16px;line-height:24px;font-weight:600">50 € HT</span>
+              </div>
+              <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">2 × 25 € HT. Extra absent et non remplacé : non facturé.</div>
+            </div>
+            <sc-if value="{{ fs.notLoading }}" hint-placeholder-val="{{ true }}">
+              <div style="height:56px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:20px;font-weight:700;cursor:pointer" style-hover="background:#9E3215">Trouver un extra</div>
+            </sc-if>
+            <sc-if value="{{ fs.isLoading }}" hint-placeholder-val="{{ false }}">
+              <div style="height:56px;border-radius:12px;background:#9E3215;color:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;line-height:20px;font-weight:700">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" style="animation:kspin 0.9s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+                Envoi de la demande
+              </div>
+            </sc-if>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;line-height:18px;font-weight:500;color:#6B6157;margin-top:-8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"></path></svg>Contrat d'extra rédigé pour vous.
+            </div>
+          </div>
+        </div>
+        <div style="width:390px;font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-wrap:pretty">{{ fs.note }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="max-width:812px;display:flex;gap:8px;align-items:flex-start;padding:16px;background:#FFFFFF;border-radius:12px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:3px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+    <div style="font-size:16px;line-height:24px;color:#211C18;text-wrap:pretty"><strong style="font-weight:600">Note dev · taux horaire.</strong> 12,31 € est un paramètre, pas une valeur en dur : c'est le SMIC horaire brut, revalorisé chaque 1er janvier. Il fixe le préremplissage et le minimum du champ, ainsi que tous les calculs de salaire (côté restaurateur et côté extra).</div>
+  </div>
+</section>
+
+<section id="2" style="padding:32px 64px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-top:1px solid #E6DCCF;padding-top:32px">
+    <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px">2 · Missions disponibles</div>
+    <div style="font-size:16px;line-height:24px;color:#6B6157">App extra · tutoiement · tri par proximité</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+    <sc-for list="{{ listStates }}" as="ls" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;line-height:18px;font-weight:600;background:#211C18;color:#FFFFFF;padding:4px 8px;border-radius:6px">{{ ls.id }}</span>
+          <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">{{ ls.label }}</span>
+        </div>
+        <div style="width:390px;height:844px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:32px;overflow:hidden;box-shadow:0 24px 48px -24px rgba(33,28,24,.25);display:flex;flex-direction:column">
+          <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600">
+            <span>16:05</span><span style="width:16px;height:8px;border:1.5px solid #211C18;border-radius:2px"></span>
+          </div>
+          <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:16px;flex:none">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px;letter-spacing:-0.01em">Missions</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:13px;line-height:18px;font-weight:600;color:#211C18;background:#FFFFFF;border:1px solid #6B6157;border-radius:999px;padding:8px 12px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Saint-Paul · sans voiture
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="padding:8px 16px;border-radius:999px;background:#211C18;color:#FFFFFF;font-size:16px;line-height:24px;font-weight:600">Toutes</span>
+              <span style="padding:8px 16px;border-radius:999px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px">Ce soir</span>
+              <span style="padding:8px 16px;border-radius:999px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px">Week-end</span>
+            </div>
+          </div>
+
+          <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:16px">
+            <sc-if value="{{ ls.isLoaded }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">4 missions près de toi · retour assuré en premier</div>
+              <sc-for list="{{ missions }}" as="m" hint-placeholder-count="3">
+                <div style="background:#FFFFFF;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 0 #E6DCCF">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                    <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;line-height:28px">{{ m.time }}</span>
+                    <sc-if value="{{ m.tonight }}" hint-placeholder-val="{{ false }}">
+                      <span style="background:#F2B33D;color:#211C18;font-size:13px;line-height:18px;font-weight:700;padding:4px 8px;border-radius:6px">Ce soir</span>
+                    </sc-if>
+                    <sc-if value="{{ m.notTonight }}" hint-placeholder-val="{{ true }}">
+                      <span style="color:#6B6157;font-size:13px;line-height:18px;font-weight:600">{{ m.day }}</span>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span style="font-weight:600">{{ m.town }}</span><span style="color:#6B6157">· {{ m.dist }}</span>
+                  </div>
+                  <div style="font-size:16px;line-height:24px">{{ m.role }}</div>
+                  <div style="display:flex;flex-direction:column;padding-top:8px;border-top:1px solid #E6DCCF">
+                    <span style="font-size:16px;line-height:24px;font-weight:600">≈ {{ m.net }} € net</span>
+                    <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">{{ m.brut }} € brut, congés payés compris</span>
+                  </div>
+                  <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">{{ m.resto }}</div>
+                  <sc-if value="{{ m.ride }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:8px;font-size:13px;line-height:18px;font-weight:600;color:#2C7350">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2C7350" stroke-width="2.5" stroke-linecap="round" style="flex:none"><path d="M20 6 9 17l-5-5"></path></svg>Retour assuré par le restaurant
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ m.noRide }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;align-items:center;gap:8px;font-size:13px;line-height:18px;font-weight:500;color:#6B6157">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M8 6v6M15 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"></path><circle cx="7" cy="18" r="2"></circle><path d="M9 18h5"></path><circle cx="16" cy="18" r="2"></circle></svg>{{ m.bus }}
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </sc-if>
+
+            <sc-if value="{{ ls.isLoading }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Recherche des missions près de toi</div>
+              <sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="4">
+                <div style="background:#FFFFFF;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;animation:kpulse 1.4s ease-in-out infinite">
+                  <div style="width:55%;height:24px;border-radius:6px;background:#FBF6EE"></div>
+                  <div style="width:70%;height:16px;border-radius:6px;background:#FBF6EE"></div>
+                  <div style="display:flex;justify-content:space-between"><div style="width:30%;height:16px;border-radius:6px;background:#FBF6EE"></div><div style="width:25%;height:16px;border-radius:6px;background:#FBF6EE"></div></div>
+                </div>
+              </sc-for>
+            </sc-if>
+
+            <sc-if value="{{ ls.isEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:0 16px 64px">
+                <div style="width:56px;height:56px;border-radius:12px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="1.75" stroke-linecap="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg></div>
+                <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;line-height:28px">Pas de mission près de toi pour l'instant.</div>
+                <div style="font-size:16px;line-height:24px;color:#6B6157">Coche tes soirées libres. On te prévient dès qu'un restaurant a besoin de toi.</div>
+                <div style="height:56px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;margin-top:8px">Mettre à jour mes dispos</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ ls.isError }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:0 16px 64px">
+                <div style="width:56px;height:56px;border-radius:12px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="1.75" stroke-linecap="round"><path d="M12 20h.01M8.5 16.429a5 5 0 0 1 7 0M5 12.859a10 10 0 0 1 5.17-2.69M19 12.859a10 10 0 0 0-2.007-1.523M2 8.82a15 15 0 0 1 4.177-2.643M22 8.82a15 15 0 0 0-11.288-3.764M2 2l20 20"></path></svg></div>
+                <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;line-height:28px;color:#8A1C12">Pas de réseau.</div>
+                <div style="font-size:16px;line-height:24px;color:#6B6157">Les missions s'afficheront dès que la connexion revient.</div>
+                <div style="height:56px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;margin-top:8px">Réessayer</div>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="flex:none;background:#FFFFFF;border-top:1px solid #E6DCCF;display:flex;padding:8px 0 24px">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#211C18;font-size:13px;font-weight:700"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><path d="M3 5h.01M3 12h.01M3 19h.01M8 5h13M8 12h13M8 19h13"></path></svg>Missions</div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#6B6157;font-size:13px;font-weight:500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>Dispos</div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#6B6157;font-size:13px;font-weight:500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profil</div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="3" style="padding:32px 64px 96px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-top:1px solid #E6DCCF;padding-top:32px;flex-wrap:wrap">
+    <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px">3 · Détail et « Mi lé la »</div>
+    <div style="font-size:16px;line-height:24px;color:#6B6157">App extra · le premier écran est cliquable</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+    <sc-for list="{{ detailStates }}" as="d" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;line-height:18px;font-weight:600;background:#211C18;color:#FFFFFF;padding:4px 8px;border-radius:6px">{{ d.id }}</span>
+          <span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">{{ d.label }}</span>
+        </div>
+        <div style="width:390px;height:844px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:32px;overflow:hidden;box-shadow:0 24px 48px -24px rgba(33,28,24,.25);display:flex;flex-direction:column;position:relative">
+          <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:13px;font-weight:600">
+            <span>16:07</span><span style="width:16px;height:8px;border:1.5px solid #211C18;border-radius:2px"></span>
+          </div>
+          <sc-if value="{{ d.isCancel }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:none;padding:4px 8px"><span onClick="{{ d.onKeep }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"></path></svg></span></div>
+            <div style="flex:1;padding:32px 16px;display:flex;flex-direction:column;gap:16px">
+              <div style="width:56px;height:56px;border-radius:12px;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="1.75" stroke-linecap="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18M14 14l-4 4M10 14l4 4"></path></svg></div>
+              <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px;letter-spacing:-0.01em">Tu ne viens plus ce soir ?</div>
+              <div style="align-self:flex-start;padding:8px 16px;border-radius:999px;background:#FFFFFF;border:1px solid #211C18;font-size:16px;line-height:24px;font-weight:600">18 h – minuit · Le Boucan Grillé</div>
+              <div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">Le restaurant sera prévenu tout de suite.</div>
+            </div>
+            <div style="flex:none;background:#FFFFFF;border-top:1px solid #E6DCCF;padding:16px 16px 32px;display:flex;flex-direction:column;gap:16px">
+              <div onClick="{{ d.onConfirmCancel }}" style="height:56px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:20px;font-weight:700;cursor:pointer" style-hover="background:#9E3215">Confirmer</div>
+              <div onClick="{{ d.onKeep }}" style="font-size:15px;line-height:20px;font-weight:700;color:#9E3215;text-align:center;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Annuler</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ d.notCancel }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:4px 8px">
+            <span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"></path></svg></span>
+            <span style="background:#F2B33D;color:#211C18;font-size:13px;line-height:18px;font-weight:700;padding:4px 8px;border-radius:6px;margin-right:16px">Ce soir</span>
+          </div>
+
+          <div style="flex:1;overflow-y:auto;padding:0 16px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:16px;line-height:24px;color:#6B6157">Vendredi 30 octobre</div>
+              <div style="display:inline-flex;align-self:flex-start;padding:8px 24px;border-radius:999px;background:#FFFFFF;border:1px solid #211C18;font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px;letter-spacing:-0.01em">18 h – minuit</div>
+            </div>
+            <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;line-height:28px">Serveur en salle · Le Boucan Grillé</div>
+
+            <div style="background:#FFFFFF;border-radius:12px;display:flex;flex-direction:column">
+              <div style="display:flex;gap:16px;padding:16px;border-bottom:1px solid #E6DCCF">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px"><path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"></path></svg>
+                <div style="display:flex;flex-direction:column"><span style="font-size:16px;line-height:24px;font-weight:600">≈ 63 € net</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">81,25 € brut, congés payés compris.</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">6 h × 12,31 € brut. Payé par le restaurant.</span></div>
+              </div>
+              <div style="display:flex;gap:16px;padding:16px;border-bottom:1px solid #E6DCCF">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <sc-if value="{{ d.notDone }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;flex-direction:column"><span style="font-size:16px;line-height:24px;font-weight:600">Saint-Gilles-les-Bains · 2,1 km</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Adresse exacte après confirmation.</span></div>
+                </sc-if>
+                <sc-if value="{{ d.isDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;flex-direction:column"><span style="font-size:16px;line-height:24px;font-weight:600">14 rue du Général de Gaulle</span><span style="font-size:16px;line-height:24px;font-weight:600">97434 Saint-Gilles-les-Bains</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">2,1 km · entrée du personnel côté cuisine</span></div>
+                    <div style="display:flex;align-items:center;gap:16px">
+                      <a href="#" style="font-size:15px;line-height:20px;font-weight:700;color:#9E3215;display:flex;align-items:center;gap:4px;text-decoration:underline;text-underline-offset:3px">Itinéraire<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9E3215" stroke-width="2" stroke-linecap="round"><path d="M7 7h10v10M7 17 17 7"></path></svg></a>
+                      <div style="flex:1;height:48px;border-radius:12px;border:1px solid #211C18;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;line-height:20px;font-weight:700;cursor:pointer">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg>Appeler le restaurant
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="display:flex;gap:16px;padding:16px;border-bottom:1px solid #E6DCCF">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C7350" stroke-width="2.5" stroke-linecap="round" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg>
+                <div style="display:flex;flex-direction:column"><span style="font-size:16px;line-height:24px;font-weight:600;color:#2C7350">Retour assuré par le restaurant</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Raccompagnement ou taxi payé après le service.</span></div>
+              </div>
+              <div style="display:flex;gap:16px;padding:16px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+                <span style="font-size:16px;line-height:24px">Tenue noire. Chaussures fermées.</span>
+              </div>
+            </div>
+
+            <div style="display:{{ d.contractDisplay }};gap:8px;align-items:flex-start;padding:0 4px 16px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:3px"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"></path></svg>
+              <span style="font-size:16px;line-height:24px;color:#6B6157">Contrat d'extra à signer sur ton téléphone. Pas besoin de SIRET.</span>
+            </div>
+          </div>
+
+          <div style="flex:none;background:#FFFFFF;border-top:1px solid #E6DCCF;padding:16px 16px 32px;display:flex;flex-direction:column;gap:12px">
+            <sc-if value="{{ d.isIdle }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ d.onPress }}" style="height:64px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque';font-size:22px;line-height:28px;font-weight:700;cursor:pointer;letter-spacing:0.01em" style-hover="background:#9E3215">Mi lé la</div>
+            </sc-if>
+            <sc-if value="{{ d.isSending }}" hint-placeholder-val="{{ false }}">
+              <div style="height:64px;border-radius:12px;background:#9E3215;color:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;line-height:20px;font-weight:700">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" style="animation:kspin 0.9s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+                On prévient le restaurant
+              </div>
+            </sc-if>
+            <sc-if value="{{ d.isDone }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:12px;background:#2C7350;color:#FFFFFF;display:flex;align-items:center;gap:8px;padding:12px 16px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" style="flex:none"><path d="M20 6 9 17l-5-5"></path></svg>
+                <span style="font-size:16px;line-height:24px;font-weight:600">C'est confirmé. On t'attend à 18 h.</span>
+              </div>
+              <div style="height:56px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;line-height:20px;font-weight:700;cursor:pointer" style-hover="background:#9E3215">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"><path d="M12 20h9M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></svg>Signer mon contrat
+              </div>
+            </sc-if>
+            <sc-if value="{{ d.isTaken }}" hint-placeholder-val="{{ false }}">
+              <div style="height:64px;border-radius:12px;background:#FBF6EE;color:#6B6157;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque';font-size:22px;font-weight:700">Mi lé la</div>
+            </sc-if>
+            <div style="font-size:13px;line-height:18px;font-weight:600;color:#211C18;text-align:center;text-wrap:pretty">Un empêchement ? Préviens au moins 4 h avant. Une absence sans prévenir = exclusion.</div>
+            <sc-if value="{{ d.canCancel }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ d.onCancel }}" style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-align:center;text-decoration:underline;text-underline-offset:3px;cursor:pointer">Je ne peux plus venir</div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ d.isTaken }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;background:rgba(33,28,24,.5);display:flex;align-items:flex-end">
+              <div style="width:100%;background:#FFFFFF;border-radius:12px 12px 0 0;padding:32px 16px;display:flex;flex-direction:column;gap:16px">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:22px;line-height:28px">Mission déjà prise.</div>
+                <div style="font-size:16px;line-height:24px;color:#6B6157">Un autre extra a répondu avant toi. 3 missions t'attendent encore ce soir.</div>
+                <div style="height:56px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700">Voir les missions</div>
+              </div>
+            </div>
+          </sc-if>
+          </sc-if>
+        </div>
+        <div style="width:390px;font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-wrap:pretty">{{ d.note }}</div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { press: 'idle' };
+  press = () => {
+    if (this.state.press !== 'idle') return;
+    this.setState({ press: 'sending' });
+    clearTimeout(this.t);
+    this.t = setTimeout(() => this.setState({ press: 'done' }), 1400);
+  };
+  reset = () => this.setState({ press: 'idle' });
+  askCancel = () => this.setState(s => ({ prev: s.press, press: 'cancel' }));
+  keep = () => this.setState(s => ({ press: s.prev || 'idle' }));
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() {
+    const f = (id, key, label, note) => ({ id, label, note, isError: key === 'error', notError: key !== 'error', isLoading: key === 'loading', notLoading: key !== 'loading', formOpacity: key === 'loading' ? 0.5 : 1 });
+    const l = (id, key, label) => ({ id, label, isLoaded: key === 'ok', isLoading: key === 'loading', isEmpty: key === 'empty', isError: key === 'error' });
+    const d = (id, key, label, note, extra) => ({ id, label, note, isIdle: key === 'idle', isSending: key === 'sending', isDone: key === 'done', isTaken: key === 'taken', isCancel: key === 'cancel', notCancel: key !== 'cancel', notDone: key !== 'done', contractDisplay: key === 'done' ? 'none' : 'flex', canCancel: key === 'idle' || key === 'done', ...extra });
+    const p = this.state.press;
+    return {
+      formStates: [
+        f('1a', 'ok', 'Rempli', "Valeurs par défaut pensées pour le service du soir : « Ce soir » et « 18 h – minuit » présélectionnés. Le coût total reste visible à côté du bouton."),
+        f('1b', 'loading', 'Envoi', "Champs grisés pendant l'envoi. Le bouton garde sa place pour éviter un double envoi."),
+        f('1c', 'error', 'Erreur de saisie', "Un résumé en haut, le détail sous le champ. La bordure braise remplace la bordure galet.")
+      ],
+      listStates: [
+        l('2a', 'ok', 'Liste'), l('2b', 'loading', 'Chargement'), l('2c', 'empty', 'Vide'), l('2d', 'error', 'Hors ligne')
+      ],
+      missions: [
+        { time: '18 h – minuit', hours: 6, tonight: true, day: '', town: 'Saint-Gilles-les-Bains', km: 2.1, role: 'Serveur', resto: 'Le Boucan Grillé', ride: true },
+        { time: '19 h – 23 h 30', hours: 4.5, tonight: true, day: '', town: 'Saint-Paul', km: 4.8, role: 'Plonge', resto: 'Chez Tatie Lucette', ride: false, bus: 'Dernier bus 20 h 15 : retour à prévoir' },
+        { time: '11 h 30 – 15 h', hours: 3.5, tonight: false, day: 'sam. 31', town: "L'Hermitage", km: 6.0, role: 'Commis', resto: 'Hôtel Les Filaos', ride: false, bus: 'Bus retour à 15 h 20' },
+        { time: '18 h – 1 h', hours: 7, tonight: false, day: 'sam. 31', town: 'Saint-Gilles-les-Bains', km: 2.3, role: 'Barman', resto: 'Ti Kaz Bar', ride: true }
+      ].map(m => {
+        const brut = Math.round(m.hours * 12.31 * 1.1 * 100) / 100;
+        return { ...m, notTonight: !m.tonight, noRide: !m.ride, dist: m.km.toFixed(1).replace('.', ',') + ' km',
+          brut: brut.toFixed(2).replace('.', ','), net: Math.round(brut * 0.78) };
+      }).sort((a, b) => (b.ride - a.ride) || (a.km - b.km)),
+      skeletons: [1, 2, 3, 4],
+      detailStates: [
+        d('3a', p, { idle: 'Par défaut · cliquable', sending: 'Envoi', done: 'Confirmé · cliquable', cancel: 'Désistement · cliquable' }[p], "Le bouton « Mi lé la » est le seul élément piment. La règle d'absence est lue juste avant le geste. « Je ne peux plus venir » ouvre la confirmation.", { onPress: this.press, onCancel: this.askCancel, onKeep: this.keep, onConfirmCancel: this.reset }),
+        d('3b', 'sending', 'Envoi', "Retour immédiat après l'appui. Libellé explicite pendant l'attente réseau."),
+        d('3c', 'taken', 'Erreur · mission prise', "Cas fréquent sur les urgences. On renvoie tout de suite vers d'autres missions."),
+        d('3d', 'done', 'Confirmé', "Bandeau vacoa, puis « Signer mon contrat » en piment. L'adresse complète, l'itinéraire et l'appel apparaissent. Le restaurateur reçoit : « Kévin a dit mi lé la. Arrivée prévue à 18 h. »"),
+        d('3e', 'cancel', 'Désistement · confirmation', "Une question, un rappel de la mission, une phrase. « Confirmer » prévient le restaurant ; « Annuler » ramène à la mission.")
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

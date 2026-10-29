@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF6EE;color:#211C18;font-family:Figtree,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#9E3215}a:hover{color:#211C18}
+</style>
+</helmet>
+
+<section id="t3" style="padding:64px;display:flex;flex-direction:column;gap:64px;width:max-content">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:1400px">
+    <div style="font-size:24px;line-height:32px;font-weight:600;color:#6B6157">Kit de marque · Partie 2</div>
+    <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:96px;line-height:100px;letter-spacing:-0.02em">Réseaux sociaux</div>
+    <div style="font-size:28px;line-height:40px;color:#6B6157;text-wrap:pretty">Visuels à taille réelle, en pixels. Les zones en pointillés sont des repères de recadrage : masquez-les avant export avec le réglage « Repères ».</div>
+  </div>
+
+  <div style="display:flex;gap:96px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2a</span><span style="font-size:32px;line-height:40px;font-weight:600">Photo de profil</span><span style="font-size:24px;line-height:32px;color:#6B6157">1080 × 1080 · Facebook, Instagram, WhatsApp Business</span></div>
+      <div id="profil" style="width:1080px;height:1080px;background:#C2401E;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:600px;display:inline-flex;flex-direction:column;align-items:flex-start;color:#FBF6EE;margin-top:-20px"><span style="width:0.30em;height:0.13em;margin-left:0.02em;margin-bottom:0.07em;border-radius:999px;background:#FBF6EE"></span><span style="line-height:0.74;letter-spacing:-0.04em">K</span></span>
+        <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;border-radius:999px;border:4px dashed #FBF6EE;pointer-events:none"></div></sc-if>
+      </div>
+      <div style="width:1080px;font-size:24px;line-height:32px;color:#6B6157">Monogramme seul, centré : tout tient dans le cercle de recadrage.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2b</span><span style="font-size:32px;line-height:40px;font-weight:600">Couverture Facebook</span><span style="font-size:24px;line-height:32px;color:#6B6157">1640 × 624</span></div>
+      <div id="couverture-facebook" style="width:1640px;height:624px;background:#FBF6EE;position:relative;overflow:hidden;box-shadow:0 0 0 1px #E6DCCF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding-bottom:160px;box-sizing:border-box">
+        <dc-import name="Koudmin Logo" size="136" ink="#211C18" dot="#C2401E" hint-size="590px,136px"></dc-import>
+        <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:52px;line-height:60px;letter-spacing:-0.01em">Les extras péi, en 2 heures.</div>
+        <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;left:190px;right:190px;top:0;bottom:160px;border:4px dashed #6B6157;pointer-events:none"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;height:160px;background:rgba(107,97,87,.18);display:flex;align-items:center;padding-left:32px;font-size:24px;font-weight:600;color:#211C18;pointer-events:none">Masqué sur mobile par la photo de profil</div>
+        </sc-if>
+      </div>
+      <div style="width:1640px;font-size:24px;line-height:32px;color:#6B6157">Zone sûre : 1260 × 464 au centre-haut. Rien d'important dans les 160 px du bas.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:96px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2c</span><span style="font-size:32px;line-height:40px;font-weight:600">Bannière LinkedIn</span><span style="font-size:24px;line-height:32px;color:#6B6157">1584 × 396</span></div>
+      <div id="banniere-linkedin" style="width:1584px;height:396px;background:#211C18;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:24px;padding:0 120px;box-sizing:border-box">
+        <dc-import name="Koudmin Logo" size="96" ink="#FBF6EE" dot="#C2401E" hint-size="420px,96px"></dc-import>
+        <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:40px;line-height:48px;color:#FBF6EE">Les extras péi, en 2 heures.</div>
+        <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:0;top:150px;width:560px;bottom:0;background:rgba(251,246,238,.14);border:4px dashed #FBF6EE;box-sizing:border-box;display:flex;align-items:flex-end;padding:16px;font-size:24px;font-weight:600;color:#FBF6EE;pointer-events:none">Photo de profil</div></sc-if>
+      </div>
+      <div style="width:1584px;font-size:24px;line-height:32px;color:#6B6157">Contenu calé à droite : la photo de profil couvre le bas gauche.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2d</span><span style="font-size:32px;line-height:40px;font-weight:600">Aperçu de lien</span><span style="font-size:24px;line-height:32px;color:#6B6157">1200 × 630 · Open Graph</span></div>
+      <div id="open-graph" style="width:1200px;height:630px;background:#FBF6EE;position:relative;overflow:hidden;box-shadow:0 0 0 1px #E6DCCF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px">
+        <dc-import name="Koudmin Logo" size="120" ink="#211C18" dot="#C2401E" hint-size="520px,120px"></dc-import>
+        <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:52px;line-height:60px;letter-spacing:-0.01em">Les extras péi, en 2 heures.</div>
+        <div style="font-size:32px;line-height:40px;font-weight:600;color:#6B6157">koudmin.re</div>
+        <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:80px;border:4px dashed #6B6157;pointer-events:none"></div></sc-if>
+      </div>
+      <div style="width:1200px;font-size:24px;line-height:32px;color:#6B6157">Tout reste dans une marge de 80 px : certaines messageries rognent les bords.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:96px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2e·1</span><span style="font-size:32px;line-height:40px;font-weight:600">Post · Annonce de mission</span><span style="font-size:24px;line-height:32px;color:#6B6157">1080 × 1350</span></div>
+      <div id="post-mission" style="width:1080px;height:1350px;background:#FBF6EE;position:relative;overflow:hidden;box-shadow:0 0 0 1px #E6DCCF;padding:88px;box-sizing:border-box;display:flex;flex-direction:column">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <dc-import name="Koudmin Logo" size="64" ink="#211C18" dot="#C2401E" hint-size="280px,64px"></dc-import>
+          <span style="background:#F2B33D;color:#211C18;font-size:40px;line-height:48px;font-weight:700;padding:8px 24px;border-radius:12px">Ce soir</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px">
+          <div style="font-size:40px;line-height:48px;color:#6B6157">Vendredi 30 octobre</div>
+          <div style="align-self:flex-start;border:6px solid #211C18;border-radius:999px;padding:16px 56px 24px;font-family:'Bricolage Grotesque';font-weight:700;font-size:128px;line-height:136px;letter-spacing:-0.03em;background:#FFFFFF">18 h – minuit</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:52px;line-height:64px;font-weight:600">Serveur · Saint-Gilles-les-Bains</div>
+            <div style="font-size:40px;line-height:48px;color:#6B6157">Le Boucan Grillé</div>
+          </div>
+          <div style="border-top:2px solid #E6DCCF;padding-top:32px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:96px;line-height:104px;letter-spacing:-0.02em">≈ 63 € net</div>
+            <div style="font-size:36px;line-height:44px;color:#6B6157">81,25 € brut, congés payés compris</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;font-size:40px;line-height:48px;font-weight:600;color:#2C7350"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2C7350" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"></path></svg>Retour assuré par le restaurant</div>
+        </div>
+        <div style="font-size:40px;line-height:48px;font-weight:600">Dis mi lé la sur l'app Koudmin.</div>
+      </div>
+      <div style="width:1080px;font-size:24px;line-height:32px;color:#6B6157;text-wrap:pretty">Modèle : badge « Ce soir » seulement pour une mission du jour. Montants calculés sur le taux en vigueur, 12,31 € brut/h (SMIC, revu chaque 1er janvier) : 6 h × 12,31 € + 10 % de congés payés = 81,25 € brut ; net ≈ brut × 0,78.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2e·2</span><span style="font-size:32px;line-height:40px;font-weight:600">Post · Chiffre clé</span><span style="font-size:24px;line-height:32px;color:#6B6157">1080 × 1350</span></div>
+      <div id="post-chiffre" style="width:1080px;height:1350px;background:#C2401E;color:#FBF6EE;position:relative;overflow:hidden;padding:88px;box-sizing:border-box;display:flex;flex-direction:column">
+        <dc-import name="Koudmin Logo" size="64" ink="#FBF6EE" dot="#FBF6EE" hint-size="280px,64px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px">
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:520px;line-height:440px;letter-spacing:-0.05em;margin-left:-20px">2 h</div>
+          <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:72px;line-height:80px;letter-spacing:-0.01em;max-width:840px;text-wrap:pretty">Le délai maximum pour trouver votre extra.</div>
+          <div style="font-size:40px;line-height:52px;max-width:840px">S'il ne vient pas, il est remplacé.</div>
+        </div>
+        <div style="font-size:40px;line-height:48px;font-weight:600">koudmin.re</div>
+      </div>
+      <div style="width:1080px;font-size:24px;line-height:32px;color:#6B6157;text-wrap:pretty">Modèle : un chiffre, une phrase, un complément. Le fond piment est l'élément piment ; le point du logo passe en creme.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2e·3</span><span style="font-size:32px;line-height:40px;font-weight:600">Post · Témoignage</span><span style="font-size:24px;line-height:32px;color:#6B6157">1080 × 1350</span></div>
+      <div id="post-temoignage" style="width:1080px;height:1350px;background:#211C18;color:#FBF6EE;position:relative;overflow:hidden;padding:88px;box-sizing:border-box;display:flex;flex-direction:column">
+        <dc-import name="Koudmin Logo" size="64" ink="#FBF6EE" dot="#C2401E" hint-size="280px,64px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:56px">
+          <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:88px;line-height:100px;letter-spacing:-0.015em;text-wrap:pretty">« Mon serveur a annulé à 16 h. À 17 h 30, Johan était là. »</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:44px;line-height:56px;font-weight:600">Marie-Claire Payet</div>
+            <div style="font-size:40px;line-height:48px">Le Boucan Grillé · Saint-Gilles-les-Bains</div>
+          </div>
+        </div>
+        <div style="align-self:flex-start;border:4px solid #FBF6EE;border-radius:999px;padding:8px 32px 12px;font-size:36px;line-height:44px;font-weight:600">Samedi · 18 h – minuit</div>
+      </div>
+      <div style="width:1080px;font-size:24px;line-height:32px;color:#6B6157;text-wrap:pretty">Modèle : citation courte, nom, établissement, créneau concerné. Témoignage fictif : à remplacer par une vraie citation, avec accord écrit.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="font-size:24px;line-height:32px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 12px;border-radius:6px">2f</span><span style="font-size:32px;line-height:40px;font-weight:600">Story et statut WhatsApp</span><span style="font-size:24px;line-height:32px;color:#6B6157">1080 × 1920</span></div>
+      <div id="story" style="width:1080px;height:1920px;background:#FBF6EE;position:relative;overflow:hidden;box-shadow:0 0 0 1px #E6DCCF;padding:250px 88px;box-sizing:border-box;display:flex;flex-direction:column">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:32px">
+          <dc-import name="Koudmin Logo" size="72" ink="#211C18" dot="#C2401E" hint-size="315px,72px"></dc-import>
+          <span style="background:#F2B33D;color:#211C18;font-size:44px;line-height:52px;font-weight:700;padding:8px 24px;border-radius:12px">Ce soir</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:40px">
+          <div style="font-size:44px;line-height:52px;color:#6B6157">Vendredi 30 octobre</div>
+          <div style="align-self:flex-start;border:6px solid #211C18;border-radius:999px;padding:16px 56px 24px;font-family:'Bricolage Grotesque';font-weight:700;font-size:136px;line-height:144px;letter-spacing:-0.03em;background:#FFFFFF">18 h – minuit</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:56px;line-height:68px;font-weight:600">Serveur</div>
+            <div style="font-size:56px;line-height:68px;font-weight:600">Saint-Gilles-les-Bains</div>
+            <div style="font-size:44px;line-height:52px;color:#6B6157">Le Boucan Grillé</div>
+          </div>
+          <div style="border-top:2px solid #E6DCCF;padding-top:40px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:112px;line-height:120px;letter-spacing:-0.02em">≈ 63 € net</div>
+            <div style="font-size:40px;line-height:48px;color:#6B6157">81,25 € brut, congés payés compris</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;font-size:44px;line-height:52px;font-weight:600;color:#2C7350"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2C7350" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"></path></svg>Retour assuré par le restaurant</div>
+        </div>
+        <div style="font-size:48px;line-height:56px;font-weight:600;padding-bottom:32px">Dis mi lé la sur l'app Koudmin.</div>
+        <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;left:0;right:0;top:0;height:250px;background:rgba(107,97,87,.18);border-bottom:4px dashed #6B6157;display:flex;align-items:center;padding-left:32px;font-size:28px;font-weight:600;pointer-events:none">250 px libres · nom du compte, barre de progression</div>
+          <div style="position:absolute;left:0;right:0;bottom:0;height:250px;background:rgba(107,97,87,.18);border-top:4px dashed #6B6157;display:flex;align-items:center;padding-left:32px;font-size:28px;font-weight:600;pointer-events:none">250 px libres · champ de réponse</div>
+        </sc-if>
+      </div>
+      <div style="width:1080px;font-size:24px;line-height:32px;color:#6B6157;text-wrap:pretty">Même contenu que le post mission, en vertical. Montants calculés sur 12,31 € brut/h (SMIC, revu chaque 1er janvier), + 10 % de congés payés ; net ≈ brut × 0,78.</div>
+    </div>
+  </div>
+</section>
+
+<section id="t2" style="padding:64px;display:flex;flex-direction:column;gap:32px;border-top:1px solid #E6DCCF">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:900px">
+    <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">Kit de marque · Partie 1 · Piste retenue : <a href="#1b">1b</a> Point pilule</div>
+    <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Identité Koudmin</div>
+  </div>
+
+  <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px;border-top:1px solid #E6DCCF;padding-top:32px">1b · Trois versions couleur</div>
+  <div style="display:flex;flex-wrap:wrap;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:480px;height:260px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Koudmin Logo" size="88" ink="#211C18" dot="#C2401E" hint-size="380px,88px"></dc-import></div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Basalte sur creme</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Version principale. Point piment.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:480px;height:260px;background:#C2401E;border-radius:12px;display:flex;align-items:center;justify-content:center"><dc-import name="Koudmin Logo" size="88" ink="#FBF6EE" dot="#FBF6EE" hint-size="380px,88px"></dc-import></div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Creme sur piment</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Le fond est l'élément piment : le point passe en creme.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:480px;height:260px;background:#211C18;border-radius:12px;display:flex;align-items:center;justify-content:center"><dc-import name="Koudmin Logo" size="88" ink="#FBF6EE" dot="#C2401E" hint-size="380px,88px"></dc-import></div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Creme sur basalte</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Point piment conservé.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:480px;height:260px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Koudmin Logo" size="88" ink="#211C18" dot="#211C18" hint-size="380px,88px"></dc-import></div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Basalte sur creme, pilule basalte</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;max-width:480px;text-wrap:pretty">Application, e-mails, contrats et factures. Le bouton d'action reste le seul élément piment de l'écran.</div>
+    </div>
+  </div>
+
+  <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px;border-top:1px solid #E6DCCF;padding-top:32px">1c · Monogramme · 1d · Favicon</div>
+  <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-end">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:320px;height:320px;background:#C2401E;display:flex;align-items:center;justify-content:center;position:relative">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:213px;display:inline-flex;flex-direction:column;align-items:flex-start;color:#FBF6EE"><span style="width:0.30em;height:0.13em;margin-left:0.02em;margin-bottom:0.07em;border-radius:999px;background:#FBF6EE"></span><span style="line-height:0.74;letter-spacing:-0.04em">K</span></span>
+      </div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Icône d'application · 1024 × 1024</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;max-width:320px">Fond plein, sans coins : le système applique son propre masque.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:160px;height:160px;border-radius:999px;background:#C2401E;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:96px;display:inline-flex;flex-direction:column;align-items:flex-start;color:#FBF6EE"><span style="width:0.30em;height:0.13em;margin-left:0.02em;margin-bottom:0.07em;border-radius:999px;background:#FBF6EE"></span><span style="line-height:0.74;letter-spacing:-0.04em">K</span></span>
+      </div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Avatar rond</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:flex-end;gap:16px">
+        <div style="width:96px;height:96px;border-radius:22px;background:#C2401E;display:flex;align-items:center;justify-content:center;position:relative">
+          <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:64px;display:inline-flex;flex-direction:column;align-items:flex-start;color:#FBF6EE"><span style="width:0.30em;height:0.13em;margin-left:0.02em;margin-bottom:0.07em;border-radius:999px;background:#FBF6EE"></span><span style="line-height:0.74;letter-spacing:-0.04em">K</span></span>
+        </div>
+        <div style="width:48px;height:48px;border-radius:11px;background:#C2401E;display:flex;align-items:center;justify-content:center;position:relative">
+          <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;display:inline-flex;flex-direction:column;align-items:flex-start;color:#FBF6EE"><span style="width:0.30em;height:0.13em;margin-left:0.02em;margin-bottom:0.07em;border-radius:999px;background:#FBF6EE"></span><span style="line-height:0.74;letter-spacing:-0.04em">K</span></span>
+        </div>
+      </div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Test 96 et 48 px</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Lisible à 48 px.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:flex-end;gap:16px">
+        <div style="width:128px;height:128px;border-radius:24px;background:#C2401E;display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:104px;line-height:1;color:#FBF6EE;letter-spacing:-0.04em;margin-top:-6px">K</span>
+        </div>
+        <div style="width:32px;height:32px;border-radius:6px;background:#C2401E;display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;line-height:1;color:#FBF6EE;margin-top:-1px">K</span>
+        </div>
+      </div>
+      <div style="font-size:16px;line-height:24px;font-weight:600">Favicon · 32 × 32</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;max-width:200px">Agrandi × 4 et taille réelle. Sans pilule : à 32 px, elle ferait 3 px de haut.</div>
+    </div>
+  </div>
+
+  <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:32px;line-height:38px;border-top:1px solid #E6DCCF;padding-top:32px">1e · Règles d'usage</div>
+  <div style="display:flex;flex-wrap:wrap;gap:32px">
+    <div style="width:560px;background:#FFFFFF;border-radius:12px;padding:32px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+      <div style="font-size:16px;line-height:24px;font-weight:600">Zone de protection</div>
+      <div style="align-self:center;padding:32px;outline:1px dashed #6B6157;position:relative;background:#FBF6EE">
+        <div style="outline:1px solid #6B6157;outline-offset:0;line-height:0"><dc-import name="Koudmin Logo" size="64" hint-size="280px,64px"></dc-import></div>
+        <span style="position:absolute;left:0;top:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#6B6157">x</span>
+        <span style="position:absolute;right:0;bottom:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#6B6157">x</span>
+      </div>
+      <div style="font-size:16px;line-height:24px;text-wrap:pretty">x = la hauteur du « o ». Aucun texte ni bord de visuel à moins de x autour du logo.</div>
+    </div>
+    <div style="width:560px;background:#FFFFFF;border-radius:12px;padding:32px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+      <div style="font-size:16px;line-height:24px;font-weight:600">Taille minimale</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:32px;background:#FBF6EE;padding:16px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><dc-import name="Koudmin Logo" size="24" hint-size="110px,24px"></dc-import><span style="font-size:13px;line-height:18px;font-weight:600">110 px · 25 mm</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;border-radius:6px;background:#C2401E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;line-height:1;color:#FBF6EE;margin-top:-1px">K</span></div>
+          <span style="font-size:13px;line-height:18px;font-weight:600">En dessous : monogramme</span>
+        </div>
+      </div>
+      <div style="font-size:16px;line-height:24px;text-wrap:pretty">Le logo ne descend pas sous 110 px de large à l'écran ni 25 mm imprimé. Plus petit, le point disparaît : on passe au « K ».</div>
+    </div>
+    <div style="width:560px;background:#FFFFFF;border-radius:12px;padding:32px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+      <div style="font-size:16px;line-height:24px;font-weight:600">Couleur de la pilule</div>
+      <div style="flex:1;display:flex;gap:16px">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#FBF6EE;padding:16px"><dc-import name="Koudmin Logo" size="36" ink="#211C18" dot="#C2401E" hint-size="160px,36px"></dc-import><span style="font-size:13px;line-height:18px;font-weight:600">Piment</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#FBF6EE;padding:16px"><dc-import name="Koudmin Logo" size="36" ink="#211C18" dot="#211C18" hint-size="160px,36px"></dc-import><span style="font-size:13px;line-height:18px;font-weight:600">Basalte</span></div>
+      </div>
+      <div style="font-size:16px;line-height:24px;text-wrap:pretty">Pilule piment : publicités, réseaux sociaux, imprimés. Pilule basalte : application, e-mails, documents.</div>
+    </div>
+  </div>
+
+  <div style="font-size:16px;line-height:24px;font-weight:600">Usages interdits</div>
+  <div style="display:flex;flex-wrap:wrap;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:260px;height:160px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+        <dc-import name="Koudmin Logo" size="36" transform="scaleX(1.45)" hint-size="160px,36px"></dc-import>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:600;color:#8A1C12"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Déformé</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:260px;height:160px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:48px;line-height:1;letter-spacing:-0.045em;background:linear-gradient(90deg,#C2401E,#F2B33D);-webkit-background-clip:text;background-clip:text;color:transparent">Koudmin</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:600;color:#8A1C12"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Dégradé</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:260px;height:160px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(35deg,#6B6157 0 14px,#F2B33D 14px 22px,#FBF6EE 22px 34px,#2C7350 34px 44px,#211C18 44px 52px)">
+        <dc-import name="Koudmin Logo" size="48" ink="#FBF6EE" dot="#C2401E" hint-size="210px,48px"></dc-import>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:600;color:#8A1C12"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Sur un fond chargé</div>
+      <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;max-width:260px">Le motif simule une photo chargée. Sur photo : zone calme ou aplat derrière le logo.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="width:260px;height:160px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center">
+        <dc-import name="Koudmin Logo" size="48" ink="#3B4FCF" dot="#8E44D8" hint-size="210px,48px"></dc-import>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:600;color:#8A1C12"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Couleur hors charte</div>
+    </div>
+  </div>
+</section>
+
+<section id="t1" style="padding:64px;display:flex;flex-direction:column;gap:32px;border-top:1px solid #E6DCCF">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:900px">
+    <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">Kit de marque · 1a · Logotype</div>
+    <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Trois pistes pour « Koudmin »</div>
+    <div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">Bricolage Grotesque 700, basalte sur creme. Chaque piste est testée en grand et aux petites tailles d'usage (en-tête d'e-mail 24 px, pied de page 16 px). Les déclinaisons viendront après votre choix.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:stretch">
+
+    <div id="1a" style="width:520px;background:#FFFFFF;border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:16px">
+        <span style="font-size:13px;line-height:18px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 8px;border-radius:6px">1a</span>
+        <span style="font-size:16px;line-height:24px;font-weight:600">Sobre</span>
+      </div>
+      <div style="height:280px;background:#FBF6EE;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:112px;line-height:1;letter-spacing:-0.045em;font-variation-settings:'opsz' 96">Koudmin</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:32px;padding:16px 32px;background:#FBF6EE;border-top:1px solid #E6DCCF">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:24px;line-height:1;letter-spacing:-0.03em">Koudmin</span>
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;line-height:1;letter-spacing:-0.02em">Koudmin</span>
+      </div>
+      <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:8px;flex:1">
+        <div style="font-size:16px;line-height:24px;text-wrap:pretty">Le mot seul, serré, comme une enseigne peinte. L'approche la plus solide et la plus facile à appliquer partout.</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Pour : aucune contrainte technique, lisible partout. Contre : peu de signe propre, la pilule n'apparaît que dans les écrans.</div>
+      </div>
+    </div>
+
+    <div id="1b" style="width:520px;background:#FFFFFF;border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:16px">
+        <span style="font-size:13px;line-height:18px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 8px;border-radius:6px">1b</span>
+        <span style="font-size:16px;line-height:24px;font-weight:600">Point pilule</span>
+      </div>
+      <div style="height:280px;background:#FBF6EE;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:112px;line-height:1;letter-spacing:-0.045em;font-variation-settings:'opsz' 96;display:flex;align-items:baseline">Koudm<span style="position:relative;display:inline-block">ı<span style="position:absolute;left:50%;top:0.09em;width:0.30em;height:0.13em;margin-left:-0.15em;border-radius:999px;background:#C2401E"></span></span>n</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:32px;padding:16px 32px;background:#FBF6EE;border-top:1px solid #E6DCCF">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:24px;line-height:1;letter-spacing:-0.03em;display:flex;align-items:baseline">Koudm<span style="position:relative;display:inline-block">ı<span style="position:absolute;left:50%;top:0.07em;width:0.32em;height:0.15em;margin-left:-0.16em;border-radius:999px;background:#C2401E"></span></span>n</span>
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;line-height:1;letter-spacing:-0.02em;display:flex;align-items:baseline">Koudm<span style="position:relative;display:inline-block">ı<span style="position:absolute;left:50%;top:0.06em;width:0.34em;height:0.16em;margin-left:-0.17em;border-radius:999px;background:#C2401E"></span></span>n</span>
+      </div>
+      <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:8px;flex:1">
+        <div style="font-size:16px;line-height:24px;text-wrap:pretty">Le point du « i » devient un créneau horaire couché, en piment. Un détail qu'on remarque au deuxième regard, et qui relie le logo aux écrans.</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Pour : signe propre, discret, réutilisable seul. Contre : le piment du point compte comme l'élément piment du visuel ; il faut le dessiner, pas le taper.</div>
+      </div>
+    </div>
+
+    <div id="1c" style="width:520px;background:#FFFFFF;border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:16px">
+        <span style="font-size:13px;line-height:18px;font-weight:700;background:#211C18;color:#FFFFFF;padding:4px 8px;border-radius:6px">1c</span>
+        <span style="font-size:16px;line-height:24px;font-weight:600">Créneau</span>
+      </div>
+      <div style="height:280px;background:#FBF6EE;display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:88px;line-height:1;letter-spacing:-0.04em;font-variation-settings:'opsz' 96;border:0.075em solid #211C18;border-radius:999px;padding:0.14em 0.42em 0.2em">Koudmin</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:32px;padding:16px 32px;background:#FBF6EE;border-top:1px solid #E6DCCF">
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;line-height:1;letter-spacing:-0.03em;border:2px solid #211C18;border-radius:999px;padding:3px 10px 4px">Koudmin</span>
+        <span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;line-height:1;letter-spacing:-0.02em;border:1.5px solid #211C18;border-radius:999px;padding:2px 7px 3px">Koudmin</span>
+      </div>
+      <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:8px;flex:1">
+        <div style="font-size:16px;line-height:24px;text-wrap:pretty">Le mot posé dans une pilule, comme une case cochée sur le planning de service. Se lit comme un tampon ou une étiquette de vitrine.</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Pour : très reconnaissable, fait naturellement autocollant et avatar. Contre : plus large, et le contour s'alourdit en dessous de 24 px de haut.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showGuides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;label&quot;:&quot;Repères de recadrage&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return { guides: this.props.showGuides ?? true };
+  }
+}
+</script>
+</body>
+</html>
