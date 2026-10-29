@@ -1,8 +1,19 @@
 import { ajouterJours, aujourdhuiReunion, type MissionResume } from '@koudmin/core';
-import type { LieuMission, MissionDetail, Profil, SourceDonnees } from './source';
+import type {
+  CleDispo,
+  ContratExtra,
+  InfosContrat,
+  LieuMission,
+  MissionConfirmee,
+  MissionDetail,
+  Profil,
+  SourceDonnees,
+} from './source';
 
 /** Mêmes données que supabase/seed.sql. Le taux vient des paramètres fictifs, pas du code métier. */
 const TAUX_FICTIF = 1231;
+/** Code accepté en démonstration, comme les numéros de test de supabase/config.toml. */
+const CODE_DEMO = '123456';
 
 function missionsFictives(): MissionResume[] {
   const ceSoir = aujourdhuiReunion();
@@ -26,14 +37,18 @@ const COMPLEMENTS: Record<string, { tenue: string; lieu: LieuMission }> = {
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function sourceFictive(): SourceDonnees {
-  // Missions confirmées par l'extra de démo, gardées en mémoire le temps de la session.
+  // État de la démo, gardé en mémoire le temps de la session.
   const confirmees = new Set<string>();
+  const signes = new Set<string>();
+  const dispos = new Set<CleDispo>([`${ajouterJours(aujourdhuiReunion(), 1)}:soir` as CleDispo]);
+  let infos: InfosContrat | null = null;
+  let profil: Profil = { prenom: 'Kévin', nom: 'Hoarau', telephone: '+262692000001', commune: 'Saint-Paul', aVoiture: false };
   const ecouteurs = new Set<() => void>();
   const prevenir = () => ecouteurs.forEach((f) => f());
 
   return {
-    async profil(): Promise<Profil> {
-      return { prenom: 'Kévin', commune: 'Saint-Paul', aVoiture: false };
+    async profil() {
+      return profil;
     },
     async missions() {
       await attendre(700);
@@ -57,6 +72,7 @@ export function sourceFictive(): SourceDonnees {
     async seDesister(id) {
       await attendre(900);
       confirmees.delete(id);
+      signes.delete(id);
       prevenir();
     },
     ecouterMissions(rappel) {
@@ -65,5 +81,60 @@ export function sourceFictive(): SourceDonnees {
         ecouteurs.delete(rappel);
       };
     },
+    async mesMissions(): Promise<MissionConfirmee[]> {
+      return missionsFictives()
+        .filter((m) => confirmees.has(m.id))
+        .map((m) => ({ ...m, contratSigne: signes.has(m.id) }));
+    },
+    async contrat(demandeId): Promise<ContratExtra | null> {
+      const m = missionsFictives().find((x) => x.id === demandeId);
+      const c = COMPLEMENTS[demandeId];
+      if (!m || !c || !confirmees.has(demandeId)) return null;
+      return {
+        affectationId: `a-${demandeId}`,
+        employeur: m.restaurant,
+        adresseEmployeur: `${c.lieu.adresse}, ${c.lieu.codePostal} ${m.commune}`,
+        signeExtra: signes.has(demandeId),
+        signeRestaurant: false,
+      };
+    },
+    async infosContrat() {
+      return infos;
+    },
+    async enregistrerInfosContrat(i) {
+      await attendre(400);
+      infos = i;
+    },
+    async signerContrat(affectationId) {
+      await attendre(900);
+      signes.add(affectationId.replace(/^a-/, ''));
+      prevenir();
+    },
+    async dispos() {
+      return [...dispos];
+    },
+    async basculerDispo(jour, creneau, actif) {
+      const cle = `${jour}:${creneau}` as CleDispo;
+      if (actif) dispos.add(cle);
+      else dispos.delete(cle);
+    },
+    async majProfil(p) {
+      profil = { ...profil, ...p };
+      prevenir();
+    },
+    async session() {
+      return 'ok';
+    },
+    async envoyerCode() {
+      await attendre(600);
+    },
+    async verifierCode(_tel, code) {
+      await attendre(600);
+      return code.trim() === CODE_DEMO;
+    },
+    async inscrire(i) {
+      profil = { prenom: i.prenom, nom: i.nom, telephone: i.telephone, commune: i.commune, aVoiture: i.aVoiture };
+    },
+    async deconnecter() {},
   };
 }

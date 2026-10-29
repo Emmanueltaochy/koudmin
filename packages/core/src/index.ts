@@ -14,3 +14,5 @@ export * from './demande';
 export * from './facturation';
 export * from './textesEcrans';
 export * from './contrat';
+export * from './communes';
+export * from './inscription';

@@ -98,12 +98,10 @@ export function FormulaireDemande() {
 
   // Après une première tentative, les erreurs se mettent à jour pendant la correction.
   function modifier(m: Partial<SaisieDemande>) {
-    setSaisie((prev) => {
-      if (!prev) return prev;
-      const suivante = { ...prev, ...m };
-      if (tente && parametres) setErreurs(validerDemande(suivante, smic, maintenant()));
-      return suivante;
-    });
+    if (!saisie) return;
+    const suivante = { ...saisie, ...m };
+    setSaisie(suivante);
+    if (tente && parametres) setErreurs(validerDemande(suivante, smic, maintenant()));
   }
 
   const minutes = saisie ? dureeMinutes(lireHeure(saisie.debut) ?? -1, lireHeure(saisie.fin) ?? -1) : null;

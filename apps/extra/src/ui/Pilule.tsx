@@ -16,7 +16,7 @@ export function PiluleFiltre({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ selected: active }}
+      aria-selected={active}
       onPress={onPress}
       // Pilule de 42 px : on étend la zone tactile à 44 px minimum.
       hitSlop={4}

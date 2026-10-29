@@ -2,8 +2,45 @@ import type { MissionResume, ProfilExtra } from '@koudmin/core';
 
 export interface Profil extends ProfilExtra {
   prenom: string;
+  nom: string;
+  telephone: string;
   commune: string;
 }
+
+export interface MissionConfirmee extends MissionResume {
+  contratSigne: boolean;
+}
+
+export interface ContratExtra {
+  affectationId: string;
+  employeur: string;
+  adresseEmployeur: string;
+  signeExtra: boolean;
+  signeRestaurant: boolean;
+}
+
+/** Infos demandées une seule fois, à la première signature (DPAE). */
+export interface InfosContrat {
+  dateNaissance: string;
+  lieuNaissance: string;
+  nir: string;
+  adresse: string;
+}
+
+export interface Inscription {
+  prenom: string;
+  nom: string;
+  /** E.164, ex. +262692123456 */
+  telephone: string;
+  commune: string;
+  aVoiture: boolean;
+}
+
+export type Creneau = 'midi' | 'soir';
+/** « 2026-10-30:soir » */
+export type CleDispo = `${string}:${Creneau}`;
+
+export type EtatSession = 'aucune' | 'sansProfil' | 'ok';
 
 /** Lieu exact : renvoyé seulement une fois la mission confirmée par l'extra. */
 export interface LieuMission {
@@ -37,6 +74,24 @@ export interface SourceDonnees {
   seDesister(id: string): Promise<void>;
   /** Prévient quand une mission change (publiée, prise, libérée). Renvoie la fonction de désabonnement. */
   ecouterMissions(rappel: () => void): () => void;
+
+  mesMissions(): Promise<MissionConfirmee[]>;
+  contrat(demandeId: string): Promise<ContratExtra | null>;
+  infosContrat(): Promise<InfosContrat | null>;
+  enregistrerInfosContrat(i: InfosContrat): Promise<void>;
+  /** Signature dessinée (SVG en data URL). */
+  signerContrat(affectationId: string, signature: string): Promise<void>;
+
+  dispos(): Promise<CleDispo[]>;
+  basculerDispo(jour: string, creneau: Creneau, actif: boolean): Promise<void>;
+  majProfil(p: { aVoiture?: boolean }): Promise<void>;
+
+  session(): Promise<EtatSession>;
+  envoyerCode(telephoneE164: string): Promise<void>;
+  verifierCode(telephoneE164: string, code: string): Promise<boolean>;
+  /** Crée le profil après vérification du numéro. */
+  inscrire(i: Inscription): Promise<void>;
+  deconnecter(): Promise<void>;
 }
 
 /** Échec réseau : l'écran affiche « Pas de réseau. » et propose de réessayer. */

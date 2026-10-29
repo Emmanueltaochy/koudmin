@@ -46,6 +46,8 @@ export default function Racine() {
         <Stack.Screen name="(onglets)" />
         <Stack.Screen name="mission/[id]" />
         <Stack.Screen name="contrat/[id]" />
+        <Stack.Screen name="bienvenue" />
+        <Stack.Screen name="connexion" />
       </Stack>
     </SafeAreaProvider>
   );

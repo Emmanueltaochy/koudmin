@@ -1,7 +1,13 @@
+import 'react-native-url-polyfill/auto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { MissionResume, Poste } from '@koudmin/core';
+import { AppState, Platform } from 'react-native';
+import { trouverCommune, type MissionResume, type Poste } from '@koudmin/core';
 import {
   ErreurReseau,
+  type CleDispo,
+  type ContratExtra,
+  type MissionConfirmee,
   type MissionDetail,
   type Profil,
   type ReponseAcceptation,
@@ -22,6 +28,18 @@ interface LigneMission {
   bus_retour: number | null;
 }
 
+interface LigneDetail extends LigneMission {
+  tenue: string | null;
+  confirmee: boolean;
+  disponible: boolean;
+  adresse: string | null;
+  code_postal: string | null;
+  acces: string | null;
+  telephone: string | null;
+  lat: number | null;
+  lng: number | null;
+}
+
 const versMission = (l: LigneMission): MissionResume => ({
   id: l.id,
   restaurant: l.restaurant,
@@ -35,18 +53,6 @@ const versMission = (l: LigneMission): MissionResume => ({
   retourAssure: l.retour_assure,
   busRetour: l.bus_retour,
 });
-
-interface LigneDetail extends LigneMission {
-  tenue: string | null;
-  confirmee: boolean;
-  disponible: boolean;
-  adresse: string | null;
-  code_postal: string | null;
-  acces: string | null;
-  telephone: string | null;
-  lat: number | null;
-  lng: number | null;
-}
 
 const versDetail = (l: LigneDetail): MissionDetail => ({
   ...versMission(l),
@@ -69,20 +75,44 @@ function verifier<T>(r: { data: T | null; error: { message: string } | null }): 
 }
 
 export function sourceSupabase(url: string, cle: string): SourceDonnees {
-  const client: SupabaseClient = createClient(url, cle);
+  const client: SupabaseClient = createClient(url, cle, {
+    auth: {
+      // Session gardée sur le téléphone : pas de nouveau code SMS à chaque ouverture.
+      storage: Platform.OS === 'web' ? undefined : AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  });
+  // Rafraîchissement du jeton seulement app au premier plan (économie de batterie).
+  if (Platform.OS !== 'web') {
+    AppState.addEventListener('change', (etat) => {
+      if (etat === 'active') void client.auth.startAutoRefresh();
+      else void client.auth.stopAutoRefresh();
+    });
+  }
+
+  const moi = async () => {
+    const { data } = await client.auth.getUser();
+    if (!data.user) throw new Error('Session absente');
+    return data.user.id;
+  };
+
   return {
     async profil(): Promise<Profil> {
       const p = verifier(
-        await client.from('extras').select('prenom, commune, a_voiture').single<{
+        await client.from('extras').select('prenom, nom, telephone, commune, a_voiture').single<{
           prenom: string;
+          nom: string;
+          telephone: string;
           commune: string;
           a_voiture: boolean;
         }>(),
       );
-      return { prenom: p.prenom, commune: p.commune, aVoiture: p.a_voiture };
+      return { prenom: p.prenom, nom: p.nom, telephone: p.telephone, commune: p.commune, aVoiture: p.a_voiture };
     },
     async missions() {
-      return verifier(await client.rpc('missions_disponibles')).map(versMission);
+      return (verifier(await client.rpc('missions_disponibles')) as LigneMission[]).map(versMission);
     },
     async detail(id) {
       const lignes = verifier(await client.rpc('detail_mission', { p_demande: id })) as LigneDetail[];
@@ -102,6 +132,100 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       return () => {
         void client.removeChannel(canal);
       };
+    },
+    async mesMissions(): Promise<MissionConfirmee[]> {
+      const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean })[];
+      return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe }));
+    },
+    async contrat(demandeId): Promise<ContratExtra | null> {
+      const lignes = verifier(await client.rpc('contrat_extra', { p_demande: demandeId })) as {
+        affectation_id: string;
+        employeur: string;
+        adresse_employeur: string;
+        signe_extra: boolean;
+        signe_restaurant: boolean;
+      }[];
+      const l = lignes[0];
+      return l
+        ? {
+            affectationId: l.affectation_id,
+            employeur: l.employeur,
+            adresseEmployeur: l.adresse_employeur,
+            signeExtra: l.signe_extra,
+            signeRestaurant: l.signe_restaurant,
+          }
+        : null;
+    },
+    async infosContrat() {
+      const l = verifier(
+        await client.from('infos_contrat').select('date_naissance, lieu_naissance, nir, adresse').maybeSingle<{
+          date_naissance: string;
+          lieu_naissance: string;
+          nir: string;
+          adresse: string;
+        }>(),
+      );
+      return l ? { dateNaissance: l.date_naissance, lieuNaissance: l.lieu_naissance, nir: l.nir, adresse: l.adresse } : null;
+    },
+    async enregistrerInfosContrat(i) {
+      verifier(
+        await client.from('infos_contrat').upsert({
+          extra_id: await moi(),
+          date_naissance: i.dateNaissance,
+          lieu_naissance: i.lieuNaissance.trim(),
+          nir: i.nir.replace(/\s/g, '').toUpperCase(),
+          adresse: i.adresse.trim(),
+          updated_at: new Date().toISOString(),
+        }),
+      );
+    },
+    async signerContrat(affectationId, signature) {
+      verifier(await client.rpc('signer_contrat', { p_affectation: affectationId, p_signature: signature }));
+    },
+    async dispos() {
+      const lignes = verifier(await client.from('disponibilites').select('jour, creneau')) as { jour: string; creneau: 'midi' | 'soir' }[];
+      return lignes.map((l) => `${l.jour}:${l.creneau}` as CleDispo);
+    },
+    async basculerDispo(jour, creneau, actif) {
+      const extra_id = await moi();
+      if (actif) verifier(await client.from('disponibilites').upsert({ extra_id, jour, creneau }));
+      else verifier(await client.from('disponibilites').delete().match({ extra_id, jour, creneau }));
+    },
+    async majProfil(p) {
+      if (p.aVoiture !== undefined) verifier(await client.from('extras').update({ a_voiture: p.aVoiture }).eq('id', await moi()));
+    },
+    async session() {
+      const { data } = await client.auth.getSession();
+      if (!data.session) return 'aucune';
+      const { count } = await client.from('extras').select('id', { count: 'exact', head: true });
+      return count ? 'ok' : 'sansProfil';
+    },
+    async envoyerCode(telephone) {
+      const { error } = await client.auth.signInWithOtp({ phone: telephone });
+      if (error) throw /network|fetch/i.test(error.message) ? new ErreurReseau(error.message) : error;
+    },
+    async verifierCode(telephone, code) {
+      const { error } = await client.auth.verifyOtp({ phone: telephone, token: code.trim(), type: 'sms' });
+      return !error;
+    },
+    async inscrire(i) {
+      const c = trouverCommune(i.commune);
+      if (!c) throw new Error('Commune inconnue');
+      verifier(
+        await client.from('extras').upsert({
+          id: await moi(),
+          prenom: i.prenom.trim(),
+          nom: i.nom.trim(),
+          telephone: i.telephone,
+          commune: c.nom,
+          lat: c.lat,
+          lng: c.lng,
+          a_voiture: i.aVoiture,
+        }),
+      );
+    },
+    async deconnecter() {
+      await client.auth.signOut();
     },
   };
 }

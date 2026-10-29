@@ -31,6 +31,13 @@ export function ChampAdresse({
   const liste = useId();
   const derniere = useRef('');
   const zone = useRef<HTMLTextAreaElement>(null);
+  // Fermeture différée au blur (pour laisser le temps de cliquer une proposition),
+  // annulée si le champ reprend le focus entre-temps.
+  const fermeture = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const annulerFermeture = () => {
+    if (fermeture.current) clearTimeout(fermeture.current);
+    fermeture.current = null;
+  };
   const idErreur = `${id}-erreur`;
 
   // L'adresse passe à la ligne au lieu d'être tronquée (hauteur ajustée au contenu).
@@ -87,11 +94,18 @@ export function ChampAdresse({
           value={valeur}
           disabled={desactive}
           onChange={(e) => {
+            annulerFermeture();
             onSaisie(e.target.value);
             setOuvert(true);
           }}
-          onFocus={() => setOuvert(true)}
-          onBlur={() => setTimeout(() => setOuvert(false), 150)}
+          onFocus={() => {
+            annulerFermeture();
+            setOuvert(true);
+          }}
+          onBlur={() => {
+            annulerFermeture();
+            fermeture.current = setTimeout(() => setOuvert(false), 150);
+          }}
           onKeyDown={(e) => {
             // Pas de retour à la ligne dans une adresse : Entrée choisit une proposition ou envoie.
             if (e.key === 'Enter' && !(visibles && active >= 0)) {

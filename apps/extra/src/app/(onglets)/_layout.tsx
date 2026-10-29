@@ -1,11 +1,13 @@
-import type { ComponentType } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
+import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import Calendar from 'lucide-react-native/icons/calendar';
 import List from 'lucide-react-native/icons/list';
 import User from 'lucide-react-native/icons/user';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textes as t } from '@koudmin/core';
+import { source } from '../../donnees';
 import { couleurs } from '../../ui/theme';
 import { Texte } from '../../ui/Texte';
 
@@ -18,13 +20,8 @@ const ONGLETS: Record<string, { libelle: string; icone: ComponentType<IconeProps
   profil: { libelle: o.profil, icone: User },
 };
 
-type BarreProps = {
-  state: { index: number; routes: { key: string; name: string }[] };
-  navigation: { navigate: (nom: string) => void };
-};
-
 /** Barre d'onglets de la maquette : fond blanc, trait en haut, onglet actif en basalte 700. */
-function Barre({ state, navigation }: BarreProps) {
+function Barre({ state, navigateToTab }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.barre, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}>
@@ -38,8 +35,8 @@ function Barre({ state, navigation }: BarreProps) {
           <Pressable
             key={route.key}
             accessibilityRole="tab"
-            accessibilityState={{ selected: actif }}
-            onPress={() => navigation.navigate(route.name)}
+            aria-selected={actif}
+            onPress={() => navigateToTab(route.key)}
             style={styles.onglet}
           >
             <Icone size={24} color={couleurs[couleur]} strokeWidth={2} />
@@ -54,9 +51,20 @@ function Barre({ state, navigation }: BarreProps) {
 }
 
 export default function Onglets() {
+  // Sans compte : inscription. Numéro vérifié mais profil à créer : fin de l'inscription.
+  const [pret, setPret] = useState(false);
+  useEffect(() => {
+    void source.session().then((s) => {
+      if (s === 'aucune') router.replace('/bienvenue');
+      else if (s === 'sansProfil') router.replace('/bienvenue?etape=profil');
+      else setPret(true);
+    });
+  }, []);
+  if (!pret) return null;
+
   return (
     <Tabs
-      tabBar={(p) => <Barre {...(p as unknown as BarreProps)} />}
+      tabBar={(p) => <Barre {...p} />}
       screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: couleurs.creme } }}
     >
       <Tabs.Screen name="index" />

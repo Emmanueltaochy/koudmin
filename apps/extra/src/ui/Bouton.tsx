@@ -31,7 +31,8 @@ export function BoutonPrincipal({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: inactif, busy: envoi }}
+      aria-disabled={inactif}
+      aria-busy={envoi}
       disabled={inactif}
       onPress={onPress}
       style={({ pressed }) => [
@@ -98,7 +99,7 @@ export function Lien({
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityState={{ disabled: desactive }}
+      aria-disabled={desactive}
       disabled={desactive}
       onPress={onPress}
       hitSlop={12}

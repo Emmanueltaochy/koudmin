@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
 import type { MissionResume } from '@koudmin/core';
-import { ErreurReseau, source, type Profil } from '../donnees';
+import { ErreurReseau, source, type MissionConfirmee, type Profil } from '../donnees';
 import { memoriserMissions } from '../donnees/cache';
 
 export type EtatListe =
@@ -16,6 +16,7 @@ export type Demo = 'chargement' | 'vide' | 'horsLigne';
 export function useMissions(demo?: Demo) {
   const [etat, setEtat] = useState<EtatListe>({ statut: 'chargement' });
   const [profil, setProfil] = useState<Profil | null>(null);
+  const [confirmees, setConfirmees] = useState<MissionConfirmee[]>([]);
   const etatCourant = useRef(etat);
   etatCourant.current = etat;
 
@@ -35,9 +36,11 @@ export function useMissions(demo?: Demo) {
         return;
       }
       try {
-        const [p, missions] = await Promise.all([source.profil(), source.missions()]);
+        const [p, missions, miennes] = await Promise.all([source.profil(), source.missions(), source.mesMissions()]);
         memoriserMissions(missions);
+        memoriserMissions(miennes);
         setProfil(p);
+        setConfirmees(miennes);
         setEtat({ statut: 'pret', missions });
       } catch (e) {
         if (!(e instanceof ErreurReseau || e instanceof TypeError)) console.error(e);
@@ -77,5 +80,5 @@ export function useMissions(demo?: Demo) {
     }, [charger, demo]),
   );
 
-  return { etat, profil, recharger: () => charger() };
+  return { etat, profil, confirmees, recharger: () => charger() };
 }

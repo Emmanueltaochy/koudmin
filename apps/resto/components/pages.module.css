@@ -47,7 +47,8 @@
   text-decoration: none;
 }
 .carteLien:hover {
-  box-shadow: 0 1px 0 var(--k-trait), 0 0 0 1px var(--k-trait);
+  /* Survol : ombre douce de la maquette, jamais de contour en trait. */
+  box-shadow: 0 1px 0 var(--k-trait), 0 12px 24px -16px rgba(33, 28, 24, 0.25);
 }
 
 .ligne {

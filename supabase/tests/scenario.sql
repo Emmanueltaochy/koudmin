@@ -132,3 +132,37 @@ select count(*) as dispos_visibles from disponibilites;
 reset role;
 \echo '--- Clôture des missions terminées'
 select cloturer_missions() >= 0 as cloture_ok;
+
+-- ---------------------------------------------------------------------------
+-- Étape e, côté extra : missions confirmées, contrat
+-- ---------------------------------------------------------------------------
+\echo '--- Kévin accepte le Ti Kaz : il apparaît dans ses missions, contrat non signé'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select accepter_mission('00000000-0000-0000-0000-00000000d002');
+select restaurant, contrat_signe from mes_missions();
+select employeur, adresse_employeur, signe_extra from contrat_extra('00000000-0000-0000-0000-00000000d002');
+select signer_contrat((select affectation_id from contrat_extra('00000000-0000-0000-0000-00000000d002')), repeat('z', 200));
+select restaurant, contrat_signe from mes_missions();
+\echo '--- Maëlle ne voit pas le contrat de Kévin'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e2';
+select count(*) as contrats from contrat_extra('00000000-0000-0000-0000-00000000d002');
+\echo '--- Consignes visibles dans le détail quand la tenue est vide'
+reset role;
+update demandes set tenue = null, consignes = 'Parking derrière, entrée par la cuisine.' where id = '00000000-0000-0000-0000-00000000d003';
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select tenue from detail_mission('00000000-0000-0000-0000-00000000d003');
+reset role;
+\echo '--- Inscription : le téléphone doit être celui vérifié par SMS'
+insert into auth.users (id, phone) values ('00000000-0000-0000-0000-0000000000e3', '262693000099');
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e3';
+\set ON_ERROR_STOP 0
+insert into extras (id, prenom, nom, telephone, commune, lat, lng) values
+  ('00000000-0000-0000-0000-0000000000e3', 'Johan', 'Grondin', '+262692000001', 'Le Port', -20.93, 55.29);
+\set ON_ERROR_STOP 1
+insert into extras (id, prenom, nom, telephone, commune, lat, lng) values
+  ('00000000-0000-0000-0000-0000000000e3', 'Johan', 'Grondin', '+262693000099', 'Le Port', -20.93, 55.29);
+select prenom, telephone from extras;
+reset role;

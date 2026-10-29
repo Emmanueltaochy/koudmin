@@ -61,7 +61,9 @@ export default function Accueil() {
 
           {aNoter.length > 0 && (
             <>
-              <h2 className={ui.sousTitre}>{ta.aNoter}</h2>
+              <h2 className={ui.sousTitre} style={{ marginTop: 16 }}>
+                {ta.aNoter}
+              </h2>
               <ul className={p.liste}>
                 {aNoter.flatMap((d) =>
                   extrasActifs(d)

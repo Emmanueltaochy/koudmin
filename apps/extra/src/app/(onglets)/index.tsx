@@ -10,10 +10,12 @@ import {
   filtrerMissions,
   legendeListe,
   textes as t,
+  textesEcrans,
   trierMissions,
   type FiltreMissions,
   type MissionResume,
 } from '@koudmin/core';
+import { CarteConfirmee } from '../../missions/CarteConfirmee';
 import { CarteMission } from '../../missions/CarteMission';
 import { CarteSquelette } from '../../missions/CarteSquelette';
 import { demoAutorisee } from '../../donnees';
@@ -28,7 +30,7 @@ const tm = t.extra.missions;
 
 export default function Missions() {
   const { demo } = useLocalSearchParams<{ demo?: Demo }>();
-  const { etat, profil, recharger } = useMissions(demoAutorisee(demo));
+  const { etat, profil, confirmees, recharger } = useMissions(demoAutorisee(demo));
   const [filtre, setFiltre] = useState<FiltreMissions>('toutes');
   const insets = useSafeAreaInsets();
   const aujourdhui = aujourdhuiReunion();
@@ -98,7 +100,7 @@ export default function Missions() {
         />
       )}
 
-      {etat.statut === 'pret' && missions.length === 0 && (
+      {etat.statut === 'pret' && missions.length === 0 && confirmees.length === 0 && (
         <EtatPlein
           icone={<Calendar size={28} color={couleurs.basalte} strokeWidth={1.75} />}
           titre={tm.videTitre}
@@ -108,15 +110,25 @@ export default function Missions() {
         />
       )}
 
-      {etat.statut === 'pret' && missions.length > 0 && profil && (
+      {etat.statut === 'pret' && (missions.length > 0 || confirmees.length > 0) && profil && (
         <FlatList
           data={missions}
           keyExtractor={(m) => m.id}
           renderItem={rendreCarte}
           ListHeaderComponent={
-            <Texte variante="legende" couleur="galet" style={styles.legende}>
-              {legendeListe(missions.length, !profil.aVoiture)}
-            </Texte>
+            <>
+              {confirmees.length > 0 && (
+                <View style={styles.confirmees}>
+                  <Texte variante="legendeForte">{textesEcrans.extra.missionsConfirmees}</Texte>
+                  {confirmees.map((m) => (
+                    <CarteConfirmee key={m.id} mission={m} aujourdhui={aujourdhui} onPress={ouvrir} />
+                  ))}
+                </View>
+              )}
+              <Texte variante="legende" couleur="galet" style={styles.legende}>
+                {missions.length > 0 ? legendeListe(missions.length, !profil.aVoiture) : tm.videTitre}
+              </Texte>
+            </>
           }
           ItemSeparatorComponent={Separateur}
           contentContainerStyle={styles.liste}
@@ -140,5 +152,6 @@ const styles = StyleSheet.create({
   contenu: { flex: 1, paddingHorizontal: 16, gap: 16 },
   liste: { paddingHorizontal: 16, paddingBottom: 16 },
   legende: { marginBottom: 16 },
+  confirmees: { gap: 16, marginBottom: 24 },
   separateur: { height: 16 },
 });
