@@ -9,7 +9,7 @@ DIR=$(mktemp -d /var/tmp/kivien-pg.XXXX)
 chmod 777 "$DIR"
 PORT=5499
 EN_PG() { if [ "$(id -u)" = 0 ]; then su postgres -c "$*"; else bash -c "$*"; fi; }
-EN_PG "$BIN/initdb -D $DIR/data -A trust >/dev/null && $BIN/pg_ctl -D $DIR/data -o '-p $PORT -k $DIR' -l $DIR/log start >/dev/null"
+EN_PG "$BIN/initdb -D $DIR/data -A trust -U postgres >/dev/null && $BIN/pg_ctl -D $DIR/data -o '-p $PORT -k $DIR' -l $DIR/log start >/dev/null"
 trap 'EN_PG "$BIN/pg_ctl -D $DIR/data stop -m fast >/dev/null"; rm -rf "$DIR"' EXIT
 P="psql -h $DIR -p $PORT -U postgres -v ON_ERROR_STOP=1 -q"
 $P -c "create database k"
