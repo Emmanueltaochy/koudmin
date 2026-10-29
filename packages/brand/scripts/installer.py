@@ -12,6 +12,8 @@ RACINE = BRAND.parents[1]
 PNG, SVG = BRAND / "png", BRAND / "svg"
 EXTRA = RACINE / "apps/extra/assets"
 RESTO = RACINE / "apps/resto/public/brand"
+# Conventions Next.js (App Router) : icônes servies depuis app/.
+RESTO_APP = RACINE / "apps/resto/app"
 
 
 def main() -> None:
@@ -19,20 +21,24 @@ def main() -> None:
     images = [Image.open(PNG / f"favicon-{t}.png").convert("RGBA") for t in (48, 32, 16)]
     images[0].save(BRAND / "png/favicon.ico", sizes=[(48, 48), (32, 32), (16, 16)], append_images=images[1:])
 
-    copies = {
-        PNG / "icon-1024.png": EXTRA / "icon.png",
-        PNG / "android-avant-plan-1024.png": EXTRA / "android-icon-foreground.png",
-        PNG / "android-monochrome-1024.png": EXTRA / "android-icon-monochrome.png",
-        PNG / "favicon-48.png": EXTRA / "favicon.png",
-        PNG / "favicon.ico": RESTO / "favicon.ico",
-        SVG / "favicon.svg": RESTO / "icon.svg",
-        PNG / "apple-icon-180.png": RESTO / "apple-icon.png",
-        SVG / "logo-pilule-basalte.svg": RESTO / "logo-pilule-basalte.svg",
-        SVG / "logo-pilule-piment.svg": RESTO / "logo-pilule-piment.svg",
-        SVG / "monogramme.svg": RESTO / "monogramme.svg",
-    }
+    # Liste de couples (une même source peut aller à plusieurs endroits).
+    copies = [
+        (PNG / "icon-1024.png", EXTRA / "icon.png"),
+        (PNG / "android-avant-plan-1024.png", EXTRA / "android-icon-foreground.png"),
+        (PNG / "android-monochrome-1024.png", EXTRA / "android-icon-monochrome.png"),
+        (PNG / "favicon-48.png", EXTRA / "favicon.png"),
+        (PNG / "favicon.ico", RESTO / "favicon.ico"),
+        (SVG / "favicon.svg", RESTO / "icon.svg"),
+        (PNG / "apple-icon-180.png", RESTO / "apple-icon.png"),
+        (SVG / "logo-pilule-basalte.svg", RESTO / "logo-pilule-basalte.svg"),
+        (SVG / "logo-pilule-piment.svg", RESTO / "logo-pilule-piment.svg"),
+        (SVG / "monogramme.svg", RESTO / "monogramme.svg"),
+        (PNG / "favicon.ico", RESTO_APP / "favicon.ico"),
+        (SVG / "favicon.svg", RESTO_APP / "icon.svg"),
+        (PNG / "apple-icon-180.png", RESTO_APP / "apple-icon.png"),
+    ]
     RESTO.mkdir(parents=True, exist_ok=True)
-    for source, cible in copies.items():
+    for source, cible in copies:
         shutil.copyfile(source, cible)
         print(f"{source.relative_to(RACINE)} → {cible.relative_to(RACINE)}")
 

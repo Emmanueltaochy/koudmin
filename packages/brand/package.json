@@ -1,8 +1,8 @@
 {
-  "name": "@koudmin/brand",
+  "name": "@kivien/brand",
   "version": "0.0.0",
   "private": true,
-  "description": "Logo Koudmin « Point pilule », monogramme, favicon et icônes d'app.",
+  "description": "Logo Kivien « Point pilule », monogramme, favicon et icônes d'app.",
   "files": ["svg", "png"],
   "scripts": {
     "generer": "python3 -I scripts/generer.py && NODE_PATH=$(npm root -g) node scripts/rasteriser.cjs && python3 -I scripts/installer.py"
