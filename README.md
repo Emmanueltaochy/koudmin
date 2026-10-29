@@ -31,7 +31,17 @@ pnpm start       # Expo (données fictives tant que EXPO_PUBLIC_SUPABASE_* est v
 pnpm web         # aperçu navigateur
 ```
 
-États forcés pour la démo : `/?demo=chargement`, `/?demo=vide`, `/?demo=horsLigne`.
+États forcés pour la démo (données fictives uniquement, ignorés dès que Supabase est branché) :
+- liste : `/?demo=chargement`, `/?demo=vide`, `/?demo=horsLigne` ;
+- détail : `/mission/d001?demo=envoi`, `?demo=prise`, `?demo=confirmee`, `?demo=desistement`.
+
+Parcours de bout en bout (liste → « Mi lé la » → confirmé → désistement → liste) :
+
+```bash
+pnpm --filter @koudmin/extra export:web
+npx serve -s apps/extra/dist -l 8090
+node apps/extra/e2e/parcours.cjs
+```
 
 Polices : Bricolage Grotesque est figée par taille optique (`packages/ui-tokens/scripts/instancier-polices.py`), Figtree reçoit le glyphe « ≈ » qui lui manque (`apps/extra/scripts/ajouter-approx.py`). Elles sont intégrées au build natif par le plugin `expo-font`.
 

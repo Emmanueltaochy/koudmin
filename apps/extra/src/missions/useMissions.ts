@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
 import type { MissionResume } from '@koudmin/core';
 import { ErreurReseau, source, type Profil } from '../donnees';
+import { memoriserMissions } from '../donnees/cache';
 
 export type EtatListe =
   | { statut: 'chargement' }
@@ -34,6 +36,7 @@ export function useMissions(demo?: Demo) {
       }
       try {
         const [p, missions] = await Promise.all([source.profil(), source.missions()]);
+        memoriserMissions(missions);
         setProfil(p);
         setEtat({ statut: 'pret', missions });
       } catch (e) {
@@ -61,6 +64,18 @@ export function useMissions(demo?: Demo) {
 
   // Temps réel : une mission publiée, prise ou libérée recharge la liste sans squelette.
   useEffect(() => (demo ? undefined : source.ecouterMissions(() => void charger(true))), [charger, demo]);
+
+  // Retour sur l'écran (après « Mi lé la » ou un désistement) : liste à jour, sans squelette.
+  const premierFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (premierFocus.current) {
+        premierFocus.current = false;
+        return;
+      }
+      if (!demo) void charger(true);
+    }, [charger, demo]),
+  );
 
   return { etat, profil, recharger: () => charger() };
 }

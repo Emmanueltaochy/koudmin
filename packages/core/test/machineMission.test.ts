@@ -1,40 +1,70 @@
 import { describe, expect, it } from 'vitest';
-import { etatInitial, transitionMission as t, type EtatMission, type EvenementMission } from '../src';
+import {
+  etatDepuisServeur,
+  etatInitial,
+  transitionMission as t,
+  type EtatMission,
+  type EvenementMission,
+} from '../src';
 
-const suite = (...evs: EvenementMission['type'][]): EtatMission =>
-  evs.reduce<EtatMission>((e, type) => t(e, { type } as EvenementMission), etatInitial);
+const suite = (depart: EtatMission, ...evs: EvenementMission['type'][]): EtatMission =>
+  evs.reduce<EtatMission>((e, type) => t(e, { type } as EvenementMission), depart);
+const depuisIdle = (...evs: EvenementMission['type'][]) => suite(etatInitial, ...evs);
 
 describe('machine d’états « Mi lé la »', () => {
   it('idle → sending → done', () => {
-    expect(suite('ACCEPTER')).toEqual({ nom: 'sending' });
-    expect(suite('ACCEPTER', 'CONFIRMEE')).toEqual({ nom: 'done' });
+    expect(depuisIdle('ACCEPTER')).toEqual({ nom: 'sending' });
+    expect(depuisIdle('ACCEPTER', 'CONFIRMEE')).toEqual({ nom: 'done' });
   });
 
   it('sending → taken si un autre extra a été plus rapide', () => {
-    expect(suite('ACCEPTER', 'DEJA_PRISE')).toEqual({ nom: 'taken' });
+    expect(depuisIdle('ACCEPTER', 'DEJA_PRISE')).toEqual({ nom: 'taken' });
   });
 
   it('ignore un double appui pendant l’envoi', () => {
-    expect(suite('ACCEPTER', 'ACCEPTER')).toEqual({ nom: 'sending' });
+    expect(depuisIdle('ACCEPTER', 'ACCEPTER')).toEqual({ nom: 'sending' });
   });
 
   it('revient en idle sur échec réseau, pour réessayer', () => {
-    expect(suite('ACCEPTER', 'ECHEC_RESEAU')).toEqual({ nom: 'idle', erreurReseau: true });
-    expect(suite('ACCEPTER', 'ECHEC_RESEAU', 'ACCEPTER')).toEqual({ nom: 'sending' });
+    expect(depuisIdle('ACCEPTER', 'ECHEC_RESEAU')).toEqual({ nom: 'idle', erreurReseau: true });
+    expect(depuisIdle('ACCEPTER', 'ECHEC_RESEAU', 'ACCEPTER')).toEqual({ nom: 'sending' });
   });
 
-  it('désistement depuis done : Annuler revient à done, Confirmer libère', () => {
-    expect(suite('ACCEPTER', 'CONFIRMEE', 'DESISTER')).toEqual({ nom: 'cancel', precedent: 'done' });
-    expect(suite('ACCEPTER', 'CONFIRMEE', 'DESISTER', 'ANNULER')).toEqual({ nom: 'done' });
-    expect(suite('ACCEPTER', 'CONFIRMEE', 'DESISTER', 'CONFIRMER_DESISTEMENT')).toEqual({ nom: 'liberee' });
+  it('désistement : Annuler revient à done', () => {
+    expect(depuisIdle('ACCEPTER', 'CONFIRMEE', 'DESISTER')).toEqual({ nom: 'cancel' });
+    expect(depuisIdle('ACCEPTER', 'CONFIRMEE', 'DESISTER', 'ANNULER')).toEqual({ nom: 'done' });
   });
 
-  it('désistement depuis idle : Annuler revient à idle', () => {
-    expect(suite('DESISTER', 'ANNULER')).toEqual({ nom: 'idle' });
+  it('désistement : Confirmer envoie, puis libère la mission', () => {
+    const done = { nom: 'done' } as const;
+    expect(suite(done, 'DESISTER', 'CONFIRMER_DESISTEMENT')).toEqual({ nom: 'liberation' });
+    expect(suite(done, 'DESISTER', 'CONFIRMER_DESISTEMENT', 'LIBEREE')).toEqual({ nom: 'liberee' });
   });
 
-  it('pas de désistement pendant l’envoi ni après une mission prise', () => {
-    expect(suite('ACCEPTER', 'DESISTER')).toEqual({ nom: 'sending' });
-    expect(suite('ACCEPTER', 'DEJA_PRISE', 'DESISTER')).toEqual({ nom: 'taken' });
+  it('désistement : échec réseau, retour à l’écran de désistement pour réessayer', () => {
+    const done = { nom: 'done' } as const;
+    expect(suite(done, 'DESISTER', 'CONFIRMER_DESISTEMENT', 'ECHEC_RESEAU')).toEqual({
+      nom: 'cancel',
+      erreurReseau: true,
+    });
+    expect(suite(done, 'DESISTER', 'CONFIRMER_DESISTEMENT', 'ECHEC_RESEAU', 'ANNULER')).toEqual(done);
+  });
+
+  it('pas de désistement avant confirmation, pendant l’envoi, ni après une mission prise', () => {
+    expect(depuisIdle('DESISTER')).toEqual({ nom: 'idle' });
+    expect(depuisIdle('ACCEPTER', 'DESISTER')).toEqual({ nom: 'sending' });
+    expect(depuisIdle('ACCEPTER', 'DEJA_PRISE', 'DESISTER')).toEqual({ nom: 'taken' });
+  });
+
+  it('pas de double désistement pendant l’envoi', () => {
+    expect(suite({ nom: 'done' }, 'DESISTER', 'CONFIRMER_DESISTEMENT', 'ANNULER')).toEqual({
+      nom: 'liberation',
+    });
+  });
+
+  it('part de l’état connu du serveur', () => {
+    expect(etatDepuisServeur({ confirmee: true, disponible: false })).toEqual({ nom: 'done' });
+    expect(etatDepuisServeur({ confirmee: false, disponible: false })).toEqual({ nom: 'taken' });
+    expect(etatDepuisServeur({ confirmee: false, disponible: true })).toEqual({ nom: 'idle' });
   });
 });

@@ -1,6 +1,12 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { MissionResume, Poste } from '@koudmin/core';
-import { ErreurReseau, type Profil, type SourceDonnees } from './source';
+import {
+  ErreurReseau,
+  type MissionDetail,
+  type Profil,
+  type ReponseAcceptation,
+  type SourceDonnees,
+} from './source';
 
 interface LigneMission {
   id: string;
@@ -30,6 +36,29 @@ const versMission = (l: LigneMission): MissionResume => ({
   busRetour: l.bus_retour,
 });
 
+interface LigneDetail extends LigneMission {
+  tenue: string | null;
+  confirmee: boolean;
+  disponible: boolean;
+  adresse: string | null;
+  code_postal: string | null;
+  acces: string | null;
+  telephone: string | null;
+  lat: number | null;
+  lng: number | null;
+}
+
+const versDetail = (l: LigneDetail): MissionDetail => ({
+  ...versMission(l),
+  tenue: l.tenue,
+  confirmee: l.confirmee,
+  disponible: l.disponible,
+  lieu:
+    l.adresse !== null && l.lat !== null && l.lng !== null
+      ? { adresse: l.adresse, codePostal: l.code_postal, acces: l.acces, telephone: l.telephone, lat: l.lat, lng: l.lng }
+      : null,
+});
+
 function verifier<T>(r: { data: T | null; error: { message: string } | null }): T {
   if (r.error) {
     // supabase-js remonte les coupures réseau comme « TypeError: Network request failed ».
@@ -54,6 +83,16 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
     },
     async missions() {
       return verifier(await client.rpc('missions_disponibles')).map(versMission);
+    },
+    async detail(id) {
+      const lignes = verifier(await client.rpc('detail_mission', { p_demande: id })) as LigneDetail[];
+      return lignes[0] ? versDetail(lignes[0]) : null;
+    },
+    async accepter(id) {
+      return verifier(await client.rpc('accepter_mission', { p_demande: id })) as ReponseAcceptation;
+    },
+    async seDesister(id) {
+      verifier(await client.rpc('se_desister', { p_demande: id }));
     },
     ecouterMissions(rappel) {
       const canal = client

@@ -37,3 +37,46 @@ values ('00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion(), 1080, 
 returning taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes, statut;
 reset role;
 select count(*) as signaux from signaux_missions;
+
+-- ---------------------------------------------------------------------------
+-- Étape c : détail, adresse cachée, expiration, désistement tardif
+-- ---------------------------------------------------------------------------
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+\echo '--- Kévin voit le Ti Kaz sans adresse (non confirmé)'
+select restaurant, confirmee, disponible, adresse is null as adresse_cachee, tenue
+from detail_mission('00000000-0000-0000-0000-00000000d002');
+\echo '--- Kévin accepte le Ti Kaz : adresse visible'
+select accepter_mission('00000000-0000-0000-0000-00000000d002');
+select confirmee, adresse, code_postal, telephone is not null as tel
+from detail_mission('00000000-0000-0000-0000-00000000d002');
+\echo '--- Maëlle ne voit pas l’adresse du Ti Kaz, et la mission n’est plus disponible'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e2';
+select disponible, confirmee, adresse is null as adresse_cachee from detail_mission('00000000-0000-0000-0000-00000000d002');
+\echo '--- Désistement de Kévin à plus de 4 h (demain) : non tardif'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select se_desister('00000000-0000-0000-0000-00000000d002');
+reset role;
+select desistement_tardif from affectations
+where demande_id = '00000000-0000-0000-0000-00000000d002' and extra_id = '00000000-0000-0000-0000-0000000000e1';
+\echo '--- Mission dans 2 h : désistement tardif'
+insert into demandes (id, restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+select '00000000-0000-0000-0000-00000000d0aa', '00000000-0000-0000-0000-00000000b002', 'plonge',
+       (now() at time zone 'Indian/Reunion' + interval '2 hours')::date,
+       extract(hour from now() at time zone 'Indian/Reunion' + interval '2 hours')::int * 60, 
+       ((extract(hour from now() at time zone 'Indian/Reunion' + interval '2 hours')::int * 60) + 120) % 1440,
+       'x', 'Saint-Paul', -21.0, 55.27;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select accepter_mission('00000000-0000-0000-0000-00000000d0aa');
+select se_desister('00000000-0000-0000-0000-00000000d0aa');
+reset role;
+select desistement_tardif from affectations where demande_id = '00000000-0000-0000-0000-00000000d0aa';
+\echo '--- Mission déjà commencée : expirée, absente de la liste'
+update demandes set jour = jour_reunion() - 1 where id = '00000000-0000-0000-0000-00000000d0aa';
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select accepter_mission('00000000-0000-0000-0000-00000000d0aa');
+select count(*) as visible from missions_disponibles() where id = '00000000-0000-0000-0000-00000000d0aa';
+select disponible from detail_mission('00000000-0000-0000-0000-00000000d0aa');
+reset role;

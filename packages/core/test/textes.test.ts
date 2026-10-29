@@ -9,6 +9,7 @@ import {
   legendeSalaires,
   notificationConfirmation,
   questionDesistement,
+  legendeAcces,
   textePrise,
   textes,
   LIBELLES_POSTE,
@@ -82,5 +83,24 @@ describe('textes calculés (README)', () => {
     expect(textePrise(3)).toBe("Quelqu'un a répondu avant toi. 3 missions t'attendent encore ce soir.");
     expect(textePrise(1)).toBe("Quelqu'un a répondu avant toi. 1 mission t'attend encore ce soir.");
     expect(textePrise(0)).toBe("Quelqu'un a répondu avant toi.");
+  });
+});
+
+describe('textes selon le jour de la mission', () => {
+  it('confirmation', () => {
+    expect(l(confirmationExtra(1080, 'ce soir'))).toBe("C'est confirmé. On t'attend à 18 h.");
+    expect(l(confirmationExtra(690, "aujourd'hui"))).toBe("C'est confirmé. On t'attend à 11 h 30.");
+    expect(l(confirmationExtra(1080, 'demain'))).toBe("C'est confirmé. On t'attend demain à 18 h.");
+    expect(l(confirmationExtra(1080, 'samedi'))).toBe("C'est confirmé. On t'attend samedi à 18 h.");
+  });
+  it('mission déjà prise', () => {
+    expect(textePrise(2, 'demain')).toBe("Quelqu'un a répondu avant toi. 2 missions t'attendent encore demain.");
+  });
+  it('désistement', () => {
+    expect(l(questionDesistement('samedi'))).toBe('Tu ne viens plus samedi ?');
+  });
+  it('accès', () => {
+    expect(legendeAcces('2,1 km', 'entrée du personnel côté cuisine')).toBe('2,1 km · entrée du personnel côté cuisine');
+    expect(legendeAcces('2,1 km', null)).toBe('2,1 km');
   });
 });

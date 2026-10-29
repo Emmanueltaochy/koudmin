@@ -91,3 +91,17 @@ export function choixDates(aujourdhui: JourISO): [ChoixDate, ChoixDate, ChoixDat
     { jour: apres, libelle: nomJour(apres), valeur: jourMoisCourt(apres) },
   ];
 }
+
+/**
+ * Quand a lieu la mission, pour l'insérer dans une phrase :
+ * « ce soir », « aujourd'hui » (avant 17 h), « demain », « samedi » (dans la semaine),
+ * sinon « le 12 novembre ».
+ */
+export function quandMission(jour: JourISO, debut: number, aujourdhui: JourISO): string {
+  if (jour === aujourdhui) return debut >= 17 * 60 ? 'ce soir' : "aujourd'hui";
+  if (jour === ajouterJours(aujourdhui, 1)) return 'demain';
+  const ecart = Math.round((enUTC(jour).getTime() - enUTC(aujourdhui).getTime()) / 86_400_000);
+  if (ecart > 1 && ecart < 7) return JOURS[jourSemaine(jour)]!;
+  const d = enUTC(jour);
+  return `le ${quantieme(d.getUTCDate())} ${MOIS[d.getUTCMonth()]}`;
+}

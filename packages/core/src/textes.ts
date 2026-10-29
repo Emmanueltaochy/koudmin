@@ -58,6 +58,7 @@ export const textes = {
       appeler: 'Appeler le restaurant',
       retourAssure: 'Retour assuré par le restaurant',
       retourAssureDetail: 'Raccompagnement ou taxi payé après le service.',
+      brutDetail: 'brut, congés payés compris.',
       contrat: "Contrat d'extra à signer sur ton téléphone. Pas besoin de SIRET.",
       miLeLa: 'Mi lé la',
       envoi: 'On prévient le restaurant',
@@ -117,9 +118,12 @@ export function champsACompleter(nb: number): string {
   return `${nb} champ${nb > 1 ? 's' : ''} à compléter.`;
 }
 
-/** « C'est confirmé. On t'attend à 18 h. » */
-export function confirmationExtra(debut: number): string {
-  return `C'est confirmé. On t'attend à ${formatHeure(debut)}.`;
+const leJourMeme = (quand: string) => quand === 'ce soir' || quand === "aujourd'hui";
+
+/** « C'est confirmé. On t'attend à 18 h. » ; un autre jour : « On t'attend samedi à 18 h. » */
+export function confirmationExtra(debut: number, quand = 'ce soir'): string {
+  const jour = leJourMeme(quand) ? '' : `${quand} `;
+  return `C'est confirmé. On t'attend ${jour}à ${formatHeure(debut)}.`;
 }
 
 /** Notification restaurateur : « Kévin a dit mi lé la. Arrivée prévue à 18 h. » */
@@ -127,12 +131,17 @@ export function notificationConfirmation(prenom: string, debut: number): string 
   return `${prenom} a dit mi lé la. Arrivée prévue à ${formatHeure(debut)}.`;
 }
 
-/** Bottom sheet « Mission déjà prise ». */
-export function textePrise(missionsRestantesCeSoir: number): string {
-  const n = missionsRestantesCeSoir;
+/** Bottom sheet « Mission déjà prise ». `missionsRestantes` : autres missions du même jour. */
+export function textePrise(missionsRestantes: number, quand = 'ce soir'): string {
+  const n = missionsRestantes;
   const base = "Quelqu'un a répondu avant toi.";
   if (n === 0) return base;
-  return `${base} ${n} mission${n > 1 ? 's' : ''} ${n > 1 ? "t'attendent" : "t'attend"} encore ce soir.`;
+  return `${base} ${n} mission${n > 1 ? 's' : ''} ${n > 1 ? "t'attendent" : "t'attend"} encore ${quand}.`;
+}
+
+/** « 2,1 km · entrée du personnel côté cuisine » */
+export function legendeAcces(distance: string, acces: string | null): string {
+  return acces ? `${distance} · ${acces}` : distance;
 }
 
 /** « Tu ne viens plus ce soir ? » / « Tu ne viens plus samedi ? » */

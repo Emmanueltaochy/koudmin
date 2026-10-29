@@ -16,6 +16,7 @@ import {
 } from '@koudmin/core';
 import { CarteMission } from '../../missions/CarteMission';
 import { CarteSquelette } from '../../missions/CarteSquelette';
+import { demoAutorisee } from '../../donnees';
 import { useMissions, type Demo } from '../../missions/useMissions';
 import { EtatPlein } from '../../ui/EtatPlein';
 import { PiluleFiltre, PiluleInfo } from '../../ui/Pilule';
@@ -27,7 +28,7 @@ const tm = t.extra.missions;
 
 export default function Missions() {
   const { demo } = useLocalSearchParams<{ demo?: Demo }>();
-  const { etat, profil, recharger } = useMissions(demo);
+  const { etat, profil, recharger } = useMissions(demoAutorisee(demo));
   const [filtre, setFiltre] = useState<FiltreMissions>('toutes');
   const insets = useSafeAreaInsets();
   const aujourdhui = aujourdhuiReunion();
@@ -133,7 +134,8 @@ const Separateur = () => <View style={styles.separateur} />;
 const styles = StyleSheet.create({
   ecran: { flex: 1, backgroundColor: couleurs.creme },
   entete: { paddingHorizontal: 16, paddingBottom: 16, gap: 16 },
-  titre: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  // Une commune longue fait passer la pilule sous le titre au lieu de déborder.
+  titre: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   filtres: { flexDirection: 'row', gap: 8 },
   contenu: { flex: 1, paddingHorizontal: 16, gap: 16 },
   liste: { paddingHorizontal: 16, paddingBottom: 16 },

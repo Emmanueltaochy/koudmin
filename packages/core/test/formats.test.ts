@@ -13,6 +13,7 @@ import {
   phraseDuree,
   aujourdhuiReunion,
   minuteReunion,
+  quandMission,
 } from '../src';
 import { l } from './aide';
 
@@ -88,5 +89,20 @@ describe('dates (La Réunion, UTC+4)', () => {
       ['Demain', 'sam. 31'],
       ['Dimanche', '1er nov.'],
     ]);
+  });
+});
+
+describe('quand a lieu la mission', () => {
+  const jeudi = '2026-10-29';
+  it.each([
+    ['2026-10-29', 1080, 'ce soir'],
+    ['2026-10-29', 690, "aujourd'hui"],
+    ['2026-10-30', 1080, 'demain'],
+    ['2026-10-31', 1080, 'samedi'],
+    ['2026-11-04', 1080, 'mercredi'],
+    ['2026-11-05', 1080, 'le 5 novembre'],
+    ['2026-12-01', 1080, 'le 1er décembre'],
+  ])('%s à %i min → %s', (jour, debut, attendu) => {
+    expect(quandMission(jour, debut, jeudi)).toBe(attendu);
   });
 });
