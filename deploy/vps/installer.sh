@@ -143,6 +143,16 @@ fichiers=docker-compose.yml:docker-compose.kivien.yml
 regler COMPOSE_FILE "$fichiers"
 regler COMPOSE_PROJECT_NAME kivien
 regler KIVIEN_PORT_API "$port"
+# Port local du site kivien.re (et le suivant, pour essayer une nouvelle version avant la bascule).
+port_site=$(lire KIVIEN_PORT_SITE || true)
+if [ -z "$port_site" ]; then
+  port_site=18100
+  while ss -ltnH "sport = :$port_site" | grep -q . || ss -ltnH "sport = :$((port_site + 1))" | grep -q .; do
+    port_site=$((port_site + 2))
+  done
+fi
+regler KIVIEN_PORT_SITE "$port_site"
+regler KIVIEN_DOMAINE_SITE "${SITE#https://}"
 regler KIVIEN_DOMAINE_API "$DOMAINE"
 regler SUPABASE_PUBLIC_URL "https://$DOMAINE"
 regler API_EXTERNAL_URL "https://$DOMAINE/auth/v1"
@@ -187,6 +197,11 @@ etape "6/9 Migrations Kivien"
 bash "$SOURCE/deploy/vps/appliquer-migrations.sh" "$SOURCE/supabase/migrations" | tee -a "$JOURNAL"
 
 # ---------------------------------------------------------------------------
+etape "6b/9 Site ${SITE#https://} et app web (construction : quelques minutes)"
+bash "$SOURCE/deploy/vps/deployer-site.sh" 2>&1 | tee -a "$JOURNAL" \
+  || arret "le site n'a pas pu être construit ou démarré (détail ci-dessus). L'ancienne version reste en ligne."
+
+# ---------------------------------------------------------------------------
 etape "7/9 nginx et HTTPS ($DOMAINE)"
 if [ -d /etc/nginx/sites-available ] && [ -d /etc/nginx/sites-enabled ]; then
   conf=/etc/nginx/sites-available/kivien-api.conf
@@ -226,6 +241,11 @@ else
   info "certificat HTTPS en place."
 fi
 [ -n "$ancien" ] && rm -f "$ancien"
+
+# ---------------------------------------------------------------------------
+info "site : nginx et HTTPS"
+bash "$SOURCE/deploy/vps/publier-site.sh" --regenerer 2>&1 | tee -a "$JOURNAL" \
+  || arret "nginx ou HTTPS du site en échec (détail ci-dessus) : configuration du site précédente remise."
 
 # ---------------------------------------------------------------------------
 etape "8/9 Sauvegarde quotidienne et mise à jour automatique"

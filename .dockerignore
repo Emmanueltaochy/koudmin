@@ -1,0 +1,12 @@
+# Contexte des images du site et de l'app web (deploy/vps/site/Dockerfile).
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/.expo
+.git
+docs
+design_handoff_kivien
+**/*.log
+**/.env
+**/.env.*

@@ -42,11 +42,12 @@ fi
 avant=$(git -C "$SOURCE" rev-parse HEAD)
 if [ "$avant" = "$SHA" ]; then
   echo "Déjà à jour."
-  exec bash "$SOURCE/deploy/vps/verifier.sh"
+  changements=
+else
+  # Les arbres des deux commits sont présents : la comparaison ne demande pas l'historique.
+  changements=$(git -C "$SOURCE" diff --name-only "$avant" "$SHA" 2>/dev/null || echo "deploy/vps/inconnu")
+  echo "Fichiers modifiés : $(wc -l <<<"$changements")"
 fi
-# Les arbres des deux commits sont présents : la comparaison ne demande pas l'historique.
-changements=$(git -C "$SOURCE" diff --name-only "$avant" "$SHA" 2>/dev/null || echo "deploy/vps/inconnu")
-echo "Fichiers modifiés : $(wc -l <<<"$changements")"
 
 if grep -q '^supabase/migrations/' <<<"$changements"; then
   echo "Nouvelles migrations : sauvegarde avant de les appliquer."
@@ -54,7 +55,8 @@ if grep -q '^supabase/migrations/' <<<"$changements"; then
 fi
 
 if grep -q '^deploy/vps/' <<<"$changements"; then
-  # Configuration du serveur modifiée : installeur complet (idempotent, secrets conservés).
+  # Configuration du serveur modifiée : installeur complet (idempotent, secrets conservés),
+  # qui reconstruit aussi le site et l'app web.
   echo "Configuration du serveur modifiée : installeur complet."
   installeur=$(mktemp)
   git -C "$SOURCE" show "$SHA:deploy/vps/installer.sh" > "$installeur"
@@ -65,6 +67,13 @@ else
   if grep -q '^supabase/migrations/' <<<"$changements"; then
     bash "$SOURCE/deploy/vps/appliquer-migrations.sh" "$SOURCE/supabase/migrations"
   fi
+  # Site et app web : reconstruits si leur code a changé, ou s'ils ne tournent pas.
+  if grep -qE '^(apps/|packages/|package\.json|pnpm-lock\.yaml|\.dockerignore)' <<<"$changements" \
+    || [ "$(docker inspect -f '{{.State.Running}}' kivien-site 2>/dev/null)" != true ]; then
+    bash "$SOURCE/deploy/vps/deployer-site.sh"
+  fi
+  # nginx du site et certificats : obtenus dès que les noms pointent vers ce VPS.
+  bash "$SOURCE/deploy/vps/publier-site.sh"
 fi
 echo "Version en place : $(git -C "$SOURCE" rev-parse --short HEAD)"
 # Le résultat de la vérification fait le résultat du déploiement (vert ou rouge dans GitHub).

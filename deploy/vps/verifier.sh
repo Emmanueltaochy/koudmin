@@ -33,6 +33,24 @@ if [ -n "$DOMAINE" ]; then
   [ "$code" = 404 ] && ok "tableau de bord non exposé publiquement : $code" || ko "https://$DOMAINE/ répond $code (attendu 404)"
 fi
 
+# Site kivien.re et app web.
+PORT_SITE=$(lire KIVIEN_PORT_SITE)
+DOMAINE_SITE=$(lire KIVIEN_DOMAINE_SITE)
+etat=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' kivien-site 2>/dev/null || echo absent)
+[ "$etat" = "running healthy" ] && ok "kivien-site : $etat" || ko "kivien-site : $etat"
+code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT_SITE:-18100}/")
+[ "$code" = 200 ] && ok "site (local) : $code" || ko "site (local) : $code"
+[ -f "${KIVIEN_RACINE:-/opt/kivien}/web/app/index.html" ] && ok "app web présente" || ko "app web absente"
+for n in "${DOMAINE_SITE:-kivien.re}" "app.${DOMAINE_SITE:-kivien.re}"; do
+  ip=$(getent ahostsv4 "$n" | awk 'NR==1 {print $1}' || true)
+  if [ -z "$ip" ] || ! hostname -I | tr ' ' '\n' | grep -qx "$ip"; then
+    echo "INFO  $n ne pointe pas encore vers ce VPS (DNS)"
+    continue
+  fi
+  code=$(curl -s -o /dev/null -w '%{http_code}' "https://$n/")
+  [ "$code" = 200 ] && ok "https://$n/ : $code" || ko "https://$n/ : $code"
+done
+
 n=$(docker exec supabase-db psql -h localhost -U postgres -d postgres -Atc "select count(*) from kivien_admin.migrations" 2>/dev/null || echo 0)
 [ "${n:-0}" -ge 1 ] && ok "migrations appliquées : $n" || ko "migrations absentes"
 ls /var/backups/kivien/kivien-*.dump >/dev/null 2>&1 && ok "sauvegarde présente" || ko "aucune sauvegarde"

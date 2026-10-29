@@ -112,6 +112,22 @@ ssh -L 18000:127.0.0.1:18000 root@187.124.33.84
 puis ouvrir `http://localhost:18000` (identifiant `kivien`, mot de passe : `DASHBOARD_PASSWORD` dans le `.env` du VPS).
 Le port réel est `KIVIEN_PORT_API` dans le `.env` (18000 sauf s'il était déjà pris).
 
+## Site kivien.re et app web (app.kivien.re)
+
+Le même VPS sert aussi :
+
+- **kivien.re** (et www) : page d'accueil et espace restaurateur (Next.js), conteneur `kivien-site`
+  sur 127.0.0.1 (port `KIVIEN_PORT_SITE`, 18100 par défaut), image construite sur le VPS
+  (`deploy/vps/site/Dockerfile`) ;
+- **app.kivien.re** : l'app extra en version web, fichiers statiques dans `/opt/kivien/web/app`.
+
+`deployer-site.sh` construit les deux, démarre la nouvelle version du site à côté de l'ancienne et ne
+bascule que si elle répond : en cas d'échec, l'ancienne reste en ligne. `publier-site.sh` écrit le
+fichier nginx `kivien-site.conf` (refuse si un autre fichier nginx sert déjà ces noms) et demande
+les certificats HTTPS dès que les noms pointent vers le VPS : relancé à chaque mise à jour.
+
+DNS attendus (zone kivien.re) : `@` et `app` en A vers l'IP du VPS, `www` vers `kivien.re`.
+
 ## Déploiement automatique (push sur main)
 
 À chaque push, GitHub Actions vérifie tout : types, tests unitaires, migrations et règles d'accès sur

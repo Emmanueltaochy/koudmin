@@ -22,7 +22,12 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "lang": "fr",
+      "name": "Kivien",
+      "shortName": "Kivien",
+      "themeColor": "#FBF6EE",
+      "backgroundColor": "#FBF6EE"
     },
     "plugins": [
       "expo-router",
@@ -40,7 +45,12 @@
           ]
         }
       ],
-      ["expo-splash-screen", { "backgroundColor": "#FBF6EE" }]
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FBF6EE"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
