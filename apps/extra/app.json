@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Koudmin",
+    "slug": "koudmin-extra",
+    "scheme": "koudmin",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FBF6EE",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "re.koudmin.extra"
+    },
+    "android": {
+      "package": "re.koudmin.extra",
+      "adaptiveIcon": {
+        "backgroundColor": "#C2401E",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Figtree_400Regular.ttf",
+            "./assets/fonts/Figtree_500Medium.ttf",
+            "./assets/fonts/Figtree_600SemiBold.ttf",
+            "./assets/fonts/Figtree_700Bold.ttf",
+            "./assets/fonts/BricolageGrotesque-600-22.ttf",
+            "./assets/fonts/BricolageGrotesque-700-22.ttf",
+            "./assets/fonts/BricolageGrotesque-700-32.ttf"
+          ]
+        }
+      ],
+      ["expo-splash-screen", { "backgroundColor": "#FBF6EE" }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

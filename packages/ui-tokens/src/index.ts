@@ -44,11 +44,14 @@ export const texteSur = {
 /** Voile sous les bottom sheets : basalte à 50 %. */
 export const voile = 'rgba(33,28,24,0.5)';
 
-/** Familles de polices. Sur le web : nom Google Fonts. Sur React Native : un nom par graisse (expo-google-fonts). */
+/**
+ * Familles de polices. Sur le web : nom Google Fonts (Bricolage variable, taille optique auto).
+ * Sur React Native : Figtree par graisse (expo-google-fonts) ; Bricolage en instances figées
+ * par graisse et taille optique (voir `familleNative` et scripts/instancier-polices.py).
+ */
 export const polices = {
   titre: {
     web: "'Bricolage Grotesque', sans-serif",
-    natif: { 600: 'BricolageGrotesque_600SemiBold', 700: 'BricolageGrotesque_700Bold' },
   },
   texte: {
     web: 'Figtree, sans-serif',
@@ -135,4 +138,11 @@ export const animations = {
 /** Interlettrage React Native (en px) à partir d'un style en em. */
 export function interlettragePx(style: StyleTexte): number {
   return Math.round(style.interlettrage * style.taille * 100) / 100;
+}
+
+/** Nom de police React Native d'un style : une instance Bricolage par (graisse, taille optique). */
+export function familleNative(style: StyleTexte): string {
+  return style.famille === 'titre'
+    ? `BricolageGrotesque-${style.graisse}-${style.taille}`
+    : polices.texte.natif[style.graisse];
 }

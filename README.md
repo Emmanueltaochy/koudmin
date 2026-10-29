@@ -6,11 +6,11 @@ Monorepo pnpm + Turborepo.
 
 | Dossier | Contenu |
 |---|---|
-| `apps/extra` | App mobile extras (Expo, React Native) — étape b |
+| `apps/extra` | App mobile extras (Expo SDK 58, Expo Router) |
 | `apps/resto` | Site restaurateur (Next.js App Router, CSS Modules) — étape d |
 | `packages/ui-tokens` | Charte : couleurs, typo, rayons, espacements. TS pour React Native, `dist/tokens.css` pour le web |
 | `packages/core` | Logique métier testée : salaire, formats, dates (La Réunion), tri des missions, machine d'états « Mi lé la », téléphone +262, textes |
-| `supabase/` | Schéma, données fictives, fonctions SQL — étape b |
+| `supabase/` | Schéma, sécurité (RLS), fonctions `missions_disponibles` / `accepter_mission` / `se_desister`, données fictives, numéros de test +262 |
 | `design_handoff_koudmin/` | Maquettes de référence (corrigées : 162,50 €, textes neutres) |
 
 ## Commandes
@@ -20,7 +20,29 @@ pnpm install
 pnpm test        # tests unitaires
 pnpm typecheck
 pnpm build       # génère packages/ui-tokens/dist/tokens.css
+scripts/verifier-sql.sh   # migration + seed + scénario SQL sur un Postgres local, sans Docker
 ```
+
+### App extra
+
+```bash
+cd apps/extra
+pnpm start       # Expo (données fictives tant que EXPO_PUBLIC_SUPABASE_* est vide)
+pnpm web         # aperçu navigateur
+```
+
+États forcés pour la démo : `/?demo=chargement`, `/?demo=vide`, `/?demo=horsLigne`.
+
+Polices : Bricolage Grotesque est figée par taille optique (`packages/ui-tokens/scripts/instancier-polices.py`), Figtree reçoit le glyphe « ≈ » qui lui manque (`apps/extra/scripts/ajouter-approx.py`). Elles sont intégrées au build natif par le plugin `expo-font`.
+
+### Supabase en local
+
+```bash
+cp supabase/.env.example supabase/.env
+npx supabase start   # nécessite Docker
+```
+
+Comptes de test (code SMS `123456`) : extra `0692 00 00 01` (Kévin), restaurateur `0693 00 00 01` (Le Boucan Grillé).
 
 ## Règles
 

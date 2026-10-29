@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { couleurs, interlettragePx, texteSur, typo } from '../src';
+import { couleurs, familleNative, interlettragePx, texteSur, typo } from '../src';
 import { tokensCss } from '../src/css';
 
 describe('charte', () => {
@@ -40,5 +40,11 @@ describe('charte', () => {
     expect(css).toContain('--k-piment-fonce: #9E3215;');
     expect(css).toContain("--k-titre-font: 700 32px/38px var(--k-font-titre);");
     expect(css).toContain('--k-rayon-pilule: 999px;');
+  });
+
+  it('associe une police native à chaque style', () => {
+    expect(familleNative(typo.titre)).toBe('BricolageGrotesque-700-32');
+    expect(familleNative(typo.sousTitre)).toBe('BricolageGrotesque-600-22');
+    expect(familleNative(typo.corpsFort)).toBe('Figtree_600SemiBold');
   });
 });
