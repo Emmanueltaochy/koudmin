@@ -104,11 +104,22 @@ jobs:
           CLE: ${{ secrets.VPS_CLE_SSH }}
         run: |
           install -d -m 700 ~/.ssh
-          printf '%s\n' "$CLE" > ~/.ssh/kivien
+          printf '%s\n' "$CLE" | tr -d '\r' > ~/.ssh/kivien
           chmod 600 ~/.ssh/kivien
-          printf '%s\n' "$EMPREINTE" > ~/.ssh/known_hosts
+          # Seule la clé publique du serveur compte : on reconstruit la ligne avec l'hôte et le port,
+          # quel que soit le format collé dans le secret (ligne complète ou clé seule).
+          HOTE=$(tr -d '[:space:]' <<<"$HOTE")
+          PORT=$(tr -d '[:space:]' <<<"${PORT:-22}")
+          PORT=${PORT:-22}
+          cle_serveur=$(grep -oE 'ssh-ed25519 [A-Za-z0-9+/=]+' <<<"$EMPREINTE" | head -n1)
+          if [ -z "$cle_serveur" ]; then
+            echo "::error::VPS_EMPREINTE_SSH ne contient pas de clé « ssh-ed25519 AAAA… »."
+            exit 1
+          fi
+          if [ "$PORT" = 22 ]; then nom="$HOTE"; else nom="[$HOTE]:$PORT"; fi
+          printf '%s %s\n' "$nom" "$cle_serveur" > ~/.ssh/known_hosts
           # La clé ne peut lancer que kivien-mise-a-jour sur le VPS (commande forcée).
-          ssh -i ~/.ssh/kivien -p "${PORT:-22}" \
+          ssh -i ~/.ssh/kivien -p "$PORT" \
             -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
             -o ConnectTimeout=20 -o ServerAliveInterval=30 \
             "root@$HOTE" "deployer $GITHUB_SHA"
