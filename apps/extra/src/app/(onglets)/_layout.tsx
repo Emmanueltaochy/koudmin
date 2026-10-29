@@ -6,7 +6,7 @@ import Calendar from 'lucide-react-native/icons/calendar';
 import List from 'lucide-react-native/icons/list';
 import User from 'lucide-react-native/icons/user';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { textes as t } from '@koudmin/core';
+import { textes as t } from '@kivien/core';
 import { source } from '../../donnees';
 import { couleurs } from '../../ui/theme';
 import { Texte } from '../../ui/Texte';

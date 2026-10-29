@@ -1,5 +1,5 @@
 import { Text, type TextProps } from 'react-native';
-import type { Couleur, StyleTypo } from '@koudmin/ui-tokens';
+import type { Couleur, StyleTypo } from '@kivien/ui-tokens';
 import { couleurs, textes } from './theme';
 
 type Props = TextProps & { variante?: StyleTypo; couleur?: Couleur };

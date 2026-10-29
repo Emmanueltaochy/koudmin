@@ -9,9 +9,15 @@
 }
 
 .marque {
-  font: var(--k-horaire-font);
-  color: var(--k-basalte);
-  text-decoration: none;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+/* 80 px : taille minimale du logo à l'écran (charte). */
+.logo {
+  display: block;
+  width: 80px;
+  height: auto;
 }
 
 .boutonMenu {
@@ -59,6 +65,9 @@
 @media (min-width: 1024px) {
   .entete {
     padding: 24px 32px;
+  }
+  .logo {
+    width: 96px;
   }
   .boutonMenu,
   .panneau {

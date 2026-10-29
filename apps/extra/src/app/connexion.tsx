@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { normaliserMobileReunion, textesEcrans } from '@koudmin/core';
+import { normaliserMobileReunion, textesEcrans } from '@kivien/core';
 import { source } from '../donnees';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
 import { ChampTexte } from '../ui/ChampTexte';
 import { couleurs } from '../ui/theme';
+import { Logo } from '../ui/Logo';
 import { Texte } from '../ui/Texte';
 
 const tc = textesEcrans.connexion;
@@ -43,7 +44,7 @@ export default function Connexion() {
 
   return (
     <ScrollView style={styles.ecran} contentContainerStyle={[styles.contenu, { paddingTop: insets.top + 16 }]} keyboardShouldPersistTaps="handled">
-      <Texte variante="horaire">Koudmin</Texte>
+      <Logo />
       <Texte variante="titre" accessibilityRole="header">
         {tc.titreExtra}
       </Texte>

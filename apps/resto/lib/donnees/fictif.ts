@@ -4,7 +4,7 @@ import {
   bornesMission,
   miseEnRelationFacturee,
   type ParametresTarifaires,
-} from '@koudmin/core';
+} from '@kivien/core';
 import type {
   DemandeSuivi,
   ExtraAffecte,
@@ -42,7 +42,7 @@ const RESTAURANT: Restaurant = {
   },
 };
 
-const CLE = 'koudmin-resto-demo-v1';
+const CLE = 'kivien-resto-demo-v1';
 
 function extra(
   id: string,
@@ -217,7 +217,7 @@ export function sourceFictive(): SourceResto {
         .sort(([a], [b]) => b.localeCompare(a))
         .map(([mois, n]) => ({
           mois,
-          numero: `KDM-${mois.replace('-', '')}-0001`,
+          numero: `KVN-${mois.replace('-', '')}-0001`,
           misesEnRelation: n,
           montantHTCentimes: n * PARAMETRES.fraisMiseEnRelationHTCentimes,
           tauxTVA: PARAMETRES.tvaPourMille,

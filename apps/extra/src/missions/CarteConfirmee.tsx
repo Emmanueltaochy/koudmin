@@ -8,7 +8,7 @@ import {
   LIBELLES_POSTE,
   textesEcrans,
   type JourISO,
-} from '@koudmin/core';
+} from '@kivien/core';
 import type { MissionConfirmee } from '../donnees';
 import { commun, couleurs, rayons } from '../ui/theme';
 import { Texte } from '../ui/Texte';

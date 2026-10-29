@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { aujourdhuiReunion, type ParametresTarifaires, type Poste, type StatutAffectation, type StatutDemande } from '@koudmin/core';
+import { aujourdhuiReunion, type ParametresTarifaires, type Poste, type StatutAffectation, type StatutDemande } from '@kivien/core';
 import {
   ErreurReseau,
   type DemandeSuivi,
@@ -245,7 +245,7 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       }[];
       return lignes.map((f) => ({
         mois: f.mois,
-        numero: `KDM-${f.mois.replace('-', '')}`,
+        numero: `KVN-${f.mois.replace('-', '')}`,
         misesEnRelation: f.mises_en_relation,
         montantHTCentimes: f.montant_ht_centimes,
         tauxTVA: f.tva_pour_mille,

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
-import '@koudmin/ui-tokens/tokens.css';
+import '@kivien/ui-tokens/tokens.css';
 import './globals.css';
 
 const bricolage = localFont({
@@ -22,7 +22,7 @@ const figtree = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: 'Koudmin · Les extras péi, en 2 heures.', template: '%s · Koudmin' },
+  title: { default: 'Kivien · Les extras péi, en 2 heures.', template: '%s · Kivien' },
   description: 'Un extra trouvé en 2 heures maximum, pour les restaurants, hôtels et bars de La Réunion.',
 };
 

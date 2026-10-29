@@ -1,10 +1,10 @@
 /**
- * Identité légale de Koudmin, imprimée sur les factures.
+ * Identité légale de Kivien, imprimée sur les factures.
  * À COMPLÉTER avant la mise en production : raison sociale, adresse, SIREN, TVA intracommunautaire.
  * Une facture sans ces mentions n'est pas conforme (article L441-9 du Code de commerce).
  */
-export const IDENTITE_KOUDMIN = {
-  raisonSociale: 'Koudmin',
+export const IDENTITE_KIVIEN = {
+  raisonSociale: 'Kivien',
   adresse: 'Adresse du siège à compléter, 974 La Réunion',
   siren: null as string | null,
   tvaIntracom: null as string | null,

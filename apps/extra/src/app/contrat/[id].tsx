@@ -5,7 +5,7 @@ import Check from 'lucide-react-native/icons/check';
 import ChevronLeft from 'lucide-react-native/icons/chevron-left';
 import Pencil from 'lucide-react-native/icons/pencil';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { redigerContrat, textesEcrans } from '@koudmin/core';
+import { redigerContrat, textesEcrans } from '@kivien/core';
 import { FormInfosContrat } from '../../contrat/FormInfosContrat';
 import { source, type ContratExtra, type InfosContrat, type MissionDetail, type Profil } from '../../donnees';
 import { BoutonPrincipal, Lien } from '../../ui/Bouton';

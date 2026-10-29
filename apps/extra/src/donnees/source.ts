@@ -1,4 +1,4 @@
-import type { MissionResume, ProfilExtra } from '@koudmin/core';
+import type { MissionResume, ProfilExtra } from '@kivien/core';
 
 export interface Profil extends ProfilExtra {
   prenom: string;

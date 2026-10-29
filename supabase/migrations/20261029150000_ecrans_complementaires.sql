@@ -2,7 +2,7 @@
 -- notation, favoris, disponibilités, factures.
 
 -- ---------------------------------------------------------------------------
--- Paramètres : TVA sur les frais Koudmin (La Réunion : 8,5 %).
+-- Paramètres : TVA sur les frais Kivien (La Réunion : 8,5 %).
 -- ---------------------------------------------------------------------------
 alter table parametres add column tva_pour_mille integer not null default 85
   check (tva_pour_mille between 0 and 1000);

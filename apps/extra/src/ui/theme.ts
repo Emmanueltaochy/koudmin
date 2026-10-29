@@ -7,9 +7,9 @@ import {
   rayons,
   typo,
   type StyleTypo,
-} from '@koudmin/ui-tokens';
+} from '@kivien/ui-tokens';
 
-export { couleurs, espaces, rayons, dimensions, animations, voile } from '@koudmin/ui-tokens';
+export { couleurs, espaces, rayons, dimensions, animations, voile } from '@kivien/ui-tokens';
 
 /** Styles de texte de la charte, prêts pour React Native. Pas de fontWeight : la graisse est dans la police. */
 export const textes = StyleSheet.create(

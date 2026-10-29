@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import Check from 'lucide-react-native/icons/check';
 import Pencil from 'lucide-react-native/icons/pencil';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { confirmationExtra, textes as t, type EtatMission } from '@koudmin/core';
+import { confirmationExtra, textes as t, type EtatMission } from '@kivien/core';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
 import { couleurs, dimensions, rayons } from '../ui/theme';
 import { Texte } from '../ui/Texte';

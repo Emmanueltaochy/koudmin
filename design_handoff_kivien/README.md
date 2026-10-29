@@ -1,11 +1,11 @@
-# Handoff : Koudmin — app extra, site restaurateur, kit de marque
+# Handoff : Kivien — app extra, site restaurateur, kit de marque
 
 ## Overview
-Koudmin met en relation les restaurants, hôtels et bars de La Réunion avec des personnes disponibles pour un extra d'une soirée. Signature : « Les extras péi, en 2 heures. »
-- Le restaurateur publie un besoin ; Koudmin trouve un extra en 2 h max. Le restaurateur embauche lui-même en contrat d'extra (CDD d'usage), pré-rempli par Koudmin, signé sur téléphone.
+Kivien (« qui vient ? » en créole) met en relation les restaurants, hôtels et bars de La Réunion avec des personnes disponibles pour un extra d'une soirée. Signature : « Les extras péi, en 2 heures. »
+- Le restaurateur publie un besoin ; Kivien trouve un extra en 2 h max. Le restaurateur embauche lui-même en contrat d'extra (CDD d'usage), pré-rempli par Kivien, signé sur téléphone.
 - 25 € HT par mise en relation, non facturée si l'extra est absent et non remplacé.
 - L'extra ne paie rien, n'a besoin d'aucun statut (pas de SIRET).
-- « Mi lé la » (« je suis là » en créole) = le bouton d'acceptation d'une mission côté extra. Ce n'est jamais un nom de marque.
+- « Mi lé la » (« je suis là » en créole) = le bouton d'acceptation d'une mission côté extra. Ce n'est jamais un nom de marque. Duo de marque : « Kivien ? » — « Mi lé la. »
 
 Deux publics :
 1. **Restaurateurs** — desktop + mobile, pressés. Vouvoiement, phrases courtes, chiffres en premier.
@@ -23,7 +23,7 @@ Pour les ouvrir : servir le dossier en local (`npx serve .`) et ouvrir chaque `.
 Livré (maquettes) :
 - Site restaurateur, mobile 390 px : **Demande d'extra** (états 1a rempli, 1b envoi, 1c erreur).
 - App extra, 390 px : **Missions disponibles** (2a liste, 2b chargement, 2c vide, 2d hors ligne) ; **Détail mission + « Mi lé la »** (3a interactif, 3b envoi, 3c mission déjà prise, 3d confirmée, 3e désistement).
-- Kit de marque : logotype (piste 1b « Point pilule »), monogramme, favicon, règles d'usage, visuels réseaux sociaux (2a–2f).
+- Charte graphique Kivien : logo, monogramme, favicon, couleurs, typographie, formes, composants, icônes, écriture, interdits.
 
 Pas encore dessiné (à concevoir dans le même langage visuel, ou à demander) : accueil restaurateur, suivi de demande, contrat + signature + rappel DPAE (lien URSSAF), notation après mission, historique/factures/favoris, versions desktop 1440 px ; côté extra : inscription (5 champs max), disponibilités, mission confirmée détaillée, profil.
 
@@ -84,7 +84,7 @@ Cadre mobile : 390 px de large, fond creme. Barre d'état 44px (affichage maquet
 ### 1. Demande d'extra (restaurateur, mobile)
 **But** : publier un besoin en un seul formulaire court.
 Layout (colonne, padding latéral 16, gap 32 entre blocs) :
-1. Header : « Koudmin » (Bricolage 700 22/28) à gauche, icône menu à droite.
+1. Header : « Kivien » (Bricolage 700 22/28) à gauche, icône menu à droite.
 2. Titre « Trouver un extra » (32/38) + « Un extra trouvé en 2 heures maximum. » (16/24 galet).
 3. **Poste** — chips radius 6, padding 8×16 : Serveur, Plonge, Commis, Barman, Réception. Sélection unique : fond basalte, texte blanc 600 + icône check. Non sélectionné : fond blanc, bordure 1px galet.
 4. **Date** — 3 cases (flex:1, radius 6) : « Ce soir / ven. 30 », « Demain / sam. 31 », « Dimanche / 1er nov. » (légende 13 + corps-fort 16) + case calendrier 48px. « Ce soir » présélectionné.
@@ -94,9 +94,9 @@ Layout (colonne, padding latéral 16, gap 32 entre blocs) :
 8. **Nombre d'extras** — label + légende « 25 € HT par extra » ; stepper (−, valeur, +) boutons 48×48, contour galet, radius 12.
 9. **Consignes** (« Facultatif ») — textarea min-height 96, placeholder « Tenue, parking, entrée du personnel ».
 10. Barre d'action (fond blanc) :
-   - « Salaires bruts estimés » … **162,50 €** (brut arrondi au centime par extra, puis × nombre d'extras) ; légende « 2 × 6 h × 12,31 €, + 10 % de congés payés. Versés par vous aux extras, hors charges patronales. » (ne pas afficher de montant de charges)
+   - « Salaires bruts estimés » … **162,50 €** ; légende « 2 × 6 h × 12,31 €, + 10 % de congés payés. Versés par vous aux extras, hors charges patronales. » (ne pas afficher de montant de charges)
    - séparateur trait
-   - « Frais Koudmin » … **50 € HT** ; légende « 2 × 25 € HT. Extra absent et non remplacé : non facturé. »
+   - « Frais Kivien » … **50 € HT** ; légende « 2 × 25 € HT. Extra absent et non remplacé : non facturé. »
    - Bouton piment « Trouver un extra »
    - Légende centrée avec icône file-text : « Contrat d'extra rédigé pour vous. »
 
@@ -161,21 +161,23 @@ Notification côté restaurateur à la confirmation : « Kévin a dit mi lé la.
 
 ## Règles d'écriture
 - Horaire, lieu, tarif d'abord. Une phrase, une information.
-- Créole uniquement dans un mot : koudmin, péi, mi lé la.
+- Créole uniquement dans un mot : kivien, péi, mi lé la.
 - **Pas de point d'exclamation, pas d'émoji.**
 - Formats : « 18 h – minuit », « 11 h 30 – 15 h », « 25 € HT », « ≈ 63 € net ».
 - **Légal** : aucune offre publique ne mentionne d'âge (« jeunes », « 18-25 ans », « étudiants »…). Utiliser « dispo le soir », « en recherche de job ».
 
 ---
 
-## Kit de marque (`Koudmin - Kit de marque.dc.html`, `Koudmin Logo.dc.html`)
-- **Logo retenu : « Point pilule »** — « Koudmin » en Bricolage Grotesque 700, letter-spacing -0.045em (≥ 40px) / -0.03em (petit). Le point du « i » est remplacé par une pilule horizontale : 0.30em × 0.13em, radius 999, centrée sur le « ı » (i sans point), top ≈ 0.09em. À vectoriser en SVG pour la prod.
-- Versions : basalte/creme pilule piment (principale) ; creme sur piment (pilule creme) ; creme sur basalte (pilule piment) ; **basalte/creme pilule basalte** — pour l'app, les e-mails, contrats et factures (le bouton d'action reste le seul élément piment).
-- Règle : pilule piment = pubs, réseaux sociaux, imprimés ; pilule basalte = application, e-mails, documents.
-- Zone de protection = hauteur du « o ». Taille min 110 px / 25 mm ; en dessous, monogramme.
-- **Monogramme** : « K » creme sur piment, pilule creme au-dessus de la barre verticale. Icône app 1024×1024 fond plein sans coins. **Favicon 32×32** : « K » seul sans pilule.
-- Réseaux sociaux (taille réelle, ids HTML pour export) : `#profil` 1080², `#couverture-facebook` 1640×624 (160 px du bas vides), `#banniere-linkedin` 1584×396, `#open-graph` 1200×630, `#post-mission` / `#post-chiffre` / `#post-temoignage` 1080×1350, `#story` 1080×1920 (250 px libres haut et bas). Le prop « Repères de recadrage » masque les guides.
-- L'**icône d'app** et le **favicon** sont à générer depuis le monogramme pour le projet.
+## Marque et logo (`Kivien - Charte graphique.dc.html`, `Kivien Logo.dc.html`)
+- **Nom** : « kivien » (« qui vient ? »). Écrit en minuscules dans le logo, « Kivien » avec majuscule dans le texte courant. L'extra répond « Mi lé la » : Kivien est la marque, Mi lé la est le geste (jamais un nom de marque).
+- **Logotype** : « kivien » en Bricolage Grotesque 700, opsz 96, interlettrage -0.04em (≥ 40 px) / -0.025em (petit). Le **premier « i » garde son point rond** ; le **second « i »** (ı sans point) porte une **pilule** de 0,24 × 0,13 em, rayon 999, centrée, à 0,09 em du haut, marge 0,015 em de part et d'autre. **Une seule pilule, jamais deux.** À vectoriser en SVG (opentype.js) depuis la police.
+- **4 versions** : basalte sur creme pilule piment (principale) ; basalte sur creme pilule basalte (app, e-mails, contrats, factures) ; creme sur piment pilule creme ; creme sur basalte pilule piment.
+- **Règle** : pilule piment = publicités, réseaux sociaux, imprimés ; pilule basalte = application, e-mails, documents.
+- **Zone de protection** : hauteur du « n ». **Taille min** : 80 px / 20 mm ; en dessous, monogramme.
+- **Monogramme** : « ki » creme sur piment, pilule sur le « i ». Icône d'app 1024 × 1024 fond plein (Android adaptatif : « ki » dans le cercle central de 66 %). Avatar rond 1080.
+- **Favicon 32 × 32** : « k » seul creme sur piment, sans pilule.
+- **Interdits** : déformer, dégradé, fond chargé, couleur hors charte, deux pilules.
+- **Domaine** : kivien.re / kivien.app à réserver (kivien.fr et .com déjà pris). **Marque à vérifier à l'INPI (classes 35, 9, 42) avant tout lancement public.**
 
 ## Assets
 Aucune image bitmap. Polices Google Fonts (Bricolage Grotesque, Figtree). Icônes Lucide. Pas de photos (direction photo à venir).
@@ -183,8 +185,8 @@ Aucune image bitmap. Polices Google Fonts (Bricolage Grotesque, Figtree). Icône
 ## Files
 - `CHARTE.md` — charte graphique complète (couleurs, typo, formes, logo, écriture, salaires).
 - `PROMPT_CLAUDE_CODE.md` — prompt de démarrage pour Claude Code.
-- `captures/` — PNG de chaque écran et état (1a–3e), des planches d'identité et des visuels réseaux sociaux à taille réelle.
-- `Koudmin - Ecrans prioritaires.dc.html` — écrans 1, 2, 3 et tous leurs états (3a interactif).
-- `Koudmin - Kit de marque.dc.html` — identité + réseaux sociaux.
-- `Koudmin Logo.dc.html` — composant logo (props `size`, `ink`, `dot`).
+- `captures/` — PNG de chaque écran et état (1a–3e) et de chaque section de la charte.
+- `Kivien - Ecrans prioritaires.dc.html` — écrans 1, 2, 3 et tous leurs états (3a interactif).
+- `Kivien - Charte graphique.dc.html` — charte graphique complète.
+- `Kivien Logo.dc.html` — composant logo (props `size`, `ink`, `dot1`, `dot2`, `lower`, `pill` = first|second, `mono`). Usage officiel : `lower` + `pill="second"`.
 - `support.js` — runtime nécessaire pour ouvrir les `.dc.html` dans un navigateur.

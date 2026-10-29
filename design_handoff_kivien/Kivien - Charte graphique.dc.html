@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF6EE;color:#211C18;font-family:Figtree,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#9E3215}a:hover{color:#211C18}
+</style>
+</helmet>
+
+<div style="max-width:1200px;margin:0 auto;padding:0 32px 96px;display:flex;flex-direction:column;gap:96px">
+
+  <section id="couverture" data-screen-label="00 Couverture" style="padding-top:96px;display:flex;flex-direction:column;gap:32px">
+    <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">Charte graphique · version 1 · octobre 2026</div>
+    <div style="background:#FFFFFF;border-radius:12px;min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:64px 32px">
+      <dc-import name="Kivien Logo" size="176" lower="{{ true }}" pill="second" hint-size="480px,176px"></dc-import>
+      <div style="font-family:'Bricolage Grotesque';font-weight:600;font-size:32px;line-height:38px;text-align:center">Les extras péi, en 2 heures.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px">
+      <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:16px;line-height:24px;font-weight:600">Le service</div><div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">kivien met en relation les restaurants, hôtels et bars de La Réunion avec des personnes disponibles pour un extra d'une soirée. Un extra en 2 heures maximum.</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:16px;line-height:24px;font-weight:600">Le nom</div><div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">« Kivien ? » : qui vient ? La question du restaurateur. L'extra répond « Mi lé la », je suis là. Kivien est la marque ; Mi lé la est le geste.</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:16px;line-height:24px;font-weight:600">L'esprit</div><div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">Une enseigne de l'île, pas une app de la Silicon Valley. Direct, chaleureux, fiable. Les horaires, le lieu et le tarif d'abord.</div></div>
+    </div>
+  </section>
+
+  <section id="logo" data-screen-label="01 Logo" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">01</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Logo</div>
+      <div style="font-size:16px;line-height:24px;color:#6B6157;max-width:720px;text-wrap:pretty">Le mot « kivien » en minuscules, Bricolage Grotesque 700. Le point du second « i » devient une pilule : un créneau horaire, la forme signature de la marque. Le premier « i » garde son point rond. Une seule pilule, jamais deux.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:32px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:220px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="88" lower="{{ true }}" pill="second" hint-size="240px,88px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">Principal · basalte sur creme, pilule piment</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Publicités, réseaux sociaux, imprimés, site.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:220px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="88" lower="{{ true }}" pill="second" dot1="#211C18" dot2="#211C18" hint-size="240px,88px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">Basalte sur creme, pilule basalte</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Application, e-mails, contrats, factures. Le bouton d'action reste le seul élément piment de l'écran.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:220px;background:#C2401E;border-radius:12px;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="88" lower="{{ true }}" pill="second" ink="#FBF6EE" dot1="#FBF6EE" dot2="#FBF6EE" hint-size="240px,88px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">Creme sur piment</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Le fond est l'élément piment : la pilule passe en creme.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:220px;background:#211C18;border-radius:12px;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="88" lower="{{ true }}" pill="second" ink="#FBF6EE" dot1="#FBF6EE" hint-size="240px,88px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">Creme sur basalte, pilule piment</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Fonds sombres, bannières.</div>
+      </div>
+    </div>
+    <div style="font-size:16px;line-height:24px;font-weight:600;padding:16px;background:#FFFFFF;border-radius:12px">Règle : pilule piment pour les publicités, réseaux sociaux et imprimés. Pilule basalte pour l'application, les e-mails et les documents.</div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:32px">
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Construction de la pilule</div>
+        <div style="background:#FBF6EE;padding:32px;display:flex;justify-content:center"><dc-import name="Kivien Logo" size="96" lower="{{ true }}" pill="second" hint-size="260px,96px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;text-wrap:pretty">Pilule de 0,24 × 0,13 em, rayon 999, centrée sur le second « i » (sans point), à 0,09 em du haut. Interlettrage du mot : −0,04 em.</div>
+      </div>
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Zone de protection</div>
+        <div style="align-self:center;padding:32px;outline:1px dashed #6B6157;background:#FBF6EE;line-height:0"><div style="outline:1px solid #6B6157"><dc-import name="Kivien Logo" size="64" lower="{{ true }}" pill="second" hint-size="175px,64px"></dc-import></div></div>
+        <div style="font-size:16px;line-height:24px;text-wrap:pretty">x = la hauteur du « n ». Aucun texte ni bord de visuel à moins de x autour du logo.</div>
+      </div>
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Taille minimale</div>
+        <div style="background:#FBF6EE;padding:32px;display:flex;align-items:center;justify-content:center;gap:32px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><dc-import name="Kivien Logo" size="28" lower="{{ true }}" pill="second" hint-size="80px,28px"></dc-import><span style="font-size:13px;line-height:18px;font-weight:600">80 px · 20 mm</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:32px;height:32px;border-radius:6px;background:#C2401E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:26px;line-height:1;color:#FBF6EE;margin-top:-3px">k</span></div><span style="font-size:13px;line-height:18px;font-weight:600">En dessous</span></div>
+        </div>
+        <div style="font-size:16px;line-height:24px;text-wrap:pretty">Pas moins de 80 px de large à l'écran ni 20 mm imprimé. Plus petit : le monogramme.</div>
+      </div>
+    </div>
+
+    <div style="font-size:16px;line-height:24px;font-weight:600">Usages interdits</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:140px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;overflow:hidden"><div style="transform:scaleX(1.5)"><dc-import name="Kivien Logo" size="40" lower="{{ true }}" pill="second" hint-size="110px,40px"></dc-import></div></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600;color:#8A1C12">Déformé</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:140px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:48px;line-height:1;letter-spacing:-0.04em;background:linear-gradient(90deg,#C2401E,#F2B33D);-webkit-background-clip:text;background-clip:text;color:transparent">kivien</span></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600;color:#8A1C12">Dégradé</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:140px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(35deg,#6B6157 0 14px,#F2B33D 14px 22px,#FBF6EE 22px 34px,#2C7350 34px 44px,#211C18 44px 52px)"><dc-import name="Kivien Logo" size="48" lower="{{ true }}" pill="second" ink="#FBF6EE" hint-size="130px,48px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600;color:#8A1C12">Sur un fond chargé</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:140px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="48" lower="{{ true }}" pill="second" ink="#3B4FCF" dot1="#3B4FCF" dot2="#8E44D8" hint-size="130px,48px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600;color:#8A1C12">Couleur hors charte</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="height:140px;background:#FBF6EE;border:1px solid #E6DCCF;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="48" lower="{{ true }}" dot1="#C2401E" dot2="#C2401E" hint-size="130px,48px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600;color:#8A1C12">Deux pilules</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="monogramme" data-screen-label="02 Monogramme" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">02</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Monogramme et favicon</div>
+      <div style="font-size:16px;line-height:24px;color:#6B6157;max-width:720px;text-wrap:pretty">« ki » creme sur piment, la pilule sur le « i ». Pour l'icône d'application, les avatars et les réseaux sociaux. Le favicon garde le « k » seul.</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-end">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:256px;height:256px;background:#C2401E;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="168" lower="{{ true }}" mono="{{ true }}" ink="#FBF6EE" dot1="#FBF6EE" hint-size="140px,168px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">Icône d'application · 1024 × 1024</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;max-width:256px">Fond plein, sans coins arrondis : le système applique son masque. Android : garder « ki » dans le cercle central de 66 %.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="width:144px;height:144px;border-radius:999px;background:#C2401E;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="88" lower="{{ true }}" mono="{{ true }}" ink="#FBF6EE" dot1="#FBF6EE" hint-size="74px,88px"></dc-import></div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">Avatar · 1080 × 1080</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:flex-end;gap:16px">
+          <div style="width:96px;height:96px;border-radius:22px;background:#C2401E;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="60" lower="{{ true }}" mono="{{ true }}" ink="#FBF6EE" dot1="#FBF6EE" hint-size="50px,60px"></dc-import></div>
+          <div style="width:48px;height:48px;border-radius:11px;background:#C2401E;display:flex;align-items:center;justify-content:center"><dc-import name="Kivien Logo" size="30" lower="{{ true }}" mono="{{ true }}" ink="#FBF6EE" dot1="#FBF6EE" hint-size="26px,30px"></dc-import></div>
+        </div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">96 et 48 px</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:flex-end;gap:16px">
+          <div style="width:128px;height:128px;border-radius:24px;background:#C2401E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:112px;line-height:1;color:#FBF6EE;margin-top:-14px">k</span></div>
+          <div style="width:32px;height:32px;border-radius:6px;background:#C2401E;display:flex;align-items:center;justify-content:center"><span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:28px;line-height:1;color:#FBF6EE;margin-top:-4px">k</span></div>
+        </div>
+        <div style="font-size:16px;line-height:24px;font-weight:600">Favicon · 32 × 32</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;max-width:200px">Agrandi × 4 et taille réelle. « k » seul : à 32 px, la pilule ferait 3 px.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="couleurs" data-screen-label="03 Couleurs" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">03</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Couleurs</div>
+      <div style="font-size:16px;line-height:24px;color:#6B6157;max-width:720px;text-wrap:pretty">Dix couleurs, pas une de plus. Les noms viennent de l'île. Un seul élément piment par écran ou par visuel.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">
+      <sc-for list="{{ colors }}" as="c" hint-placeholder-count="10">
+        <div style="background:#FFFFFF;border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="height:112px;background:{{ c.hex }};box-shadow:inset 0 -1px 0 #E6DCCF;display:flex;align-items:flex-end;padding:12px;box-sizing:border-box"><span style="font-size:13px;line-height:18px;font-weight:700;color:{{ c.on }}">{{ c.onLabel }}</span></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:16px;line-height:24px;font-weight:600">{{ c.name }}</span><span style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">{{ c.hex }}</span></div>
+            <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-wrap:pretty">{{ c.use }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="typographie" data-screen-label="04 Typographie" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">04</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Typographie</div>
+      <div style="font-size:16px;line-height:24px;color:#6B6157;max-width:720px;text-wrap:pretty">Bricolage Grotesque pour les titres, Figtree pour le texte. Les deux sont sur Google Fonts. Jamais moins de 16 px pour un texte courant sur mobile.</div>
+    </div>
+    <div style="background:#FFFFFF;border-radius:12px;display:flex;flex-direction:column">
+      <sc-for list="{{ type }}" as="t" hint-placeholder-count="8">
+        <div style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1fr);gap:32px;align-items:baseline;padding:24px 32px;border-bottom:1px solid #E6DCCF">
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;line-height:24px;font-weight:600">{{ t.name }}</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">{{ t.spec }}</span></div>
+          <div style="font-family:{{ t.family }};font-weight:{{ t.weight }};font-size:{{ t.size }};line-height:{{ t.lh }};letter-spacing:{{ t.ls }};text-wrap:pretty">{{ t.sample }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="formes" data-screen-label="05 Formes" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">05</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Formes et espacements</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px">
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">La pilule · rayon 999</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="padding:8px 16px;border-radius:999px;background:#211C18;color:#FFFFFF;font-size:16px;line-height:24px;font-weight:600">18 h – minuit</span>
+          <span style="padding:8px 16px;border-radius:999px;background:#FFFFFF;border:1px solid #6B6157;font-size:16px;line-height:24px;font-weight:600">11 h 30 – 15 h</span>
+        </div>
+        <div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">Forme signature. Réservée aux créneaux horaires et aux filtres de jour, comme les cases d'un planning de service.</div>
+      </div>
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Rayons</div>
+        <div style="display:flex;gap:16px;align-items:flex-end">
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:96px;height:64px;border-radius:12px;background:#FBF6EE;border:1px solid #6B6157"></div><span style="font-size:13px;line-height:18px;font-weight:600">12 px</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:96px;height:48px;border-radius:6px;background:#FBF6EE;border:1px solid #6B6157"></div><span style="font-size:13px;line-height:18px;font-weight:600">6 px</span></div>
+        </div>
+        <div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">12 px : cartes et boutons. 6 px : champs, badges, chips.</div>
+      </div>
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Grille de 4 px</div>
+        <div style="display:flex;gap:16px;align-items:flex-end">
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:4px;height:4px;background:#211C18"></div><span style="font-size:13px;font-weight:600">4</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:8px;height:8px;background:#211C18"></div><span style="font-size:13px;font-weight:600">8</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:16px;height:16px;background:#211C18"></div><span style="font-size:13px;font-weight:600">16</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:32px;height:32px;background:#211C18"></div><span style="font-size:13px;font-weight:600">32</span></div>
+        </div>
+        <div style="font-size:16px;line-height:24px;color:#6B6157;text-wrap:pretty">Tous les espacements : 4, 8, 16, 32 (64 et 96 pour les grandes marges).</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="composants" data-screen-label="06 Composants" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">06</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Composants</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:32px">
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Boutons</div>
+        <div style="height:56px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:20px;font-weight:700" style-hover="background:#9E3215">Trouver un extra</div>
+        <div style="height:64px;border-radius:12px;background:#C2401E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque';font-size:22px;font-weight:700">Mi lé la</div>
+        <div style="height:48px;border-radius:12px;border:1px solid #211C18;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:20px;font-weight:700">Appeler le restaurant</div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-wrap:pretty">Principal : piment, 56 px, texte blanc 15/20 700, survol piment-fonce. « Mi lé la » : 64 px, Bricolage 22. Secondaire : contour basalte, 48 px. Un seul bouton piment par écran.</div>
+      </div>
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Champs</div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:16px;line-height:24px;font-weight:600">Adresse du service</span><div style="height:48px;border:1px solid #6B6157;border-radius:6px;display:flex;align-items:center;padding:0 16px;font-size:16px;font-weight:600">14 rue du Général de Gaulle</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:16px;line-height:24px;font-weight:600">Taux horaire brut</span><div style="height:48px;border:2px solid #8A1C12;border-radius:6px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#6B6157">11,00 €</div><span style="font-size:13px;line-height:18px;font-weight:600;color:#8A1C12">Le taux ne peut pas être sous le minimum légal.</span></div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">48 px, bordure galet 1 px, rayon 6. Erreur : bordure braise 2 px et message dessous.</div>
+      </div>
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Chips, badges, états</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="padding:8px 16px;border-radius:6px;background:#211C18;color:#FFFFFF;font-size:16px;line-height:24px;font-weight:600">Serveur</span>
+          <span style="padding:8px 16px;border-radius:6px;border:1px solid #6B6157;font-size:16px;line-height:24px">Plonge</span>
+          <span style="padding:8px 16px;border-radius:6px;border:1px solid #6B6157;font-size:16px;line-height:24px">Barman</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <span style="background:#F2B33D;color:#211C18;font-size:13px;line-height:18px;font-weight:700;padding:4px 8px;border-radius:6px">Ce soir</span>
+          <span style="background:#2C7350;color:#FFFFFF;font-size:13px;line-height:18px;font-weight:700;padding:4px 8px;border-radius:6px">Confirmé</span>
+          <span style="background:#8A1C12;color:#FFFFFF;font-size:13px;line-height:18px;font-weight:700;padding:4px 8px;border-radius:6px">Absent</span>
+        </div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-wrap:pretty">Chip sélectionnée : fond basalte. Curcuma = urgence, toujours texte basalte. Vacoa = succès, braise = erreur, texte blanc.</div>
+      </div>
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Carte de mission</div>
+        <div style="background:#FBF6EE;padding:16px;border-radius:12px">
+          <div style="background:#FFFFFF;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 0 #E6DCCF">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;line-height:28px">18 h – minuit</span><span style="background:#F2B33D;color:#211C18;font-size:13px;line-height:18px;font-weight:700;padding:4px 8px;border-radius:6px">Ce soir</span></div>
+            <div style="font-size:16px;line-height:24px"><span style="font-weight:600">Saint-Gilles-les-Bains</span><span style="color:#6B6157"> · 2,1 km</span></div>
+            <div style="font-size:16px;line-height:24px">Serveur</div>
+            <div style="display:flex;flex-direction:column;padding-top:8px;border-top:1px solid #E6DCCF"><span style="font-size:16px;line-height:24px;font-weight:600">≈ 63 € net</span><span style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">81,25 € brut, congés payés compris</span></div>
+            <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157">Le Boucan Grillé</div>
+            <div style="font-size:13px;line-height:18px;font-weight:600;color:#2C7350">Retour assuré par le restaurant</div>
+          </div>
+        </div>
+        <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-wrap:pretty">Ordre fixe : horaire, commune, poste, salaire, restaurant, retour. Montant : 12,31 € brut/h (SMIC, revu chaque 1er janvier).</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="icones" data-screen-label="07 Icônes" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">07</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Icônes</div>
+      <div style="font-size:16px;line-height:24px;color:#6B6157;max-width:720px;text-wrap:pretty">Bibliothèque Lucide, au trait, épaisseur 2, extrémités arrondies. En basalte ou galet ; vacoa ou braise seulement pour un succès ou une erreur.</div>
+    </div>
+    <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-wrap:wrap;gap:32px">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6M15 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"></path><circle cx="7" cy="18" r="2"></circle><path d="M9 18h5"></path><circle cx="16" cy="18" r="2"></circle></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"></path></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#211C18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6B6157" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2C7350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+    </div>
+  </section>
+
+  <section id="ecriture" data-screen-label="08 Écriture" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">08</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">Écriture</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:32px">
+      <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:16px;line-height:24px;font-weight:600">Règles</div>
+        <sc-for list="{{ rules }}" as="r" hint-placeholder-count="7">
+          <div style="font-size:16px;line-height:24px;padding-bottom:12px;border-bottom:1px solid #E6DCCF;text-wrap:pretty">{{ r }}</div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:32px">
+        <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:16px;line-height:24px;font-weight:600">Restaurateurs · vouvoiement</div>
+          <div style="font-size:16px;line-height:24px;color:#2C7350;font-weight:600">Kévin a dit mi lé la. Arrivée prévue à 18 h.</div>
+          <div style="font-size:16px;line-height:24px;color:#2C7350;font-weight:600">25 € HT. Non facturé s'il ne vient pas.</div>
+          <div style="font-size:16px;line-height:24px;color:#8A1C12;text-decoration:line-through">Super nouvelle ! Votre extra est en route !</div>
+        </div>
+        <div style="background:#FFFFFF;border-radius:12px;padding:32px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:16px;line-height:24px;font-weight:600">Extras · tutoiement</div>
+          <div style="font-size:16px;line-height:24px;color:#2C7350;font-weight:600">18 h – minuit, Saint-Gilles. ≈ 63 € net.</div>
+          <div style="font-size:16px;line-height:24px;color:#2C7350;font-weight:600">Un empêchement ? Préviens au moins 4 h avant.</div>
+          <div style="font-size:16px;line-height:24px;color:#8A1C12;text-decoration:line-through">Jeunes de 18-25 ans, rejoignez-nous !</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="eviter" data-screen-label="09 À éviter" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #E6DCCF;padding-top:32px">
+      <div style="font-size:13px;line-height:18px;font-weight:600;color:#6B6157">09</div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:56px;line-height:60px;letter-spacing:-0.02em">À éviter</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <sc-for list="{{ avoid }}" as="a" hint-placeholder-count="8">
+        <div style="background:#FFFFFF;border-radius:12px;padding:16px;display:flex;gap:8px;align-items:flex-start">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A1C12" stroke-width="2.5" stroke-linecap="round" style="flex:none;margin-top:2px"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+          <span style="font-size:16px;line-height:24px">{{ a }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-size:13px;line-height:18px;font-weight:500;color:#6B6157;text-wrap:pretty">Marque « kivien » : vérifier la disponibilité à l'INPI (classes 35, 9 et 42) avant tout dépôt ou lancement public.</div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      colors: [
+        { name: 'creme', hex: '#FBF6EE', on: '#211C18', onLabel: 'Aa', use: 'Fond de page.' },
+        { name: 'blanc', hex: '#FFFFFF', on: '#211C18', onLabel: 'Aa', use: 'Fond des cartes et des champs.' },
+        { name: 'basalte', hex: '#211C18', on: '#FBF6EE', onLabel: 'Aa', use: 'Texte principal, titres, chips sélectionnées.' },
+        { name: 'galet', hex: '#6B6157', on: '#FFFFFF', onLabel: 'Aa', use: 'Texte secondaire, légendes, bordures de champs.' },
+        { name: 'trait', hex: '#E6DCCF', on: '#211C18', onLabel: '', use: 'Séparateurs uniquement. Jamais pour du texte ni des bordures de champs.' },
+        { name: 'piment', hex: '#C2401E', on: '#FFFFFF', onLabel: 'Aa', use: 'Marque et action principale. Un seul élément piment par écran. Texte blanc.' },
+        { name: 'piment-fonce', hex: '#9E3215', on: '#FFFFFF', onLabel: 'Aa', use: 'Survol du bouton piment, liens.' },
+        { name: 'curcuma', hex: '#F2B33D', on: '#211C18', onLabel: 'Aa', use: 'Urgence, badge « Ce soir ». Toujours texte basalte.' },
+        { name: 'vacoa', hex: '#2C7350', on: '#FFFFFF', onLabel: 'Aa', use: 'Succès : confirmé, terminé, retour assuré. Texte blanc.' },
+        { name: 'braise', hex: '#8A1C12', on: '#FFFFFF', onLabel: 'Aa', use: 'Erreur, absence non prévenue.' }
+      ],
+      type: [
+        { name: 'Affiche', spec: 'Bricolage 700 · 56/60', family: "'Bricolage Grotesque'", weight: 700, size: '56px', lh: '60px', ls: '-0.02em', sample: 'Un extra en 2 heures.' },
+        { name: 'Titre', spec: 'Bricolage 700 · 32/38', family: "'Bricolage Grotesque'", weight: 700, size: '32px', lh: '38px', ls: '-0.01em', sample: 'Trouver un extra' },
+        { name: 'Sous-titre', spec: 'Bricolage 600 · 22/28', family: "'Bricolage Grotesque'", weight: 600, size: '22px', lh: '28px', ls: '0', sample: 'Serveur en salle · Le Boucan Grillé' },
+        { name: 'Corps', spec: 'Figtree 400 · 16/24', family: 'Figtree', weight: 400, size: '16px', lh: '24px', ls: '0', sample: 'Coche tes soirées libres. On te prévient dès qu\'un restaurant a besoin de toi.' },
+        { name: 'Corps fort', spec: 'Figtree 600 · 16/24 · horaires, tarifs, adresses', family: 'Figtree', weight: 600, size: '16px', lh: '24px', ls: '0', sample: '18 h – minuit · ≈ 63 € net · 14 rue du Général de Gaulle' },
+        { name: 'Bouton', spec: 'Figtree 700 · 15/20', family: 'Figtree', weight: 700, size: '15px', lh: '20px', ls: '0', sample: 'Trouver un extra' },
+        { name: 'Bouton « Mi lé la »', spec: 'Bricolage 700 · 22/28', family: "'Bricolage Grotesque'", weight: 700, size: '22px', lh: '28px', ls: '0.01em', sample: 'Mi lé la' },
+        { name: 'Légende', spec: 'Figtree 500 · 13/18', family: 'Figtree', weight: 500, size: '13px', lh: '18px', ls: '0', sample: '81,25 € brut, congés payés compris' }
+      ],
+      rules: [
+        "L'horaire, le lieu et le tarif d'abord, le reste après.",
+        'Une phrase, une information.',
+        'Le créole se glisse dans un mot (kivien, péi, mi lé la), jamais dans une phrase entière.',
+        "Pas de point d'exclamation, pas d'émoji.",
+        'Restaurateurs : vouvoiement, phrases courtes, chiffres en premier. Extras : tutoiement, direct, chaleureux.',
+        'Textes neutres : « Arrivée prévue à 18 h » plutôt que « Il arrive ».',
+        "Aucune mention d'âge dans une annonce : « dispo le soir », « en recherche de job ».",
+        'Lieux et prénoms réunionnais, vrais horaires de service (18 h – minuit, 11 h 30 – 15 h).'
+      ],
+      avoid: [
+        'Dégradés',
+        'Illustrations de personnages',
+        "Émoji dans l'interface",
+        'Photos de banque d\'images de serveurs souriants',
+        'Cartes avec une bordure colorée à gauche',
+        'Palette bleu-violet de startup',
+        'Deux éléments piment dans le même écran',
+        'Curcuma avec du texte blanc'
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

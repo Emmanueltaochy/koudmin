@@ -6,7 +6,7 @@ import {
   type EtatMission,
   type EvenementMission,
   type MissionResume,
-} from '@koudmin/core';
+} from '@kivien/core';
 import { ErreurReseau, source, type MissionDetail } from '../donnees';
 import { cacheMissions } from '../donnees/cache';
 

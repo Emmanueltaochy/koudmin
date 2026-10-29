@@ -1,5 +1,5 @@
 /**
- * Charte Koudmin : source unique des couleurs, typographies, rayons et espacements.
+ * Charte Kivien : source unique des couleurs, typographies, rayons et espacements.
  * Consommée telle quelle par l'app extra (React Native) et convertie en variables CSS
  * (`dist/tokens.css`) pour le site restaurateur.
  */
@@ -82,7 +82,7 @@ export const typo = {
   affiche: { famille: 'titre', graisse: 700, taille: 56, interligne: 60, interlettrage: -0.02 },
   titre: { famille: 'titre', graisse: 700, taille: 32, interligne: 38, interlettrage: -0.01 },
   sousTitre: { famille: 'titre', graisse: 600, taille: 22, interligne: 28, interlettrage: 0 },
-  /** Horaire des cartes mission, nom « Koudmin » en en-tête. */
+  /** Horaire des cartes mission, nom « Kivien » en en-tête. */
   horaire: { famille: 'titre', graisse: 700, taille: 22, interligne: 28, interlettrage: 0 },
   /** Bouton « Mi lé la » : seule exception au style bouton. */
   miLeLa: { famille: 'titre', graisse: 700, taille: 22, interligne: 28, interlettrage: 0.01 },

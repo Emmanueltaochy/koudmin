@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import CalendarX from 'lucide-react-native/icons/calendar-x';
 import ChevronLeft from 'lucide-react-native/icons/chevron-left';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { formatPlage, questionDesistement, textes as t, type MissionResume } from '@koudmin/core';
+import { formatPlage, questionDesistement, textes as t, type MissionResume } from '@kivien/core';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
 import { couleurs, rayons } from '../ui/theme';
 import { Texte } from '../ui/Texte';

@@ -1,5 +1,5 @@
 // Parcours restaurateur de bout en bout, données fictives.
-// 1. pnpm --filter @koudmin/resto build && pnpm --filter @koudmin/resto start
+// 1. pnpm --filter @kivien/resto build && pnpm --filter @kivien/resto start
 // 2. node apps/resto/e2e/parcours.cjs   (nécessite playwright + Chromium)
 // CAPTURES=<dossier> pour enregistrer les captures de chaque écran.
 const { chromium } = require('playwright');

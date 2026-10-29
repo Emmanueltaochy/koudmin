@@ -1,6 +1,6 @@
 'use client';
 
-import { normaliserMobileReunion } from '@koudmin/core';
+import { normaliserMobileReunion } from '@kivien/core';
 import { donneesFictives, source } from './donnees';
 import type { SupabaseClient } from '@supabase/supabase-js';
 

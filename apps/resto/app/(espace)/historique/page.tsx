@@ -13,7 +13,7 @@ import {
   recapDemande,
   textesEcrans,
   totauxFacture,
-} from '@koudmin/core';
+} from '@kivien/core';
 import onglets from '@/components/Onglets.module.css';
 import p from '@/components/pages.module.css';
 import ui from '@/components/ui.module.css';

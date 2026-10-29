@@ -13,7 +13,7 @@ import {
   LIBELLES_POSTE,
   quandMission,
   textes as t,
-} from '@koudmin/core';
+} from '@kivien/core';
 import { demoAutorisee } from '../../donnees';
 import { BarreAction } from '../../mission/BarreAction';
 import { CarteInfos } from '../../mission/CarteInfos';

@@ -4,7 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import Check from 'lucide-react-native/icons/check';
 import MapPin from 'lucide-react-native/icons/map-pin';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { aujourdhuiReunion, formatMobileReunion, textesEcrans } from '@koudmin/core';
+import { aujourdhuiReunion, formatMobileReunion, textesEcrans } from '@kivien/core';
 import { FormInfosContrat } from '../../contrat/FormInfosContrat';
 import { donneesFictives, source, type InfosContrat, type MissionConfirmee, type Profil } from '../../donnees';
 import { CarteConfirmee } from '../../missions/CarteConfirmee';

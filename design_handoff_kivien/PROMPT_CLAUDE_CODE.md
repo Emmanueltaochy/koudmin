@@ -1,6 +1,6 @@
-Tu vas développer Koudmin à partir des maquettes du dossier design_handoff_koudmin/.
+Tu vas développer Kivien à partir des maquettes du dossier design_handoff_kivien/.
 
-1. Lis d'abord en entier design_handoff_koudmin/README.md (écrans, états, règles métier, textes) et design_handoff_koudmin/CHARTE.md (charte graphique). Ce sont les références. Les captures PNG sont dans design_handoff_koudmin/captures/. Les fichiers .dc.html sont des maquettes HTML à reproduire, pas du code à reprendre. Pour les voir : `npx serve design_handoff_koudmin`, puis ouvre chaque .dc.html (support.js doit rester à côté). Les valeurs exactes (px, hex) sont dans les style="…" inline.
+1. Lis d'abord en entier design_handoff_kivien/README.md (écrans, états, règles métier, textes) et design_handoff_kivien/CHARTE.md (charte graphique). Ce sont les références. Les captures PNG sont dans design_handoff_kivien/captures/. Les fichiers .dc.html sont des maquettes HTML à reproduire, pas du code à reprendre. Pour les voir : `npx serve design_handoff_kivien`, puis ouvre chaque .dc.html (support.js doit rester à côté). Les valeurs exactes (px, hex) sont dans les style="…" inline.
 
 2. Architecture (si tu as une meilleure proposition, dis-le avant de coder) :
    - Monorepo pnpm + Turborepo.
@@ -24,6 +24,6 @@ Tu vas développer Koudmin à partir des maquettes du dossier design_handoff_kou
    d. Site resto : Demande d'extra mobile (rempli, envoi, erreur ; récapitulatif en direct ; case retour décochée par défaut).
    e. Ensuite seulement, les écrans listés « pas encore dessinés » dans le README, dans le même langage visuel. Signale-moi chaque choix de design que tu fais seul.
 
-5. Logo : vectorise en SVG le logotype « Point pilule » (versions pilule piment et pilule basalte), puis génère l'icône d'app et le favicon à partir du monogramme, comme indiqué dans CHARTE.md.
+5. Logo (voir CHARTE.md §1–2 : « kivien » minuscules, pilule unique sur le second « i ») : vectorise en SVG le logotype kivien (pilule sur le second « i ») (versions pilule piment et pilule basalte), puis génère l'icône d'app et le favicon à partir du monogramme, comme indiqué dans CHARTE.md.
 
 Commence par résumer ce que tu as compris et proposer l'arborescence, puis attends mon accord.

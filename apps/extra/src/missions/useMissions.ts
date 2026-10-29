@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
-import type { MissionResume } from '@koudmin/core';
+import type { MissionResume } from '@kivien/core';
 import { ErreurReseau, source, type MissionConfirmee, type Profil } from '../donnees';
 import { memoriserMissions } from '../donnees/cache';
 

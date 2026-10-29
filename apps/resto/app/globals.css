@@ -1,4 +1,4 @@
-/* Base Koudmin : variables de la charte (tokens.css) + polices locales. */
+/* Base Kivien : variables de la charte (tokens.css) + polices locales. */
 :root {
   /* Après tokens.css (même spécificité) : les familles pointent vers les polices locales. */
   --k-font-titre: var(--police-bricolage), sans-serif;

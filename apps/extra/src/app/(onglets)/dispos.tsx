@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ajouterJours, aujourdhuiReunion, jourCourt, textesEcrans } from '@koudmin/core';
+import { ajouterJours, aujourdhuiReunion, jourCourt, textesEcrans } from '@kivien/core';
 import { source, type CleDispo, type Creneau } from '../../donnees';
 import { couleurs, rayons } from '../../ui/theme';
 import { Texte } from '../../ui/Texte';

@@ -4,7 +4,7 @@ import type {
   Poste,
   StatutAffectation,
   StatutDemande,
-} from '@koudmin/core';
+} from '@kivien/core';
 import type { AdresseGeo } from '../adresse';
 
 export interface Restaurant {

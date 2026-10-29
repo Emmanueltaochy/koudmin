@@ -16,7 +16,7 @@ import {
   type JourISO,
   type MissionResume,
   type ProfilExtra,
-} from '@koudmin/core';
+} from '@kivien/core';
 import { commun, couleurs, rayons } from '../ui/theme';
 import { Texte } from '../ui/Texte';
 

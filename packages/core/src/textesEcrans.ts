@@ -65,7 +65,7 @@ export const textesEcrans = {
       present: 'était là ?',
       oui: 'Oui',
       non: 'Non',
-      absentInfo: 'Mise en relation non facturée. Koudmin fait le point avec l’extra.',
+      absentInfo: 'Mise en relation non facturée. Kivien fait le point avec l’extra.',
       note: 'Note',
       noteAide: '1 : à revoir, 5 : parfait.',
       favori: 'Ajouter à mes favoris',
@@ -119,7 +119,7 @@ export const textesEcrans = {
   },
   extra: {
     inscription: {
-      titre: 'Bienvenue sur Koudmin',
+      titre: 'Bienvenue sur Kivien',
       sousTitre: 'Des missions près de chez toi, le soir ou le week-end. Pas besoin de SIRET.',
       prenom: 'Prénom',
       nom: 'Nom',

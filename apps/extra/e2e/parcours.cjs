@@ -1,5 +1,5 @@
 // Parcours extra de bout en bout, sur l'export web avec données fictives.
-// 1. pnpm --filter @koudmin/extra export:web
+// 1. pnpm --filter @kivien/extra export:web
 // 2. npx serve -s apps/extra/dist -l 8090
 // 3. node apps/extra/e2e/parcours.cjs   (nécessite le paquet playwright et Chromium)
 const { chromium } = require('playwright');
@@ -95,7 +95,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
 
   // Inscription
   await p.goto(URL_APP + '/bienvenue');
-  await p.getByText('Bienvenue sur Koudmin').waitFor();
+  await p.getByText('Bienvenue sur Kivien').waitFor();
   await p.getByText('Continuer').click();
   await p.getByText('Indique ton prénom.').waitFor(); await etape('inscription : 5 champs obligatoires');
   await p.getByLabel('Prénom').fill('Johan');

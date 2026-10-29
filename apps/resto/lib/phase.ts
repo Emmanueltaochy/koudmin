@@ -1,4 +1,4 @@
-import { bornesMission } from '@koudmin/core';
+import { bornesMission } from '@kivien/core';
 import type { DemandeSuivi, ExtraAffecte } from './donnees';
 
 /** Étape d'une demande, pour l'affichage. Le temps fait passer « en cours » à « à noter ». */

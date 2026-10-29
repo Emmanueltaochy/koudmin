@@ -2,7 +2,7 @@ import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
-import { trouverCommune, type MissionResume, type Poste } from '@koudmin/core';
+import { trouverCommune, type MissionResume, type Poste } from '@kivien/core';
 import {
   ErreurReseau,
   type CleDispo,

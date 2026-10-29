@@ -6,7 +6,7 @@ import {
   textesEcrans,
   validerInfosContrat,
   type SaisieInfosContrat,
-} from '@koudmin/core';
+} from '@kivien/core';
 import { source, type InfosContrat } from '../donnees';
 import { BoutonPrincipal } from '../ui/Bouton';
 import { ChampTexte } from '../ui/ChampTexte';

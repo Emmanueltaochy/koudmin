@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { Check, ChevronLeft } from 'lucide-react';
-import { dateLongue, formatPlage, LIBELLES_POSTE, textes as t, textesEcrans } from '@koudmin/core';
+import { dateLongue, formatPlage, LIBELLES_POSTE, textes as t, textesEcrans } from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';

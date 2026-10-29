@@ -33,7 +33,7 @@ import {
   type ErreursDemande,
   type ParametresTarifaires,
   type SaisieDemande,
-} from '@koudmin/core';
+} from '@kivien/core';
 import { ChampAdresse } from '@/components/ChampAdresse';
 import { ChampHeure } from '@/components/ChampHeure';
 import { Spinner } from '@/components/Spinner';

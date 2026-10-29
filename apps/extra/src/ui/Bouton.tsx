@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import type { StyleTypo } from '@koudmin/ui-tokens';
+import type { StyleTypo } from '@kivien/ui-tokens';
 import { Spinner } from './Spinner';
 import { couleurs, dimensions, rayons } from './theme';
 import { Texte } from './Texte';

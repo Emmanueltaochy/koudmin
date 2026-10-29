@@ -1,4 +1,4 @@
-import type { MissionResume } from '@koudmin/core';
+import type { MissionResume } from '@kivien/core';
 
 /**
  * Dernière liste reçue. Le détail s'affiche aussitôt à partir de la carte touchée,

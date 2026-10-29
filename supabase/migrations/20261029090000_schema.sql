@@ -1,4 +1,4 @@
--- Koudmin : schéma initial.
+-- Kivien : schéma initial.
 -- Une seule base pour l'app extra et le site restaurateur. Les montants sont en centimes,
 -- les horaires en minutes depuis minuit (0–1439), les jours à l'heure de La Réunion.
 

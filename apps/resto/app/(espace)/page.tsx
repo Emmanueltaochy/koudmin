@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import { dateLongue, formatPlage, textes as t, textesEcrans } from '@koudmin/core';
+import { dateLongue, formatPlage, textes as t, textesEcrans } from '@kivien/core';
 import { CarteDemande } from '@/components/CarteDemande';
 import p from '@/components/pages.module.css';
 import ui from '@/components/ui.module.css';

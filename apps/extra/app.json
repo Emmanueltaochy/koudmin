@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Koudmin",
-    "slug": "koudmin-extra",
-    "scheme": "koudmin",
+    "name": "Kivien",
+    "slug": "kivien-extra",
+    "scheme": "kivien",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,10 +10,10 @@
     "backgroundColor": "#FBF6EE",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "re.koudmin.extra"
+      "bundleIdentifier": "re.kivien.extra"
     },
     "android": {
-      "package": "re.koudmin.extra",
+      "package": "re.kivien.extra",
       "adaptiveIcon": {
         "backgroundColor": "#C2401E",
         "foregroundImage": "./assets/android-icon-foreground.png",

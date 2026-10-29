@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import { textesEcrans } from '@koudmin/core';
+import { textesEcrans } from '@kivien/core';
 import { deconnecter } from '@/lib/auth';
 import { donneesFictives } from '@/lib/donnees';
 import s from './EnTete.module.css';
@@ -24,7 +24,7 @@ function estActif(href: string, chemin: string, onglet: string | null) {
   return base !== '/historique' || ongletLien === onglet;
 }
 
-/** En-tête : « Koudmin » à gauche ; menu à droite sur mobile, liens en ligne sur grand écran. */
+/** En-tête : « Kivien » à gauche ; menu à droite sur mobile, liens en ligne sur grand écran. */
 export function EnTete() {
   const chemin = usePathname();
   const recherche = useSearchParams();
@@ -46,8 +46,9 @@ export function EnTete() {
 
   return (
     <header className={s.entete}>
-      <Link href="/" className={s.marque}>
-        Koudmin
+      <Link href="/" className={s.marque} aria-label="Kivien, accueil">
+        {/* Logo pilule basalte : version de l'application (le bouton d'action reste le seul piment). */}
+        <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" className={s.logo} />
       </Link>
       <nav aria-label="Navigation principale" className={s.navLarge}>
         {LIENS.map((l) => (

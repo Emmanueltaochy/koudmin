@@ -1,6 +1,6 @@
 'use client';
 
-import { normaliserHeure } from '@koudmin/core';
+import { normaliserHeure } from '@kivien/core';
 
 /** Heure au format 24 h (« 18:00 »), identique quelle que soit la langue du navigateur. */
 export function ChampHeure({

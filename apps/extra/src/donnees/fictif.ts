@@ -1,4 +1,4 @@
-import { ajouterJours, aujourdhuiReunion, type MissionResume } from '@koudmin/core';
+import { ajouterJours, aujourdhuiReunion, type MissionResume } from '@kivien/core';
 import type {
   CleDispo,
   ContratExtra,

@@ -9,9 +9,9 @@ export interface ParametresTarifaires {
   dateEffet: JourISO;
   /** SMIC horaire brut, en centimes. */
   tauxHoraireBrutCentimes: number;
-  /** Frais Koudmin par extra, en centimes HT. */
+  /** Frais Kivien par extra, en centimes HT. */
   fraisMiseEnRelationHTCentimes: number;
-  /** TVA sur les frais Koudmin, en pour mille (La Réunion : 85, soit 8,5 %). */
+  /** TVA sur les frais Kivien, en pour mille (La Réunion : 85, soit 8,5 %). */
   tvaPourMille: number;
 }
 

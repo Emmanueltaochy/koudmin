@@ -5,7 +5,7 @@
 set -euo pipefail
 RACINE=$(cd "$(dirname "$0")/.." && pwd)
 BIN=${PG_BIN:-/usr/lib/postgresql/16/bin}
-DIR=$(mktemp -d /var/tmp/koudmin-pg.XXXX)
+DIR=$(mktemp -d /var/tmp/kivien-pg.XXXX)
 chmod 777 "$DIR"
 PORT=5499
 EN_PG() { if [ "$(id -u)" = 0 ]; then su postgres -c "$*"; else bash -c "$*"; fi; }

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Suspense, useRef, useState } from 'react';
 import { ArrowUpRight, Check, ChevronLeft } from 'lucide-react';
-import { formatHeure, redigerContrat, textesEcrans } from '@koudmin/core';
+import { formatHeure, redigerContrat, textesEcrans } from '@kivien/core';
 import { PaveSignature, type PaveSignatureRef } from '@/components/PaveSignature';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';

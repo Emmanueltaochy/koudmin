@@ -18,7 +18,7 @@ import {
   salaireMission,
   textes as t,
   type MissionResume,
-} from '@koudmin/core';
+} from '@kivien/core';
 import type { LieuMission } from '../donnees';
 import { BoutonSecondaire, Lien } from '../ui/Bouton';
 import { couleurs, rayons } from '../ui/theme';

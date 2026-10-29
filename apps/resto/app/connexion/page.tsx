@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { textesEcrans } from '@koudmin/core';
+import { textesEcrans } from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
@@ -41,7 +41,7 @@ export default function Connexion() {
 
   return (
     <main className={`${p.etroite} ${s.page}`}>
-      <p className={ui.horaire}>Koudmin</p>
+      <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" width={96} style={{ height: "auto" }} />
       <h1 className={ui.titre}>{tc.titreResto}</h1>
       <form onSubmit={soumettre} className={s.formulaire} noValidate>
         {etape === 'numero' ? (

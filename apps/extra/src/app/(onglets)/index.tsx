@@ -14,7 +14,7 @@ import {
   trierMissions,
   type FiltreMissions,
   type MissionResume,
-} from '@koudmin/core';
+} from '@kivien/core';
 import { CarteConfirmee } from '../../missions/CarteConfirmee';
 import { CarteMission } from '../../missions/CarteMission';
 import { CarteSquelette } from '../../missions/CarteSquelette';

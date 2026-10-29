@@ -20,7 +20,7 @@ import {
   recapDemande,
   textes as t,
   textesEcrans,
-} from '@koudmin/core';
+} from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import type { Couleur } from '@koudmin/ui-tokens';
+import type { Couleur } from '@kivien/ui-tokens';
 import { BoutonPrincipal } from './Bouton';
 import { couleurs, rayons } from './theme';
 import { Texte } from './Texte';

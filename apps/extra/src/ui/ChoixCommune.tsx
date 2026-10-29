@@ -4,7 +4,7 @@ import Check from 'lucide-react-native/icons/check';
 import ChevronDown from 'lucide-react-native/icons/chevron-down';
 import X from 'lucide-react-native/icons/x';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COMMUNES_REUNION } from '@koudmin/core';
+import { COMMUNES_REUNION } from '@kivien/core';
 import { couleurs, dimensions, rayons } from './theme';
 import { Texte } from './Texte';
 

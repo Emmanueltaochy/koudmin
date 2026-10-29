@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import CircleAlert from 'lucide-react-native/icons/circle-alert';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { textePrise, textes as t } from '@koudmin/core';
+import { textePrise, textes as t } from '@kivien/core';
 import { BoutonPrincipal } from '../ui/Bouton';
 import { couleurs, rayons, voile } from '../ui/theme';
 import { Texte } from '../ui/Texte';

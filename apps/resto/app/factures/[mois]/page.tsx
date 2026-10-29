@@ -1,9 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { formatEuros, formatHT, textesEcrans, totauxFacture } from '@koudmin/core';
+import { formatEuros, formatHT, textesEcrans, totauxFacture } from '@kivien/core';
 import ui from '@/components/ui.module.css';
-import { IDENTITE_KOUDMIN, libelleMois } from '@/lib/identite';
+import { IDENTITE_KIVIEN, libelleMois } from '@/lib/identite';
 import { useDonnees } from '@/lib/useDonnees';
 import s from './facture.module.css';
 
@@ -32,16 +32,16 @@ export default function Facture() {
       <article className={s.facture}>
         <header className={s.entete}>
           <div>
-            <p className={ui.horaire}>Koudmin</p>
-            <p className={ui.legende}>{IDENTITE_KOUDMIN.raisonSociale}</p>
-            <p className={ui.legende}>{IDENTITE_KOUDMIN.adresse}</p>
-            {IDENTITE_KOUDMIN.siren && <p className={ui.legende}>SIREN {IDENTITE_KOUDMIN.siren}</p>}
-            {IDENTITE_KOUDMIN.tvaIntracom && <p className={ui.legende}>TVA {IDENTITE_KOUDMIN.tvaIntracom}</p>}
+            <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" width={96} style={{ height: "auto", marginBottom: 8 }} />
+            <p className={ui.legende}>{IDENTITE_KIVIEN.raisonSociale}</p>
+            <p className={ui.legende}>{IDENTITE_KIVIEN.adresse}</p>
+            {IDENTITE_KIVIEN.siren && <p className={ui.legende}>SIREN {IDENTITE_KIVIEN.siren}</p>}
+            {IDENTITE_KIVIEN.tvaIntracom && <p className={ui.legende}>TVA {IDENTITE_KIVIEN.tvaIntracom}</p>}
           </div>
           <div className={s.droite}>
             <p className={ui.sousTitre}>Facture {f.numero}</p>
             <p className={ui.legende}>Période : {libelleMois(f.mois)}</p>
-            <p className={ui.legende}>Paiement à {IDENTITE_KOUDMIN.delaiPaiementJours} jours</p>
+            <p className={ui.legende}>Paiement à {IDENTITE_KIVIEN.delaiPaiementJours} jours</p>
           </div>
         </header>
 

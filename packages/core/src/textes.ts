@@ -4,7 +4,7 @@ import { formatDuree, formatHeure } from './temps';
 
 /**
  * Textes validés (README), partagés par l'app extra et le site restaurateur.
- * Règles : pas de point d'exclamation, pas d'émoji, créole limité à koudmin / péi / mi lé la,
+ * Règles : pas de point d'exclamation, pas d'émoji, créole limité à kivien / péi / mi lé la,
  * aucune mention d'âge, formulations neutres en genre. Vérifié par test/textes.test.ts.
  */
 export const textes = {
@@ -32,7 +32,7 @@ export const textes = {
       facultatif: 'Facultatif',
       consignesPlaceholder: 'Tenue, parking, entrée du personnel',
       salaires: 'Salaires bruts estimés',
-      frais: 'Frais Koudmin',
+      frais: 'Frais Kivien',
       envoyer: 'Trouver un extra',
       envoi: 'Envoi de la demande',
       contrat: "Contrat d'extra rédigé pour vous.",

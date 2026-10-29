@@ -6,7 +6,7 @@ import {
   formatPlage,
   LIBELLES_POSTE,
   textesEcrans,
-} from '@koudmin/core';
+} from '@kivien/core';
 import type { DemandeSuivi } from '@/lib/donnees';
 import { extrasActifs, phaseDemande } from '@/lib/phase';
 import p from './pages.module.css';

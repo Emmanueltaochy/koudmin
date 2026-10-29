@@ -7,13 +7,14 @@ import {
   textesEcrans,
   validerInscription,
   type SaisieInscription,
-} from '@koudmin/core';
+} from '@kivien/core';
 import { ErreurReseau, source } from '../donnees';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
 import { ChampTexte } from '../ui/ChampTexte';
 import { Choix } from '../ui/Choix';
 import { ChoixCommune } from '../ui/ChoixCommune';
 import { couleurs } from '../ui/theme';
+import { Logo } from '../ui/Logo';
 import { Texte } from '../ui/Texte';
 
 const ti = textesEcrans.extra.inscription;
@@ -82,7 +83,7 @@ export default function Bienvenue() {
   return (
     <KeyboardAvoidingView style={styles.ecran} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={[styles.contenu, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
-        <Texte variante="horaire">Koudmin</Texte>
+        <Logo />
         <View style={styles.intro}>
           <Texte variante="titre" accessibilityRole="header">
             {ti.titre}

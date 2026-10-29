@@ -20,10 +20,10 @@ importers:
 
   apps/extra:
     dependencies:
-      '@koudmin/core':
+      '@kivien/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@koudmin/ui-tokens':
+      '@kivien/ui-tokens':
         specifier: workspace:*
         version: link:../../packages/ui-tokens
       '@react-native-async-storage/async-storage':
@@ -93,10 +93,10 @@ importers:
 
   apps/resto:
     dependencies:
-      '@koudmin/core':
+      '@kivien/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@koudmin/ui-tokens':
+      '@kivien/ui-tokens':
         specifier: workspace:*
         version: link:../../packages/ui-tokens
       '@supabase/supabase-js':

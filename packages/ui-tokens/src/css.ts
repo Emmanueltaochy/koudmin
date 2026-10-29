@@ -31,5 +31,5 @@ export function tokensCss(): string {
     `--k-squelette: ${animations.squeletteMs}ms;`,
     `--k-ombre-carte: 0 1px 0 ${couleurs.trait};`,
   );
-  return `/* Généré par @koudmin/ui-tokens : ne pas modifier à la main. */\n:root {\n${l.map((x) => '  ' + x).join('\n')}\n}\n`;
+  return `/* Généré par @kivien/ui-tokens : ne pas modifier à la main. */\n:root {\n${l.map((x) => '  ' + x).join('\n')}\n}\n`;
 }
