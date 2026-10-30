@@ -36,6 +36,9 @@ const COMPLEMENTS: Record<string, { tenue: string; lieu: LieuMission }> = {
 
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** Démonstration : adresse e-mail du compte. */
+let emailDemo: { email: string | null; enAttente: string | null } = { email: null, enAttente: null };
+
 export function sourceFictive(): SourceDonnees {
   // État de la démo, gardé en mémoire le temps de la session.
   const confirmees = new Set<string>();
@@ -96,6 +99,13 @@ export function sourceFictive(): SourceDonnees {
       return missionsFictives()
         .filter((m) => confirmees.has(m.id))
         .map((m) => ({ ...m, contratSigne: signes.has(m.id), annulee: false }));
+    },
+    async emailDuCompte() {
+      return emailDemo;
+    },
+    async changerEmail(email) {
+      emailDemo = { ...emailDemo, enAttente: email };
+      return 'ok' as const;
     },
     async mesGains() {
       // Démonstration : deux missions déjà faites, puis les missions confirmées dans la session.

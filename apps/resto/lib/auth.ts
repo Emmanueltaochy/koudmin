@@ -116,3 +116,39 @@ export async function connecterAdmin(email: string, motDePasse: string): Promise
   if (error.status === 400 || error.code === 'invalid_credentials') return 'identifiants';
   throw error;
 }
+
+/** Démonstration : adresse e-mail du compte, gardée pour la page. */
+let emailDemo: { email: string | null; enAttente: string | null } = { email: null, enAttente: null };
+
+/** Adresse e-mail confirmée du compte, et celle en attente de confirmation. */
+export async function emailDuCompte(): Promise<{ email: string | null; enAttente: string | null }> {
+  if (donneesFictives) return emailDemo;
+  const { data } = await client()!.auth.getUser();
+  const u = data.user as { email?: string; new_email?: string } | null;
+  return { email: u?.email || null, enAttente: u?.new_email || null };
+}
+
+/** Ajoute ou change l'adresse e-mail : un lien de confirmation part sur la nouvelle adresse. */
+export async function changerEmail(email: string): Promise<'ok' | 'pris'> {
+  if (donneesFictives) {
+    emailDemo = { ...emailDemo, enAttente: email };
+    return 'ok';
+  }
+  const { error } = await client()!.auth.updateUser({ email }, { emailRedirectTo: `${window.location.origin}/email-confirme` });
+  if (!error) return 'ok';
+  if (error.code === 'email_exists' || /already/i.test(error.message)) return 'pris';
+  throw error;
+}
+
+export async function changerMotDePasse(motDePasse: string): Promise<void> {
+  if (donneesFictives) return;
+  const { error } = await client()!.auth.updateUser({ password: motDePasse });
+  if (error) throw error;
+}
+
+/** Mot de passe oublié : lien envoyé à l'adresse du compte (sans dire si elle existe). */
+export async function demanderNouveauMotDePasse(email: string): Promise<void> {
+  if (donneesFictives) return;
+  const { error } = await client()!.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/nouveau-mot-de-passe` });
+  if (error && error.status !== 429) throw error;
+}

@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { textesVitrine } from '@kivien/core';
+import { emailValide, textesVitrine } from '@kivien/core';
 import s from './vitrine.module.css';
 
 const t = textesVitrine.lettre;
-const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 /** Inscription à la lettre mensuelle : fonction inscrire_lettre (Supabase), simulée en démonstration. */
 async function inscrire(email: string): Promise<'ok' | 'email' | 'reseau'> {
@@ -33,7 +32,7 @@ export function Lettre() {
   async function envoyer(e: FormEvent) {
     e.preventDefault();
     const adresse = email.trim();
-    if (!EMAIL.test(adresse)) return setErreur(t.erreurEmail);
+    if (!emailValide(adresse)) return setErreur(t.erreurEmail);
     setErreur(null);
     setEtat('envoi');
     const r = await inscrire(adresse);

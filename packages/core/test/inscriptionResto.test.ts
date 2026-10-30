@@ -33,16 +33,16 @@ describe('SIRET', () => {
 });
 
 describe('inscription restaurateur', () => {
-  const ok = { etablissement: 'Le Boucan Grillé', secteur: 'hotellerie_restauration', adresseChoisie: true, siret: '73282932000074', telephone: '0692 12 34 56', motDePasse: 'kivien974' };
+  const ok = { etablissement: 'Le Boucan Grillé', secteur: 'hotellerie_restauration', adresseChoisie: true, siret: '73282932000074', telephone: '0692 12 34 56', email: 'contact@boucan.re', motDePasse: 'kivien974' };
   it('accepte une saisie complète', () => {
     expect(validerInscriptionResto(ok)).toEqual({});
   });
   it('signale chaque champ manquant ou faux', () => {
-    const e = validerInscriptionResto({ etablissement: ' ', secteur: 'garage', adresseChoisie: false, siret: '123', telephone: '0612345678', motDePasse: 'court' });
-    expect(Object.keys(e)).toEqual(['etablissement', 'secteur', 'adresseChoisie', 'siret', 'telephone', 'motDePasse']);
+    const e = validerInscriptionResto({ etablissement: ' ', secteur: 'garage', adresseChoisie: false, siret: '123', telephone: '0612345678', email: 'pas-une-adresse', motDePasse: 'court' });
+    expect(Object.keys(e)).toEqual(['etablissement', 'secteur', 'adresseChoisie', 'siret', 'telephone', 'email', 'motDePasse']);
   });
   it('ne redemande pas mobile et mot de passe quand le compte est déjà ouvert', () => {
-    expect(validerInscriptionResto({ ...ok, telephone: '', motDePasse: '' }, true)).toEqual({});
+    expect(validerInscriptionResto({ ...ok, telephone: '', email: '', motDePasse: '' }, true)).toEqual({});
   });
 });
 

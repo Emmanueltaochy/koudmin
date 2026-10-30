@@ -16,12 +16,18 @@ import s from './admin.module.css';
 const ta = textesEcrans.resto.admin;
 
 type Onglet = 'vue' | 'demandes' | 'extras' | 'etablissements' | 'recrutement';
-const ONGLETS: { id: Onglet; icone: LucideIcon }[] = [
-  { id: 'vue', icone: BarChart3 },
-  { id: 'demandes', icone: ClipboardList },
-  { id: 'extras', icone: Users },
-  { id: 'etablissements', icone: Building2 },
-  { id: 'recrutement', icone: MapPinned },
+/** Menu de gauche : piloter (chiffres), suivre l'activité, développer le réseau. */
+const GROUPES: { titre: string; onglets: { id: Onglet; icone: LucideIcon }[] }[] = [
+  { titre: ta.groupes.pilotage, onglets: [{ id: 'vue', icone: BarChart3 }] },
+  { titre: ta.groupes.activite, onglets: [{ id: 'demandes', icone: ClipboardList }] },
+  {
+    titre: ta.groupes.reseau,
+    onglets: [
+      { id: 'extras', icone: Users },
+      { id: 'etablissements', icone: Building2 },
+      { id: 'recrutement', icone: MapPinned },
+    ],
+  },
 ];
 
 /** Connexion des administrateurs par e-mail (comptes créés avec deploy/vps/creer-admin.sh). */
@@ -122,12 +128,18 @@ export default function Admin() {
       {etat === 'refuse' && <p className={p.vide}>{ta.reserve}</p>}
       {etat === 'pret' && (
         <>
+          <div className={s.disposition}>
           <nav className={s.onglets} aria-label={ta.espace}>
-            {ONGLETS.map(({ id, icone: Icone }) => (
-              <button key={id} type="button" className={s.onglet} aria-current={onglet === id ? 'page' : undefined} onClick={() => setOnglet(id)}>
-                <Icone size={18} strokeWidth={2} aria-hidden />
-                {ta.onglets[id]}
-              </button>
+            {GROUPES.map((g) => (
+              <div key={g.titre} className={s.groupe}>
+                <span className={s.groupeTitre}>{g.titre}</span>
+                {g.onglets.map(({ id, icone: Icone }) => (
+                  <button key={id} type="button" className={s.onglet} aria-current={onglet === id ? 'page' : undefined} onClick={() => setOnglet(id)}>
+                    <Icone size={18} strokeWidth={2} aria-hidden />
+                    {ta.onglets[id]}
+                  </button>
+                ))}
+              </div>
             ))}
           </nav>
           <main className={s.contenu}>
@@ -138,6 +150,7 @@ export default function Admin() {
             {onglet === 'etablissements' && <ListeEtablissements />}
             {onglet === 'recrutement' && <Recrutement />}
           </main>
+          </div>
         </>
       )}
     </div>

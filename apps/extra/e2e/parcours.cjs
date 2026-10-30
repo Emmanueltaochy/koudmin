@@ -94,6 +94,10 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Missions', { exact: true }).filter({ visible: true }).first().waitFor();
   await p.getByText('Contrat signé', { exact: true }).filter({ visible: true }).first().waitFor(); await etape('liste : contrat signé sur la mission confirmée');
   // Mes gains : missions avec contrat, au mois, à l'année, à venir.
+  await p.getByRole('tab', { name: /Profil/ }).click();
+  await p.getByLabel('Ton adresse e-mail').fill('kevin@exemple.re');
+  await p.getByText('Enregistrer mon adresse').click();
+  await p.getByText('Lien envoyé à kevin@exemple.re', { exact: false }).waitFor(); await etape('profil : adresse e-mail à confirmer');
   await p.getByRole('tab', { name: /Gains/ }).click();
   await p.getByText('Ce mois-ci').filter({ visible: true }).first().waitFor();
   await p.getByText('Mission par mission').filter({ visible: true }).first().waitFor();
@@ -111,7 +115,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/dispos.png` });
 
   // Profil : voiture
-  await p.getByText('Profil', { exact: true }).click();
+  await p.getByRole('tab', { name: /Profil/ }).click();
   await p.getByText('Kévin Hoarau').waitFor();
   await p.getByRole('radio', { name: 'Oui' }).click();
   await p.getByText('Enregistré.').last().waitFor(); await etape('profil : voiture enregistrée');
@@ -129,10 +133,10 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   if ((await p.getByRole('radio', { name: 'Plus de 3 ans de métier' }).getAttribute('aria-checked')) !== 'true') throw new Error('expérience non choisie');
   await etape('profil : expérience et langue enregistrées');
   await p.getByLabel('En quelques mots').fill('x'.repeat(281));
-  await p.getByRole('button', { name: 'Enregistrer' }).click();
+  await p.getByRole('button', { name: 'Enregistrer', exact: true }).click();
   await p.getByText('Raccourcis ton texte : 280 caractères maximum.').waitFor(); await etape('profil : présentation trop longue refusée');
   await p.getByLabel('En quelques mots').fill('  Trois saisons au bar   à Saint-Pierre.  ');
-  await p.getByRole('button', { name: 'Enregistrer' }).click();
+  await p.getByRole('button', { name: 'Enregistrer', exact: true }).click();
   await p.waitForFunction(() => document.querySelector('textarea')?.value === 'Trois saisons au bar à Saint-Pierre.');
   await etape('profil : présentation nettoyée et enregistrée');
   const [choix] = await Promise.all([p.waitForEvent('filechooser'), p.getByText('Ajouter une photo').click()]);

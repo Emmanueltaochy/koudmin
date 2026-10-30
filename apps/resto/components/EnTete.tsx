@@ -13,6 +13,7 @@ import {
   Menu,
   Search,
   Star,
+  UserCog,
   Users,
   X,
   type LucideIcon,
@@ -33,17 +34,32 @@ interface Lien {
   gerant?: boolean;
 }
 
-const MISSIONS: Lien[] = [
-  { href: '/espace', libelle: tm.accueil, icone: House },
-  { href: '/demande', libelle: tm.demander, icone: Search },
-  { href: '/historique', libelle: tm.demandes, icone: History },
-  { href: '/planning', libelle: tm.planning, icone: CalendarDays },
-  { href: '/historique?onglet=favoris', libelle: tm.favoris, icone: Star },
-  { href: '/historique?onglet=factures', libelle: tm.factures, icone: FileText, gerant: true },
-];
-const COMPTE: Lien[] = [
-  { href: '/etablissements', libelle: tm.etablissements, icone: Building2 },
-  { href: '/utilisateurs', libelle: tm.utilisateurs, icone: Users },
+/** Menu en trois temps : agir, suivre, gérer. */
+const GROUPES: { titre: string; liens: Lien[] }[] = [
+  {
+    titre: tm.quotidien,
+    liens: [
+      { href: '/espace', libelle: tm.accueil, icone: House },
+      { href: '/demande', libelle: tm.demander, icone: Search },
+      { href: '/planning', libelle: tm.planning, icone: CalendarDays },
+    ],
+  },
+  {
+    titre: tm.suivi,
+    liens: [
+      { href: '/historique', libelle: tm.demandes, icone: History },
+      { href: '/historique?onglet=favoris', libelle: tm.favoris, icone: Star },
+      { href: '/historique?onglet=factures', libelle: tm.factures, icone: FileText, gerant: true },
+    ],
+  },
+  {
+    titre: tm.gestion,
+    liens: [
+      { href: '/etablissements', libelle: tm.etablissements, icone: Building2 },
+      { href: '/utilisateurs', libelle: tm.utilisateurs, icone: Users },
+      { href: '/compte', libelle: tm.monCompte, icone: UserCog },
+    ],
+  },
 ];
 
 function estActif(href: string, chemin: string, onglet: string | null) {
@@ -122,10 +138,12 @@ export function EnTete() {
   const contenu = (idSuffixe: string, classe: string | undefined) => (
     <>
       {choix(idSuffixe)}
-      <p className={s.groupe}>{tm.missions}</p>
-      {liens(MISSIONS, classe)}
-      <p className={s.groupe}>{tm.compte}</p>
-      {liens(COMPTE, classe)}
+      {GROUPES.map((g) => (
+        <div key={g.titre} className={s.bloc}>
+          <p className={s.groupe}>{g.titre}</p>
+          {liens(g.liens, classe)}
+        </div>
+      ))}
       {!donneesFictives && (
         <button type="button" className={classe} onClick={sortir}>
           <LogOut size={20} strokeWidth={2} aria-hidden />

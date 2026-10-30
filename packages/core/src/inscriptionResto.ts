@@ -1,4 +1,5 @@
 import { MOT_DE_PASSE_MIN } from './inscription';
+import { emailValide } from './email';
 import { estSecteur } from './secteurs';
 import { siretValide } from './siret';
 import { normaliserMobileReunion } from './telephone';
@@ -14,6 +15,8 @@ export interface SaisieInscriptionResto {
   adresseChoisie: boolean;
   siret: string;
   telephone: string;
+  /** Pour le mot de passe oublié et les nouvelles des missions (confirmée par lien). */
+  email: string;
   motDePasse: string;
 }
 
@@ -29,6 +32,7 @@ export function validerInscriptionResto(s: SaisieInscriptionResto, compteOuvert 
   if (!siretValide(s.siret)) e.siret = ti.erreurSiret;
   if (!compteOuvert) {
     if (!normaliserMobileReunion(s.telephone)) e.telephone = textesEcrans.connexion.erreurTelephone;
+    if (!emailValide(s.email)) e.email = textesEcrans.resto.compte.erreurEmail;
     if ([...s.motDePasse].length < MOT_DE_PASSE_MIN) e.motDePasse = ti.erreurMotDePasse;
   }
   return e;

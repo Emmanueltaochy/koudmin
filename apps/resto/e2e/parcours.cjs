@@ -92,6 +92,7 @@ let pageCourante = null;
   await p.locator('ul[role="listbox"] [role="option"]').first().click();
   await p.locator('#siret').fill('73282932000075');
   await p.locator('#telephone').fill('0692 11 22 33');
+  await p.locator('#email').fill('contact@caripei.re');
   await p.locator('#mot-de-passe').fill('kivien974');
   await p.getByRole('button', { name: 'Créer mon compte' }).click();
   await p.getByText('Vérifiez le numéro SIRET : 14 chiffres.').waitFor(); ok('inscription : SIRET invalide refusé (clé de Luhn)');
@@ -289,10 +290,25 @@ let pageCourante = null;
   await p.waitForURL(URL_SITE + '/espace'); ok('invitation : accès créé, espace ouvert');
   await p.setViewportSize({ width: 390, height: 844 });
 
+  // Mot de passe oublié et Mon compte (adresse e-mail confirmée par lien).
+  await p.goto(URL_SITE + '/connexion');
+  await p.getByRole('link', { name: 'Mot de passe oublié ?' }).click();
+  await p.waitForURL(URL_SITE + '/mot-de-passe-oublie');
+  await p.locator('#email').fill('pas-une-adresse');
+  await p.getByRole('button', { name: 'Recevoir le lien' }).click();
+  await p.getByText('Indiquez une adresse e-mail valide.').waitFor();
+  await p.locator('#email').fill('contact@boucan.re');
+  await p.getByRole('button', { name: 'Recevoir le lien' }).click();
+  await p.getByText('Si un compte utilise cette adresse', { exact: false }).waitFor(); ok('mot de passe oublié : lien demandé par e-mail');
+  await p.goto(URL_SITE + '/compte');
+  await p.locator('#compte-email').fill('gerance@boucan.re');
+  await p.getByRole('button', { name: 'Enregistrer' }).click();
+  await p.getByText('Lien de confirmation envoyé à gerance@boucan.re', { exact: false }).first().waitFor(); ok('mon compte : adresse e-mail à confirmer');
+
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/extras', '/admin', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

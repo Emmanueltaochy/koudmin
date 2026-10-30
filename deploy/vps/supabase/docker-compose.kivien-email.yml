@@ -1,0 +1,20 @@
+# Kivien : envoi des e-mails (boîte bonjour@kivien.re chez Hostinger). Ajouté à COMPOSE_FILE par
+# configurer-email.sh (et installer.sh) quand SMTP_HOST pointe vers un vrai serveur d'envoi.
+# Sujets en français ; modèles HTML servis par le site (apps/resto/public/emails).
+
+services:
+  auth:
+    environment:
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Confirmez votre adresse e-mail · Kivien"
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: "Confirmez votre adresse e-mail · Kivien"
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Choisir un nouveau mot de passe · Kivien"
+      GOTRUE_MAILER_SUBJECTS_INVITE: "Votre accès Kivien"
+      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Votre lien de connexion · Kivien"
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: ${KIVIEN_SITE_PUBLIC:-https://kivien.re}/emails/confirmation.html
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: ${KIVIEN_SITE_PUBLIC:-https://kivien.re}/emails/confirmation.html
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: ${KIVIEN_SITE_PUBLIC:-https://kivien.re}/emails/mot-de-passe.html
+      GOTRUE_MAILER_TEMPLATES_INVITE: ${KIVIEN_SITE_PUBLIC:-https://kivien.re}/emails/invitation.html
+      GOTRUE_MAILER_TEMPLATES_MAGIC_LINK: ${KIVIEN_SITE_PUBLIC:-https://kivien.re}/emails/lien.html
+      # Pas d'adresse précédente à confirmer : les comptes se créent par mobile, l'e-mail s'ajoute ensuite.
+      GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "false"
+      GOTRUE_SMTP_MAX_FREQUENCY: "30s"

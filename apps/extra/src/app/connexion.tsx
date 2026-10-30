@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { normaliserMobileReunion, textesEcrans } from '@kivien/core';
@@ -74,6 +74,12 @@ export default function Connexion() {
       <BoutonPrincipal libelle={tc.seConnecter} onPress={seConnecter} envoi={envoi} />
       <View>
         <Lien libelle={tc.creerCompte} onPress={() => router.replace('/bienvenue')} variante="legende" couleur="galet" />
+        <Lien
+          libelle={textesEcrans.extra.email.oublie}
+          onPress={() => void Linking.openURL('https://kivien.re/mot-de-passe-oublie')}
+          variante="legende"
+          couleur="galet"
+        />
       </View>
     </ScrollView>
   );

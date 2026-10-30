@@ -63,6 +63,14 @@
   text-underline-offset: 6px;
 }
 
+.bloc {
+  display: flex;
+  flex-direction: column;
+}
+.bloc + .bloc {
+  border-top: 1px solid var(--k-trait);
+  margin-top: 8px;
+}
 .groupe {
   margin: 16px 0 4px;
   font: var(--k-legende-forte-font);

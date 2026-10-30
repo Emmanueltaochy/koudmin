@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import {
   formatSiret,
+  normaliserEmail,
   normaliserSiret,
   textesEcrans,
   validerInscriptionResto,
@@ -18,7 +19,7 @@ import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import type { AdresseGeo } from '@/lib/adresse';
-import { aUnEtablissement, connecte, inscrireRestaurateur } from '@/lib/auth';
+import { aUnEtablissement, changerEmail, connecte, inscrireRestaurateur } from '@/lib/auth';
 import { donneesFictives } from '@/lib/donnees';
 import s from '../inscription.module.css';
 
@@ -30,7 +31,7 @@ type Erreurs = ErreursInscriptionResto & { general?: string };
 /** Inscription d'un établissement : compte actif tout de suite, SIRET et secteur obligatoires. */
 export default function InscriptionRestaurant() {
   const router = useRouter();
-  const [saisie, setSaisie] = useState({ etablissement: '', secteur: '' as Secteur | '', adresse: '', siret: '', telephone: '', motDePasse: '' });
+  const [saisie, setSaisie] = useState({ etablissement: '', secteur: '' as Secteur | '', adresse: '', siret: '', telephone: '', email: '', motDePasse: '' });
   const [adresseGeo, setAdresseGeo] = useState<AdresseGeo | null>(null);
   const [erreurs, setErreurs] = useState<Erreurs>({});
   const [tente, setTente] = useState(false);
@@ -53,6 +54,7 @@ export default function InscriptionRestaurant() {
     adresseChoisie: !!geo && geo.libelle === v.adresse,
     siret: v.siret,
     telephone: v.telephone,
+    email: v.email,
     motDePasse: v.motDePasse,
   });
   const modifier = (m: Partial<typeof saisie>, geo: AdresseGeo | null = adresseGeo) => {
@@ -82,6 +84,8 @@ export default function InscriptionRestaurant() {
         compteOuvert,
       );
       if (r === 'ok') {
+        // Lien de confirmation envoyé sur l'adresse ; l'inscription ne dépend pas de son envoi.
+        if (!compteOuvert) await changerEmail(normaliserEmail(saisie.email)).catch(() => undefined);
         router.replace('/espace');
         return;
       }
@@ -188,6 +192,12 @@ export default function InscriptionRestaurant() {
                 {ti.telephone}
               </label>
               {champ('telephone', erreurs.telephone, ti.telephoneAide, { type: 'tel', inputMode: 'tel', autoComplete: 'tel', placeholder: '0692 12 34 56' })}
+            </div>
+            <div className={s.bloc}>
+              <label htmlFor="email" className={ui.corpsFort}>
+                {textesEcrans.resto.compte.email}
+              </label>
+              {champ('email', erreurs.email, textesEcrans.resto.compte.emailAide, { type: 'email', autoComplete: 'email', placeholder: 'contact@monetablissement.re' })}
             </div>
             <div className={s.bloc}>
               <label htmlFor="mot-de-passe" className={ui.corpsFort}>

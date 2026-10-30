@@ -155,6 +155,17 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean; annulee: boolean })[];
       return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe, annulee: l.annulee }));
     },
+    async emailDuCompte() {
+      const { data } = await client.auth.getUser();
+      const u = data.user as { email?: string; new_email?: string } | null;
+      return { email: u?.email || null, enAttente: u?.new_email || null };
+    },
+    async changerEmail(email) {
+      const { error } = await client.auth.updateUser({ email }, { emailRedirectTo: 'https://kivien.re/email-confirme' });
+      if (!error) return 'ok';
+      if (error.code === 'email_exists' || /already/i.test(error.message)) return 'prise';
+      throw error;
+    },
     async mesGains() {
       const lignes = verifier(await client.rpc('mes_gains')) as {
         demande_id: string; restaurant: string; commune: string; poste: Poste; jour: string; debut: number; fin: number;

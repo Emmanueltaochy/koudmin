@@ -139,6 +139,8 @@ if [ -z "$port" ]; then
 fi
 fichiers=docker-compose.yml:docker-compose.kivien.yml
 [ -n "$(lire SMS_PROVIDER || true)" ] && fichiers=$fichiers:docker-compose.kivien-sms.yml
+# E-mails : surcharge ajoutée une fois la boîte d'envoi branchée (configurer-email.sh).
+[ "$(lire SMTP_HOST || true)" = smtp.hostinger.com ] && fichiers=$fichiers:docker-compose.kivien-email.yml
 
 regler COMPOSE_FILE "$fichiers"
 regler COMPOSE_PROJECT_NAME kivien
@@ -157,7 +159,8 @@ regler KIVIEN_DOMAINE_API "$DOMAINE"
 regler SUPABASE_PUBLIC_URL "https://$DOMAINE"
 regler API_EXTERNAL_URL "https://$DOMAINE/auth/v1"
 regler SITE_URL "$SITE"
-regler ADDITIONAL_REDIRECT_URLS ""
+# Liens des e-mails (confirmation, mot de passe oublié) : retour sur le site ou sur l'app web.
+regler ADDITIONAL_REDIRECT_URLS "https://kivien.re/**,https://app.kivien.re/**"
 # Connexion par e-mail ouverte pour les comptes administrateurs (creer-admin.sh, adresse confirmée
 # d'office) ; une inscription libre par e-mail reste inactive tant que l'adresse n'est pas confirmée.
 regler ENABLE_EMAIL_SIGNUP true

@@ -48,7 +48,7 @@ function FormEtablissement({
   async function envoyer(e: FormEvent) {
     e.preventDefault();
     const tout = validerInscriptionResto(
-      { etablissement: nom, secteur, adresseChoisie: !!geo && geo.libelle === adresse, siret, telephone: '', motDePasse: '' },
+      { etablissement: nom, secteur, adresseChoisie: !!geo && geo.libelle === adresse, siret, telephone: '', email: '', motDePasse: '' },
       true,
     );
     // En modification, seuls le nom et l'adresse changent (secteur et SIRET restent ceux de l'inscription).

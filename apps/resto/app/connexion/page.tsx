@@ -102,6 +102,9 @@ export default function Connexion() {
       <Link href="/inscription" className={ui.lienDiscret}>
         {textesEcrans.resto.inscription.pasEncoreCompte}
       </Link>
+      <Link href="/mot-de-passe-oublie" className={ui.lienDiscret}>
+        {textesEcrans.resto.motDePasseOublie.lien}
+      </Link>
     </main>
   );
 }

@@ -164,3 +164,13 @@ describe('zone d’un établissement', () => {
     expect(zoneDuLieu(null)).toBeNull();
   });
 });
+
+describe('adresse e-mail', () => {
+  it('accepte une adresse bien formée, nettoyée', async () => {
+    const { emailValide, normaliserEmail } = await import('../src');
+    expect(emailValide(' Bonjour@Kivien.re ')).toBe(true);
+    expect(normaliserEmail(' Bonjour@Kivien.re ')).toBe('bonjour@kivien.re');
+    expect(emailValide('pas-une-adresse')).toBe(false);
+    expect(emailValide('a@b.c')).toBe(false);
+  });
+});
