@@ -159,7 +159,15 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Saint-Paul · avec voiture').waitFor(); await etape('liste : profil avec voiture pris en compte');
 
   // Connexion par mot de passe (démo : kivien974)
-  await p.goto(URL_APP + '/connexion');
+  // En CI, l'ouverture directe de /connexion a trois fois abouti sur la liste des missions (adresse « / »,
+  // page rechargée), sans reproduction possible en local. Le parcours le note puis réessaie une fois.
+  for (let essai = 1; ; essai++) {
+    await p.goto(URL_APP + '/connexion');
+    const ok = await p.getByLabel('Numéro de téléphone').waitFor({ timeout: 10000 }).then(() => true, () => false);
+    if (ok) break;
+    console.log(`NOTE /connexion a abouti sur ${p.url()} (essai ${essai})`);
+    if (essai === 2) throw new Error('/connexion inaccessible deux fois de suite');
+  }
   await p.getByLabel('Numéro de téléphone').fill('0692 00 00 01');
   await p.getByText('Se connecter').click();
   await p.getByText('Indique ton mot de passe.').waitFor(); await etape('connexion : mot de passe obligatoire');

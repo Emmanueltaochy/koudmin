@@ -1,4 +1,6 @@
-# À chaque push : vérifications complètes. Sur main seulement : mise à jour du VPS ensuite.
+# Push sur main : vérifications complètes, puis mise à jour du VPS. Pull request : vérifications.
+# (Les branches de travail sont poussées en même temps que main : les vérifier aussi doublait chaque
+# run pour le même commit.)
 # Secrets à créer dans GitHub (deploy/vps/autoriser-github.sh les affiche sur le VPS) :
 #   VPS_HOTE, VPS_PORT, VPS_CLE_SSH
 # La clé publique du VPS (non secrète) est dans deploy/vps/cle-hote-vps.pub.
@@ -6,6 +8,7 @@ name: Vérifier et déployer
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
