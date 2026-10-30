@@ -158,7 +158,10 @@ regler SUPABASE_PUBLIC_URL "https://$DOMAINE"
 regler API_EXTERNAL_URL "https://$DOMAINE/auth/v1"
 regler SITE_URL "$SITE"
 regler ADDITIONAL_REDIRECT_URLS ""
-regler ENABLE_EMAIL_SIGNUP false
+# Connexion par e-mail ouverte pour les comptes administrateurs (creer-admin.sh, adresse confirmée
+# d'office) ; une inscription libre par e-mail reste inactive tant que l'adresse n'est pas confirmée.
+regler ENABLE_EMAIL_SIGNUP true
+regler ENABLE_EMAIL_AUTOCONFIRM false
 regler ENABLE_ANONYMOUS_USERS false
 regler ENABLE_PHONE_SIGNUP true
 # Sans fournisseur SMS, le numéro ne peut pas être vérifié : connexion par téléphone et mot de passe,

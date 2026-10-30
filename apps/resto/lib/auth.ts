@@ -106,3 +106,13 @@ export async function rejoindreEtablissement(
   if ((await accepterInvitations()) > 0) return 'ok';
   return (await source().etablissements()).length > 0 ? 'ok' : 'aucune';
 }
+
+/** Connexion d'un administrateur de la plateforme (e-mail et mot de passe). */
+export async function connecterAdmin(email: string, motDePasse: string): Promise<'ok' | 'identifiants' | 'attente'> {
+  if (donneesFictives) return motDePasse === MOT_DE_PASSE_DEMO ? 'ok' : 'identifiants';
+  const { error } = await client()!.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: motDePasse });
+  if (!error) return 'ok';
+  if (error.status === 429) return 'attente';
+  if (error.status === 400 || error.code === 'invalid_credentials') return 'identifiants';
+  throw error;
+}

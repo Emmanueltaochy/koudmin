@@ -55,9 +55,23 @@ let pageCourante = null;
 
   // Compteur de l'équipe Kivien (démo) : extras par zone et par métier.
   await p.goto(URL_SITE + '/admin');
-  await p.getByRole('heading', { name: 'Recrutement' }).waitFor();
-  await p.getByRole('row', { name: /^Ouest/ }).first().waitFor(); ok('compteur : extras et établissements par zone');
+  await p.getByRole('heading', { name: "Vue d'ensemble" }).waitFor();
+  await p.getByText("Chiffre d'affaires HT").waitFor();
+  await p.getByText('Taux de pourvoi').waitFor(); ok('admin : vue d’ensemble (valeur, demande, offre, qualité)');
   await capture('admin');
+  await p.getByRole('radio', { name: '12 mois' }).click();
+  await p.getByText('Mois par mois').waitFor(); ok('admin : période de 12 mois, évolution mensuelle');
+  await p.getByRole('button', { name: 'Extras', exact: true }).click();
+  await p.getByRole('row', { name: /Kévin Hoarau/ }).waitFor();
+  await p.getByRole('searchbox').fill('maelle');
+  if (await p.getByRole('row', { name: /Kévin Hoarau/ }).count()) throw new Error('recherche des extras');
+  await p.getByRole('row', { name: /Maëlle Payet/ }).waitFor(); ok('admin : liste des extras, recherche sans accents');
+  await p.getByRole('button', { name: 'Établissements', exact: true }).click();
+  await p.getByRole('row', { name: /Village vacances Les Filaos/ }).waitFor(); ok('admin : liste des établissements');
+  await p.getByRole('button', { name: 'Demandes', exact: true }).click();
+  await p.getByRole('row', { name: /Le Boucan Grillé/ }).first().waitFor(); ok('admin : dernières demandes');
+  await p.getByRole('button', { name: 'Recrutement', exact: true }).click();
+  await p.getByRole('row', { name: /^Ouest/ }).first().waitFor(); ok('admin : recrutement par zone');
 
   // Création de compte restaurateur : SIRET obligatoire, compte actif tout de suite.
   await p.goto(URL_SITE + '/');

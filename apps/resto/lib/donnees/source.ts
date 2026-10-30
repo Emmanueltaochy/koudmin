@@ -44,6 +44,40 @@ export interface Membre {
 
 export type ResultatInvitation = 'ok' | 'dejaMembre' | 'compteExtra' | 'reserve';
 
+/** Tableau de bord de l'espace administrateur (période en jours, montants en centimes). */
+export interface TableauAdmin {
+  periode_jours: number;
+  demande: { demandes: number; places: number; pourvues: number; annulees: number; en_recherche: number; delai_median_minutes: number | null; par_poste: Partial<Record<Poste, number>> };
+  offre: { extras: number; nouveaux: number; actifs: number; dispo_7_jours: number; avec_photo: number };
+  etablissements: { total: number; nouveaux: number; actifs: number; utilisateurs: number };
+  valeur: { frais_ht_centimes: number; tva_centimes: number; salaires_bruts_centimes: number; missions_facturees: number; frais_a_venir_ht_centimes: number };
+  qualite: { note_moyenne: number | null; notations: number; absences: number; desistements: number; contrats_signes: number };
+  par_mois: { mois: string; demandes: number; places: number; pourvues: number; frais_ht_centimes: number; salaires_bruts_centimes: number }[];
+}
+
+export interface EtablissementAdmin {
+  id: string; nom: string; commune: string | null; lat: number | null; lng: number | null; secteur: string; siret: string | null;
+  telephone: string | null; inscritLe: string; utilisateurs: number; demandes: number; placesPourvues: number; fraisHTCentimes: number; derniereDemande: string | null;
+}
+
+export interface ExtraAdmin {
+  id: string; prenom: string; nom: string; telephone: string; commune: string; competences: Poste[]; experience: string | null; aVoiture: boolean;
+  inscritLe: string; missions: number; absences: number; desistements: number; noteMoyenne: number | null; dispo7Jours: boolean; avecPhoto: boolean;
+}
+
+export interface DemandeAdmin {
+  id: string; etablissement: string; commune: string; poste: Poste; jour: string; debut: number; fin: number; nbExtras: number;
+  pourvues: number; statut: StatutDemande; publieeLe: string; delaiMinutes: number | null; fraisHTCentimes: number;
+}
+
+/** Accès de l'espace administrateur (null : compte sans droit administrateur). */
+export interface SourceAdmin {
+  tableau(jours: number): Promise<TableauAdmin | null>;
+  etablissements(): Promise<EtablissementAdmin[]>;
+  extras(): Promise<ExtraAdmin[]>;
+  demandes(limite?: number): Promise<DemandeAdmin[]>;
+}
+
 /** Compteur de l'équipe Kivien : extras et établissements inscrits, sans donnée personnelle. */
 export interface Statistiques {
   extras: { commune: string; competences: Poste[]; experience: string | null; aVoiture: boolean; inscritLe: string; dispoWeekEnd: boolean; dispo7Jours: boolean }[];
@@ -159,6 +193,7 @@ export interface SourceResto {
   retirerMembre(restaurantId: string, utilisateurId: string): Promise<'ok' | 'dernierGerant'>;
   /** null : compte sans accès administrateur. */
   statistiques(): Promise<Statistiques | null>;
+  admin: SourceAdmin;
   /** Photo de profil d'un extra affecté à une de vos demandes (JPEG base64), null sans photo. */
   photoExtra(extraId: string): Promise<string | null>;
   parametres(): Promise<ParametresTarifaires>;

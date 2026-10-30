@@ -232,6 +232,56 @@ export function sourceFictive(): SourceResto {
       });
       return 'ok';
     },
+    admin: {
+      // Démonstration : chiffres d'un premier mois d'activité.
+      async tableau(jours) {
+        const mois = (n: number) => new Date(Date.now() - n * 31 * 86400e3).toISOString().slice(0, 7);
+        return {
+          periode_jours: jours,
+          demande: { demandes: 42, places: 51, pourvues: 46, annulees: 3, en_recherche: 2, delai_median_minutes: 38,
+            par_poste: { serveur: 18, plonge: 11, commis: 8, barman: 6, cuisine: 4, animation: 4 } },
+          offre: { extras: 127, nouveaux: 31, actifs: 34, dispo_7_jours: 58, avec_photo: 71 },
+          etablissements: { total: 19, nouveaux: 6, actifs: 14, utilisateurs: 27 },
+          valeur: { frais_ht_centimes: 43 * 1900, tva_centimes: Math.round(43 * 1900 * 0.085), salaires_bruts_centimes: 43 * 8125,
+            missions_facturees: 43, frais_a_venir_ht_centimes: 3 * 1900 },
+          qualite: { note_moyenne: 4.6, notations: 38, absences: 1, desistements: 4, contrats_signes: 44 },
+          par_mois: [
+            { mois: mois(2), demandes: 6, places: 7, pourvues: 6, frais_ht_centimes: 6 * 2500, salaires_bruts_centimes: 6 * 8125 },
+            { mois: mois(1), demandes: 17, places: 20, pourvues: 18, frais_ht_centimes: 18 * 2500, salaires_bruts_centimes: 18 * 8125 },
+            { mois: mois(0), demandes: 42, places: 51, pourvues: 46, frais_ht_centimes: 43 * 1900, salaires_bruts_centimes: 43 * 8125 },
+          ],
+        };
+      },
+      async etablissements() {
+        const il = (j: number) => new Date(Date.now() - j * 86400e3).toISOString();
+        return [
+          { id: 'r001', nom: 'Le Boucan Grillé', commune: 'Saint-Paul', lat: -21.0394, lng: 55.2375, secteur: 'hotellerie_restauration', siret: '73282932000074',
+            telephone: '+262262000001', inscritLe: il(40), utilisateurs: 3, demandes: 12, placesPourvues: 14, fraisHTCentimes: 14 * 1900, derniereDemande: il(0) },
+          { id: 'r002', nom: 'Village vacances Les Filaos', commune: 'Saint-Paul', lat: -21.0601, lng: 55.2235, secteur: 'loisirs_vacances', siret: '44306184100047',
+            telephone: '+262262000002', inscritLe: il(9), utilisateurs: 1, demandes: 3, placesPourvues: 4, fraisHTCentimes: 4 * 1900, derniereDemande: il(1) },
+          { id: 'r003', nom: 'Ti Kaz Bar', commune: 'Saint-Pierre', lat: -21.3393, lng: 55.4781, secteur: 'hotellerie_restauration', siret: null,
+            telephone: null, inscritLe: il(3), utilisateurs: 1, demandes: 0, placesPourvues: 0, fraisHTCentimes: 0, derniereDemande: null },
+        ];
+      },
+      async extras() {
+        const il = (j: number) => new Date(Date.now() - j * 86400e3).toISOString();
+        return [
+          { id: 'e1', prenom: 'Kévin', nom: 'Hoarau', telephone: '+262692000001', commune: 'Saint-Paul', competences: ['serveur', 'barman'], experience: '1_3_ans',
+            aVoiture: true, inscritLe: il(30), missions: 9, absences: 0, desistements: 1, noteMoyenne: 4.8, dispo7Jours: true, avecPhoto: true },
+          { id: 'e2', prenom: 'Maëlle', nom: 'Payet', telephone: '+262693000002', commune: 'Le Port', competences: ['plonge', 'commis'], experience: 'moins_1_an',
+            aVoiture: false, inscritLe: il(12), missions: 4, absences: 0, desistements: 0, noteMoyenne: 4.5, dispo7Jours: true, avecPhoto: false },
+          { id: 'e3', prenom: 'Johan', nom: 'Grondin', telephone: '+262692000003', commune: 'Saint-Pierre', competences: ['barman', 'serveur'], experience: 'plus_3_ans',
+            aVoiture: true, inscritLe: il(2), missions: 0, absences: 0, desistements: 0, noteMoyenne: null, dispo7Jours: false, avecPhoto: true },
+        ];
+      },
+      async demandes() {
+        return lire().map((d) => ({
+          id: d.id, etablissement: etat().etablissements.find((r) => r.id === d.restaurantId)?.nom ?? '', commune: d.commune, poste: d.poste,
+          jour: d.jour, debut: d.debut, fin: d.fin, nbExtras: d.nbExtras, pourvues: d.extras.filter((e) => e.statut !== 'desistee').length,
+          statut: d.statut, publieeLe: d.creeLe, delaiMinutes: d.extras.length ? 35 : null, fraisHTCentimes: d.fraisMiseEnRelationHTCentimes,
+        }));
+      },
+    },
     async statistiques() {
       // Démonstration : quelques inscrits répartis sur l'île.
       const il = (jours: number) => new Date(Date.now() - jours * 86400e3).toISOString();

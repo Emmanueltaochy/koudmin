@@ -296,3 +296,16 @@ set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
 select commune, competences, dispo_7_jours from statistiques_extras() order by commune;
 select count(*) as etablissements from statistiques_etablissements();
 reset role;
+\echo '--- Espace administrateur : tableau de bord et listes'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select jsonb_pretty(admin_tableau(365) - 'par_mois') as tableau;
+select jsonb_array_length(admin_tableau(365)->'par_mois') >= 1 as mois_presents;
+select nom, demandes, places_pourvues, frais_ht_centimes from admin_etablissements() order by nom;
+select prenom, missions, absences, desistements, note_moyenne from admin_extras() order by prenom;
+select etablissement, poste, statut, pourvues from admin_demandes(5);
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+\set ON_ERROR_STOP 0
+select admin_tableau();
+\set ON_ERROR_STOP 1
+reset role;

@@ -1,156 +1,145 @@
 'use client';
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import {
-  LIBELLES_POSTE,
-  LIBELLES_ZONE,
-  POSTES,
-  textes as t,
-  textesEcrans,
-  ZONES,
-  zoneDuLieu,
-  type Poste,
-  type Zone,
-} from '@kivien/core';
-import { Garde } from '@/components/Garde';
+import { useEffect, useState, type FormEvent } from 'react';
+import { BarChart3, Building2, ClipboardList, LogOut, MapPinned, Users, type LucideIcon } from 'lucide-react';
+import { textesEcrans } from '@kivien/core';
 import p from '@/components/pages.module.css';
+import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
-import { VignettePoste } from '@/components/VignettePoste';
-import { source, type Statistiques } from '@/lib/donnees';
+import { connecte, connecterAdmin, deconnecter } from '@/lib/auth';
+import { source } from '@/lib/donnees';
+import { ListeDemandes, ListeEtablissements, ListeExtras } from './Listes';
+import { Recrutement } from './Recrutement';
+import { VueEnsemble } from './VueEnsemble';
 import s from './admin.module.css';
 
 const ta = textesEcrans.resto.admin;
-type Colonne = Zone | 'autre';
-const COLONNES: Colonne[] = [...ZONES, 'autre'];
-const libelle = (c: Colonne) => (c === 'autre' ? ta.autre : LIBELLES_ZONE[c]);
 
-function Compteur() {
-  const [etat, setEtat] = useState<{ statut: 'chargement' } | { statut: 'refuse' } | { statut: 'erreur' } | { statut: 'pret'; s: Statistiques }>({
-    statut: 'chargement',
-  });
-  useEffect(() => {
-    source()
-      .statistiques()
-      .then((r) => setEtat(r ? { statut: 'pret', s: r } : { statut: 'refuse' }))
-      .catch(() => setEtat({ statut: 'erreur' }));
-  }, []);
+type Onglet = 'vue' | 'demandes' | 'extras' | 'etablissements' | 'recrutement';
+const ONGLETS: { id: Onglet; icone: LucideIcon }[] = [
+  { id: 'vue', icone: BarChart3 },
+  { id: 'demandes', icone: ClipboardList },
+  { id: 'extras', icone: Users },
+  { id: 'etablissements', icone: Building2 },
+  { id: 'recrutement', icone: MapPinned },
+];
 
-  if (etat.statut === 'chargement') return <div className={p.squelette} aria-busy />;
-  if (etat.statut === 'refuse') return <p className={p.vide}>{ta.reserve}</p>;
-  if (etat.statut === 'erreur') return <p className={`${ui.sousTitre} ${ui.braise}`}>{t.extra.missions.horsLigneTitre}</p>;
+/** Connexion des administrateurs par e-mail (comptes créés avec deploy/vps/creer-admin.sh). */
+function Connexion({ onConnecte }: { onConnecte: () => void }) {
+  const [email, setEmail] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [envoi, setEnvoi] = useState(false);
 
-  const { extras, etablissements } = etat.s;
-  const zoneExtra = extras.map((e) => ({ e, z: (zoneDuLieu(e.commune) ?? 'autre') as Colonne }));
-  const zoneEtab = etablissements.map((r) => (zoneDuLieu(r.commune, r.lat, r.lng) ?? 'autre') as Colonne);
-  const ilYa7Jours = Date.now() - 7 * 86400e3;
-  const compter = (z: Colonne, f: (e: Statistiques['extras'][number]) => boolean = () => true) =>
-    zoneExtra.filter((x) => x.z === z && f(x.e)).length;
-  const colonnes = COLONNES.filter((c) => c !== 'autre' || zoneExtra.some((x) => x.z === 'autre') || zoneEtab.includes('autre'));
-  const metiers = POSTES.filter((m: Poste) => extras.some((e) => e.competences.includes(m)));
+  async function soumettre(e: FormEvent) {
+    e.preventDefault();
+    setErreur(null);
+    setEnvoi(true);
+    try {
+      const r = await connecterAdmin(email, motDePasse);
+      if (r === 'ok') return onConnecte();
+      setErreur(r === 'attente' ? textesEcrans.connexion.tropDEssais : ta.erreurIdentifiants);
+    } catch {
+      setErreur(textesEcrans.connexion.pasDeReseau);
+    }
+    setEnvoi(false);
+  }
 
   return (
-    <>
-      <div className={s.chiffres}>
-        {[
-          [ta.extras, extras.length],
-          [ta.nouveaux, extras.filter((e) => Date.parse(e.inscritLe) >= ilYa7Jours).length],
-          [ta.libresWeekEnd, extras.filter((e) => e.dispoWeekEnd).length],
-          [ta.etablissements, etablissements.length],
-        ].map(([l, v]) => (
-          <div key={l} className={s.chiffre}>
-            <span className={s.valeur}>{v}</span>
-            <span className={ui.legende}>{l}</span>
-          </div>
-        ))}
+    <form onSubmit={soumettre} className={s.connexion} noValidate>
+      <div className={p.intro}>
+        <h1 className={ui.titre}>{ta.connexionTitre}</h1>
+        <p className={`${ui.corps} ${ui.galet}`}>{ta.connexionTexte}</p>
       </div>
-
-      <section className={p.section} aria-labelledby="par-zone">
-        <h2 id="par-zone" className={ui.sousTitre}>
-          {ta.parZone}
-        </h2>
-        <div className={s.defilement}>
-          <table className={s.tableau}>
-            <thead>
-              <tr>
-                <th scope="col">{ta.zone}</th>
-                <th scope="col">{ta.extras}</th>
-                <th scope="col">{ta.libresWeekEnd}</th>
-                <th scope="col">{ta.avecVoiture}</th>
-                <th scope="col">{ta.etablissements}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {colonnes.map((z) => (
-                <tr key={z}>
-                  <th scope="row">{libelle(z)}</th>
-                  <td>{compter(z)}</td>
-                  <td>{compter(z, (e) => e.dispoWeekEnd)}</td>
-                  <td>{compter(z, (e) => e.aVoiture)}</td>
-                  <td>{zoneEtab.filter((x) => x === z).length}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className={p.section} aria-labelledby="par-metier">
-        <h2 id="par-metier" className={ui.sousTitre}>
-          {ta.parMetier}
-        </h2>
-        {metiers.length === 0 ? (
-          <p className={p.vide}>{ta.aucun}</p>
-        ) : (
-          <div className={s.defilement}>
-            <table className={s.tableau}>
-              <thead>
-                <tr>
-                  <th scope="col">{ta.metier}</th>
-                  {colonnes.map((z) => (
-                    <th key={z} scope="col">
-                      {libelle(z)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {metiers.map((m) => (
-                  <tr key={m}>
-                    <th scope="row">
-                      <span className={p.ligne}>
-                        <VignettePoste poste={m} taille={28} />
-                        {LIBELLES_POSTE[m].court}
-                      </span>
-                    </th>
-                    {colonnes.map((z) => (
-                      <td key={z}>{compter(z, (e) => e.competences.includes(m))}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-    </>
+      <label className={s.bloc}>
+        <span className={ui.corpsFort}>{ta.email}</span>
+        <span className={ui.champ}>
+          <input id="admin-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} disabled={envoi} />
+        </span>
+      </label>
+      <label className={s.bloc}>
+        <span className={ui.corpsFort}>{ta.motDePasse}</span>
+        <span className={ui.champ} data-erreur={!!erreur}>
+          <input
+            id="admin-mot-de-passe"
+            type="password"
+            autoComplete="current-password"
+            value={motDePasse}
+            onChange={(e) => setMotDePasse(e.target.value)}
+            disabled={envoi}
+          />
+        </span>
+      </label>
+      {erreur && (
+        <p className={ui.messageErreur} role="alert">
+          {erreur}
+        </p>
+      )}
+      <button type="submit" className={ui.boutonPrincipal} aria-busy={envoi} disabled={envoi}>
+        {envoi && <Spinner />}
+        {ta.seConnecter}
+      </button>
+    </form>
   );
 }
 
-/** Compteur de l'équipe Kivien pour le recrutement, zone par zone. */
+/** Espace administrateur de la plateforme : demande, offre, valeur, listes et recrutement. */
 export default function Admin() {
+  const [etat, setEtat] = useState<'verification' | 'connexion' | 'refuse' | 'pret'>('verification');
+  const [onglet, setOnglet] = useState<Onglet>('vue');
+
+  async function verifier() {
+    if (!(await connecte())) return setEtat('connexion');
+    const tableau = await source().admin.tableau(1).catch(() => null);
+    setEtat(tableau ? 'pret' : 'refuse');
+  }
+  useEffect(() => {
+    void verifier();
+  }, []);
+
+  const sortir = async () => {
+    await deconnecter();
+    setEtat('connexion');
+  };
+
   return (
-    <Garde>
-      <main className={p.page}>
-        <Link href="/" className={s.marque} aria-label="Kivien">
-          <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" width={96} style={{ height: 'auto' }} />
-        </Link>
-        <div className={p.intro}>
-          <h1 className={ui.titre}>{ta.titre}</h1>
-          <p className={`${ui.corps} ${ui.galet}`}>{ta.sousTitre}</p>
-        </div>
-        <Compteur />
-      </main>
-    </Garde>
+    <div className={s.cadre}>
+      <header className={s.tete}>
+        <a href="/" aria-label="Kivien" className={s.marque}>
+          <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" width={88} style={{ height: 'auto' }} />
+        </a>
+        <span className={s.espace}>{ta.espace}</span>
+        {(etat === 'pret' || etat === 'refuse') && (
+          <button type="button" className={s.sortir} onClick={() => void sortir()}>
+            <LogOut size={18} strokeWidth={2} aria-hidden />
+            {ta.deconnexion}
+          </button>
+        )}
+      </header>
+
+      {etat === 'verification' && <div className={p.squelette} aria-busy />}
+      {etat === 'connexion' && <Connexion onConnecte={() => void verifier()} />}
+      {etat === 'refuse' && <p className={p.vide}>{ta.reserve}</p>}
+      {etat === 'pret' && (
+        <>
+          <nav className={s.onglets} aria-label={ta.espace}>
+            {ONGLETS.map(({ id, icone: Icone }) => (
+              <button key={id} type="button" className={s.onglet} aria-current={onglet === id ? 'page' : undefined} onClick={() => setOnglet(id)}>
+                <Icone size={18} strokeWidth={2} aria-hidden />
+                {ta.onglets[id]}
+              </button>
+            ))}
+          </nav>
+          <main className={s.contenu}>
+            <h1 className={ui.titre}>{ta.onglets[onglet]}</h1>
+            {onglet === 'vue' && <VueEnsemble />}
+            {onglet === 'demandes' && <ListeDemandes />}
+            {onglet === 'extras' && <ListeExtras />}
+            {onglet === 'etablissements' && <ListeEtablissements />}
+            {onglet === 'recrutement' && <Recrutement />}
+          </main>
+        </>
+      )}
+    </div>
   );
 }

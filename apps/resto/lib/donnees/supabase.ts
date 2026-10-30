@@ -18,6 +18,7 @@ import {
   type Membre,
   type Restaurant,
   type Role,
+  type TableauAdmin,
   type SourceResto,
 } from './source';
 import { agregerFavoris } from './favoris';
@@ -217,6 +218,49 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       if (refus(error, /hors de La Réunion/)) return 'adresse';
       verifier({ data: null, error });
       return 'ok';
+    },
+    admin: {
+      async tableau(jours) {
+        const { data, error } = await client.rpc('admin_tableau', { p_jours: jours });
+        if (refus(error, /administrateurs Kivien/)) return null;
+        return verifier({ data, error }) as TableauAdmin;
+      },
+      async etablissements() {
+        const l = verifier(await client.rpc('admin_etablissements')) as {
+          id: string; nom: string; commune: string | null; lat: number | null; lng: number | null; secteur: string; siret: string | null;
+          telephone: string | null; inscrit_le: string; utilisateurs: number; demandes: number; places_pourvues: number;
+          frais_ht_centimes: number; derniere_demande: string | null;
+        }[];
+        return l.map((r) => ({
+          id: r.id, nom: r.nom, commune: r.commune, lat: r.lat, lng: r.lng, secteur: r.secteur, siret: r.siret, telephone: r.telephone,
+          inscritLe: r.inscrit_le, utilisateurs: r.utilisateurs, demandes: r.demandes, placesPourvues: r.places_pourvues,
+          fraisHTCentimes: r.frais_ht_centimes, derniereDemande: r.derniere_demande,
+        }));
+      },
+      async extras() {
+        const l = verifier(await client.rpc('admin_extras')) as {
+          id: string; prenom: string; nom: string; telephone: string; commune: string; competences: Poste[] | null; experience: string | null;
+          a_voiture: boolean; inscrit_le: string; missions: number; absences: number; desistements: number; note_moyenne: number | null;
+          dispo_7_jours: boolean; avec_photo: boolean;
+        }[];
+        return l.map((e) => ({
+          id: e.id, prenom: e.prenom, nom: e.nom, telephone: e.telephone, commune: e.commune, competences: e.competences ?? [],
+          experience: e.experience, aVoiture: e.a_voiture, inscritLe: e.inscrit_le, missions: e.missions, absences: e.absences,
+          desistements: e.desistements, noteMoyenne: e.note_moyenne === null ? null : Number(e.note_moyenne),
+          dispo7Jours: e.dispo_7_jours, avecPhoto: e.avec_photo,
+        }));
+      },
+      async demandes(limite = 100) {
+        const l = verifier(await client.rpc('admin_demandes', { p_limite: limite })) as {
+          id: string; etablissement: string; commune: string; poste: Poste; jour: string; debut: number; fin: number; nb_extras: number;
+          pourvues: number; statut: StatutDemande; publiee_le: string; delai_minutes: number | null; frais_ht_centimes: number;
+        }[];
+        return l.map((d) => ({
+          id: d.id, etablissement: d.etablissement, commune: d.commune, poste: d.poste, jour: d.jour, debut: d.debut, fin: d.fin,
+          nbExtras: d.nb_extras, pourvues: d.pourvues, statut: d.statut, publieeLe: d.publiee_le, delaiMinutes: d.delai_minutes,
+          fraisHTCentimes: d.frais_ht_centimes,
+        }));
+      },
     },
     async statistiques() {
       const [ex, et] = await Promise.all([client.rpc('statistiques_extras'), client.rpc('statistiques_etablissements')]);
