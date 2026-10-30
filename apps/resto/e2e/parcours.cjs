@@ -75,7 +75,10 @@ let pageCourante = null;
   // Prospection : import (échantillon OpenStreetMap en démonstration), e-mail ajouté à la main, campagne.
   await p.getByRole('button', { name: 'Prospection', exact: true }).click();
   await p.getByRole('button', { name: 'Chercher les établissements sur OpenStreetMap' }).click();
-  await p.getByText('4 établissements ajoutés, 0 mis à jour.').waitFor(); ok('prospection : import OpenStreetMap');
+  await p.getByText('Recherche en cours sur OpenStreetMap', { exact: false }).waitFor(); ok('prospection : recherche demandée au serveur, avancement affiché');
+  await p.getByText('4 établissements trouvés (4 nouveaux), 1 e-mail trouvé sur les sites.', { exact: false }).waitFor({ timeout: 15000 });
+  await p.getByRole('row', { name: /Hôtel des Hauts/ }).waitFor(); ok('prospection : bilan de la recherche, fiches rechargées');
+  await p.getByText('Trouvé sur le site').waitFor(); ok('prospection : origine de l’e-mail affichée');
   await p.getByRole('row', { name: /Ti Bar Lagon/ }).getByRole('button', { name: 'Ajouter un e-mail' }).click();
   await p.getByLabel('Ajouter un e-mail').fill('pas-une-adresse');
   await p.getByRole('button', { name: 'Enregistrer' }).click();

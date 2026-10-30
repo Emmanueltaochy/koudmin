@@ -20,7 +20,7 @@ import {
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
-import { source, type CampagneProspection, type Prospect } from '@/lib/donnees';
+import { source, type CampagneProspection, type Prospect, type RechercheProspects } from '@/lib/donnees';
 import s from './admin.module.css';
 
 const tp = textesEcrans.resto.admin.prospection;
@@ -51,7 +51,7 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
     return (
       <span>
         <a href={`mailto:${x.email}`} className={ui.lienDiscret}>{x.email}</a>
-        {x.desinscrit && <span className={s.sousLigne}>{tp.desinscrit}</span>}
+        <span className={s.sousLigne}>{x.desinscrit ? tp.desinscrit : x.sourceEmail ? tp.sourceEmail[x.sourceEmail] : ''}</span>
       </span>
     );
   return <button type="button" className={ui.lienDiscret} onClick={() => setEdition(true)}>{tp.ajouterEmail}</button>;
@@ -61,7 +61,7 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
 export function Prospection() {
   const [fiches, setFiches] = useState<Prospect[] | 'chargement' | 'erreur'>('chargement');
   const [campagnes, setCampagnes] = useState<CampagneProspection[]>([]);
-  const [import_, setImport] = useState<{ enCours: boolean; message: string | null; ok: boolean; detail?: string }>({ enCours: false, message: null, ok: true });
+  const [bilan, setBilan] = useState<RechercheProspects | null>(null);
   const [recherche, setRecherche] = useState('');
   const [categorie, setCategorie] = useState<CategorieProspect | ''>('');
   const [zone, setZone] = useState<Zone | ''>('');
@@ -94,18 +94,31 @@ export function Prospection() {
       });
   }, [charger]);
 
-  async function importer() {
-    setImport({ enCours: true, message: tp.importEnCours, ok: true });
-    try {
-      const src = source().admin.prospection;
-      const r = await src.importer(await src.chercherOsm());
-      setImport({ enCours: false, message: tp.importFait(r.ajoutes, r.misAJour), ok: true });
-      await charger();
-    } catch (e) {
-      // Le détail (serveur, code HTTP) permet de savoir si OpenStreetMap est saturé ou injoignable.
-      setImport({ enCours: false, message: tp.importErreur, ok: false, detail: e instanceof Error ? e.message : String(e) });
-    }
+  // Recherche faite par le VPS : on suit son avancement, puis on recharge les fiches.
+  const suivre = useCallback(async () => {
+    const r = await source().admin.prospection.derniereRecherche().catch(() => null);
+    setBilan((avant) => {
+      if (avant && (avant.statut === 'demandee' || avant.statut === 'en_cours') && r?.statut === 'terminee') void charger();
+      return r;
+    });
+  }, [charger]);
+  useEffect(() => {
+    void suivre();
+  }, [suivre]);
+  const enCours = bilan?.statut === 'demandee' || bilan?.statut === 'en_cours';
+  useEffect(() => {
+    if (!enCours) return;
+    const minuterie = setInterval(() => void suivre(), 5000);
+    return () => clearInterval(minuterie);
+  }, [enCours, suivre]);
+
+  async function chercher() {
+    await source().admin.prospection.demanderRecherche();
+    await suivre();
   }
+
+  const dateHeure = (iso: string) =>
+    new Date(iso).toLocaleString('fr-FR', { timeZone: 'Indian/Reunion', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
   const liste = Array.isArray(fiches) ? fiches : [];
   const filtrees = useMemo(
@@ -147,14 +160,22 @@ export function Prospection() {
     <>
       <p className={`${ui.corps} ${ui.galet}`}>{tp.intro}</p>
       <div className={s.importer}>
-        <button type="button" className={ui.boutonSecondaire} onClick={() => void importer()} disabled={import_.enCours}>
-          {import_.enCours ? <Spinner /> : <MapPinned size={18} strokeWidth={2} aria-hidden />}
+        <button type="button" className={ui.boutonSecondaire} onClick={() => void chercher()} disabled={enCours}>
+          {enCours ? <Spinner /> : <MapPinned size={18} strokeWidth={2} aria-hidden />}
           {tp.importer}
         </button>
-        {import_.message && (
-          <span className={import_.ok ? ui.corps : ui.messageErreur} role="status">{import_.message}</span>
+        {bilan && (
+          <span className={bilan.statut === 'echouee' ? ui.messageErreur : ui.corps} role="status">
+            {bilan.statut === 'demandee' && tp.rechercheDemandee}
+            {bilan.statut === 'en_cours' && tp.rechercheEnCours}
+            {bilan.statut === 'terminee' &&
+              tp.rechercheFaite(dateHeure(bilan.finLe ?? bilan.demandeeLe), bilan.trouves ?? 0, bilan.ajoutes ?? 0, bilan.emailsTrouves ?? 0)}
+            {bilan.statut === 'echouee' && tp.rechercheEchouee(dateHeure(bilan.finLe ?? bilan.demandeeLe))}
+          </span>
         )}
-        {import_.detail && <span className={`${ui.legende} ${ui.galet}`}>{tp.importDetail(import_.detail)}</span>}
+        {bilan?.statut === 'echouee' && bilan.erreur && (
+          <span className={`${ui.legende} ${ui.galet}`}>{tp.importDetail(bilan.erreur)}</span>
+        )}
         <span className={`${ui.legende} ${ui.galet}`}>{tp.attribution}</span>
       </div>
 

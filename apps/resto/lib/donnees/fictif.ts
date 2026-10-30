@@ -8,6 +8,7 @@ import {
 } from '@kivien/core';
 import type {
   CampagneProspection,
+  RechercheProspects,
   MoyenPaiement,
   Prospect,
   PaiementFrais,
@@ -177,7 +178,11 @@ const PROSPECTS_OSM_DEMO: ProspectOsm[] = [
   { osm_id: 'node/104', nom: 'Snack Chez Ti Jean', categorie: 'restauration_rapide', commune: 'Saint-Denis', adresse: null, lat: -20.88, lng: 55.45, telephone: '+262 692 00 11 22', email: null, site: null },
 ];
 
-const prospectionDemo: { prospects: Prospect[]; campagnes: CampagneProspection[] } = { prospects: [], campagnes: [] };
+const prospectionDemo: { prospects: Prospect[]; campagnes: CampagneProspection[]; recherche: RechercheProspects | null } = {
+  prospects: [],
+  campagnes: [],
+  recherche: null,
+};
 
 const paiementDemo: { moyen: MoyenPaiement; historique: PaiementFrais[] } = {
   moyen: { mode: 'carte_mission', carte: null, sepa: null, sepaEnAttente: false, mandatValide: false },
@@ -305,9 +310,27 @@ export function sourceFictive(): SourceResto {
     admin: {
       prospection: {
         // Démonstration : échantillon fixe à la place d'OpenStreetMap, aucun e-mail n'est envoyé.
-        async chercherOsm() {
-          await attendre(600);
-          return PROSPECTS_OSM_DEMO;
+        async demanderRecherche() {
+          // Démonstration : la « recherche du VPS » se termine en deux secondes avec un échantillon.
+          prospectionDemo.recherche = { statut: 'en_cours', demandeeLe: new Date().toISOString(), finLe: null, trouves: null, ajoutes: null, emailsTrouves: null, erreur: null };
+          setTimeout(() => {
+            const avant = prospectionDemo.prospects.length;
+            for (const f of PROSPECTS_OSM_DEMO) {
+              if (prospectionDemo.prospects.some((p) => p.id === f.osm_id)) continue;
+              prospectionDemo.prospects.push({
+                id: f.osm_id, nom: f.nom, categorie: f.categorie, commune: f.commune, adresse: f.adresse, lat: f.lat, lng: f.lng,
+                telephone: f.telephone, email: f.email, sourceEmail: f.email ? (f.site ? 'site' : 'osm') : null, site: f.site,
+                statut: 'a_contacter', notes: null, desinscrit: false, dernierEnvoi: null, envois: 0,
+              });
+            }
+            prospectionDemo.recherche = {
+              ...prospectionDemo.recherche!, statut: 'terminee', finLe: new Date().toISOString(), trouves: PROSPECTS_OSM_DEMO.length,
+              ajoutes: prospectionDemo.prospects.length - avant, emailsTrouves: 1,
+            };
+          }, 2000);
+        },
+        async derniereRecherche() {
+          return prospectionDemo.recherche ? { ...prospectionDemo.recherche } : null;
         },
         async prospects() {
           return prospectionDemo.prospects.map((p) => ({ ...p }));
@@ -319,8 +342,8 @@ export function sourceFictive(): SourceResto {
             ajoutes++;
             prospectionDemo.prospects.push({
               id: f.osm_id, nom: f.nom, categorie: f.categorie, commune: f.commune, adresse: f.adresse, lat: f.lat, lng: f.lng,
-              telephone: f.telephone, email: f.email, site: f.site, statut: 'a_contacter', notes: null, desinscrit: false,
-              dernierEnvoi: null, envois: 0,
+              telephone: f.telephone, email: f.email, sourceEmail: f.email ? 'osm' : null, site: f.site, statut: 'a_contacter',
+              notes: null, desinscrit: false, dernierEnvoi: null, envois: 0,
             });
           }
           return { ajoutes, misAJour: fiches.length - ajoutes };
@@ -328,7 +351,7 @@ export function sourceFictive(): SourceResto {
         async modifier(id, m) {
           if (m.email && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(m.email)) return 'email';
           const p = prospectionDemo.prospects.find((x) => x.id === id);
-          if (p) Object.assign(p, { ...m, email: m.email?.trim().toLowerCase() || null });
+          if (p) Object.assign(p, { ...m, email: m.email?.trim().toLowerCase() || null, sourceEmail: m.email ? 'manuel' : null });
           return 'ok';
         },
         async lancerCampagne(sujet, _message, ids) {

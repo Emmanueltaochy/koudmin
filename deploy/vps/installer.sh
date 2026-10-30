@@ -326,10 +326,35 @@ OnCalendar=Mon..Fri *-*-* 08..17:00/15:00 Indian/Reunion
 [Install]
 WantedBy=timers.target
 UNIT
+# Recherche des établissements (OpenStreetMap, sites) : chaque minute, seulement si demandée par
+# l'admin ou si rien n'a été cherché depuis 7 jours. Une recherche longue ne se lance pas deux fois.
+install -m 0700 "$SOURCE/deploy/vps/recherche-prospects.sh" /usr/local/sbin/kivien-recherche-prospects
+cat > /etc/systemd/system/kivien-recherche-prospects.service <<'UNIT'
+[Unit]
+Description=Recherche des établissements à prospecter (OpenStreetMap)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kivien-recherche-prospects --si-demande
+TimeoutStartSec=40min
+UNIT
+cat > /etc/systemd/system/kivien-recherche-prospects.timer <<'UNIT'
+[Unit]
+Description=Recherche des établissements à prospecter, sur demande (vérifiée chaque minute)
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target
+UNIT
 systemctl daemon-reload
 systemctl enable --now kivien-sauvegarde.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prelevements.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prospection.timer >> "$JOURNAL" 2>&1
+systemctl enable --now kivien-recherche-prospects.timer >> "$JOURNAL" 2>&1
 info "prochaine sauvegarde : $(systemctl show kivien-sauvegarde.timer -p NextElapseUSecRealtime --value)"
 /usr/local/sbin/kivien-sauvegarde | tee -a "$JOURNAL" || arret "la première sauvegarde a échoué."
 

@@ -184,6 +184,8 @@ Journal des mises à jour sur le VPS : `/var/log/kivien-mises-a-jour.log`. Mise 
 | Lancer les débits maintenant | `sudo kivien-prelevements` |
 | Historique des débits | `journalctl -u kivien-prelevements --since -2d` |
 | Envoyer un lot de prospection maintenant | `sudo kivien-prospection` |
+| Chercher les établissements maintenant (OpenStreetMap) | `sudo kivien-recherche-prospects` |
+| Bilan de la dernière recherche | `sudo kivien-recherche-prospects --bilan` |
 | Historique des envois de prospection | `journalctl -u kivien-prospection --since -2d` |
 | Changer le plafond d'e-mails de prospection par jour | `PROSPECTION_PAR_JOUR=60` dans `/opt/kivien/supabase/.env` |
 

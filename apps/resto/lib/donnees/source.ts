@@ -9,6 +9,7 @@ import type {
   StatutAffectation,
   StatutDemande,
   StatutProspect,
+  StatutRecherche,
 } from '@kivien/core';
 import type { AdresseGeo } from '../adresse';
 
@@ -85,6 +86,8 @@ export interface Prospect {
   lng: number | null;
   telephone: string | null;
   email: string | null;
+  /** Origine de l'e-mail : OpenStreetMap, site de l'établissement, saisie à la main. */
+  sourceEmail: 'osm' | 'site' | 'manuel' | null;
   site: string | null;
   statut: StatutProspect;
   notes: string | null;
@@ -103,10 +106,22 @@ export interface CampagneProspection {
   echecs: number;
 }
 
-/** Espace prospection (administrateurs) : fiches, import OpenStreetMap, campagnes e-mail. */
+/** Recherche des établissements faite par le VPS (OpenStreetMap, puis sites web). */
+export interface RechercheProspects {
+  statut: StatutRecherche;
+  demandeeLe: string;
+  finLe: string | null;
+  trouves: number | null;
+  ajoutes: number | null;
+  emailsTrouves: number | null;
+  erreur: string | null;
+}
+
+/** Espace prospection (administrateurs) : fiches, recherche OpenStreetMap, campagnes e-mail. */
 export interface SourceProspection {
-  /** Établissements de l'île dans OpenStreetMap (requête depuis le navigateur). */
-  chercherOsm(): Promise<ProspectOsm[]>;
+  /** Dépose une demande : le VPS la prend dans la minute. */
+  demanderRecherche(): Promise<void>;
+  derniereRecherche(): Promise<RechercheProspects | null>;
   prospects(): Promise<Prospect[]>;
   importer(fiches: ProspectOsm[]): Promise<{ ajoutes: number; misAJour: number }>;
   modifier(id: string, m: { email: string | null; telephone: string | null; statut: StatutProspect; notes: string | null }): Promise<'ok' | 'email'>;

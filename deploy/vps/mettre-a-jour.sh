@@ -76,5 +76,7 @@ else
   bash "$SOURCE/deploy/vps/publier-site.sh"
 fi
 echo "Version en place : $(git -C "$SOURCE" rev-parse --short HEAD)"
+# Bilan de la prospection (dernière recherche OpenStreetMap, erreur exacte) : lisible dans GitHub.
+KIVIEN_SOURCE="$SOURCE" bash "$SOURCE/deploy/vps/recherche-prospects.sh" --bilan || true
 # Le résultat de la vérification fait le résultat du déploiement (vert ou rouge dans GitHub).
 bash "$SOURCE/deploy/vps/verifier.sh"

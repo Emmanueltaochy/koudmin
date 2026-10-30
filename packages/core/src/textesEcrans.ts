@@ -170,10 +170,13 @@ export const textesEcrans = {
       prospection: {
         intro: "Établissements de l'île trouvés dans OpenStreetMap ou ajoutés à la main, pour les prévenir du lancement.",
         importer: 'Chercher les établissements sur OpenStreetMap',
-        importEnCours: 'Recherche en cours : une à deux minutes.',
-        importFait: (ajoutes: number, majs: number) => `${ajoutes} établissement${ajoutes > 1 ? 's' : ''} ajouté${ajoutes > 1 ? 's' : ''}, ${majs} mis à jour.`,
-        importErreur: "OpenStreetMap ne répond pas pour l'instant. Réessayez dans quelques minutes.",
+        rechercheDemandee: 'Recherche demandée : elle démarre dans la minute.',
+        rechercheEnCours: 'Recherche en cours sur OpenStreetMap, puis sur les sites des établissements : quelques minutes.',
+        rechercheFaite: (le: string, trouves: number, ajoutes: number, emails: number) =>
+          `Dernière recherche le ${le} : ${trouves} établissement${trouves > 1 ? 's' : ''} trouvé${trouves > 1 ? 's' : ''} (${ajoutes} nouveau${ajoutes > 1 ? 'x' : ''}), ${emails} e-mail${emails > 1 ? 's' : ''} trouvé${emails > 1 ? 's' : ''} sur les sites.`,
+        rechercheEchouee: (le: string) => `La recherche du ${le} n'a pas abouti. Vous pouvez la relancer.`,
         importDetail: (detail: string) => `Détail technique : ${detail}`,
+        sourceEmail: { osm: 'OpenStreetMap', site: 'Trouvé sur le site', manuel: 'Saisi à la main' } as Record<string, string>,
         attribution: '© les contributeurs d’OpenStreetMap (ODbL)',
         total: 'Établissements',
         avecEmail: 'Avec e-mail',

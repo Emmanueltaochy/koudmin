@@ -399,3 +399,19 @@ set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 select count(*) from admin_prospects();
 \set ON_ERROR_STOP 1
 reset role;
+\echo '--- Recherche des établissements par le VPS : une demande à la fois, import réservé au serveur'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select admin_demander_recherche() = admin_demander_recherche() as une_seule_demande;
+select statut from admin_derniere_recherche();
+select nom, email, source_email from admin_prospects() where email is not null order by nom;
+\set ON_ERROR_STOP 0
+select * from importer_prospects('[]'::jsonb);
+\set ON_ERROR_STOP 1
+reset role;
+select * from importer_prospects('[{"osm_id": "node/9", "nom": "Snack du Port", "categorie": "restauration_rapide", "site": "https://snack.re"}]'::jsonb);
+update recherches_prospects set statut = 'terminee', trouves = 4, ajoutes = 1, mis_a_jour = 3, emails_trouves = 0, fin_le = now();
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select statut, ajoutes, emails_trouves from admin_derniere_recherche();
+reset role;
