@@ -15,6 +15,7 @@ import {
   type FiltreMissions,
   type MissionResume,
 } from '@kivien/core';
+import { Bandeau } from '../../missions/Bandeau';
 import { CarteConfirmee } from '../../missions/CarteConfirmee';
 import { CarteMission } from '../../missions/CarteMission';
 import { CarteSquelette } from '../../missions/CarteSquelette';
@@ -117,6 +118,7 @@ export default function Missions() {
           renderItem={rendreCarte}
           ListHeaderComponent={
             <>
+              <Bandeau missions={missions} />
               {confirmees.length > 0 && (
                 <View style={styles.confirmees}>
                   <Texte variante="legendeForte">{textesEcrans.extra.missionsConfirmees}</Texte>

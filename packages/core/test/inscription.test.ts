@@ -42,4 +42,8 @@ describe('infos du contrat', () => {
       'nir',
     ]);
   });
+  it('accepte un numéro de sécurité sociale laissé vide (DPAE avec date et lieu de naissance)', () => {
+    const ok = { dateNaissance: '12/05/2001', lieuNaissance: 'Saint-Paul', nir: '  ', adresse: '5 chemin des Vacoas, Saint-Paul' };
+    expect(validerInfosContrat(ok, '2026-10-29')).toEqual({});
+  });
 });

@@ -146,3 +146,17 @@
     gap: 16px;
   }
 }
+
+/* En-tête de carte : vignette du métier à gauche. */
+.teteCarte {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.teteTexte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

@@ -57,7 +57,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByLabel('Numéro de sécurité sociale').fill('1234');
   await p.getByLabel('Adresse').fill('5 chemin des Vacoas, 97460 Saint-Paul');
   await p.getByText('Continuer').click();
-  await p.getByText('Vérifie ton numéro de sécurité sociale.').waitFor(); await etape('contrat : clé du NIR vérifiée');
+  await p.getByText('Ce numéro ne correspond pas à un numéro de sécurité sociale.', { exact: false }).waitFor(); await etape('contrat : clé du NIR vérifiée (facultatif mais juste)');
   await p.getByLabel('Numéro de sécurité sociale').fill(nir);
   await p.getByText('Continuer').click();
   await p.getByText('Kévin Hoarau, né·e le 12 mai 2001', { exact: false }).waitFor(); await etape('contrat prérempli (identité, date de naissance)');

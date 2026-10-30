@@ -45,3 +45,27 @@ export const LIBELLES_POSTE: Record<Poste, { court: string; mission: string }> =
   travaux_forestiers: { court: 'Travaux forestiers', mission: 'Travaux forestiers' },
   formation: { court: 'Formation', mission: 'Intervention de formation' },
 };
+
+/** Famille d'un métier, pour sa vignette (couleur et icône) dans les deux apps. */
+export type FamillePoste = 'salle' | 'cuisine' | 'hebergement' | 'animation' | 'technique' | 'manutention' | 'terrain';
+
+export const FAMILLE_POSTE: Record<Poste, FamillePoste> = {
+  serveur: 'salle',
+  barman: 'salle',
+  reception: 'hebergement',
+  etages: 'hebergement',
+  cuisine: 'cuisine',
+  commis: 'cuisine',
+  plonge: 'cuisine',
+  animation: 'animation',
+  fete_foraine: 'animation',
+  accueil_spectacle: 'animation',
+  technique_spectacle: 'technique',
+  montage_spectacle: 'technique',
+  reparation_navale: 'technique',
+  demenagement: 'manutention',
+  entrepot_viande: 'manutention',
+  travaux_forestiers: 'terrain',
+  enquete: 'terrain',
+  formation: 'terrain',
+};

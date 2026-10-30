@@ -60,7 +60,8 @@ export function validerInfosContrat(
   const date = lireDate(s.dateNaissance);
   if (!date || date >= aujourdhui || date < '1900-01-01') e.dateNaissance = tc.erreurDate;
   if (!s.lieuNaissance.trim()) e.lieuNaissance = tc.erreurLieu;
-  if (!nirValide(s.nir)) e.nir = tc.erreurNir;
+  // Facultatif : la DPAE se fait aussi avec la date et le lieu de naissance. S'il est saisi, il doit être juste.
+  if (s.nir.trim() && !nirValide(s.nir)) e.nir = tc.erreurNir;
   if (s.adresse.trim().length < 8) e.adresse = tc.erreurAdresse;
   return e;
 }

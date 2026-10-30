@@ -10,6 +10,7 @@ import {
 import type { DemandeSuivi } from '@/lib/donnees';
 import { extrasActifs, phaseDemande } from '@/lib/phase';
 import p from './pages.module.css';
+import { VignettePoste } from './VignettePoste';
 import ui from './ui.module.css';
 
 const ta = textesEcrans.resto.accueil;
@@ -24,17 +25,22 @@ export function CarteDemande({ demande: d }: { demande: DemandeSuivi }) {
 
   return (
     <Link href={`/demandes/${d.id}`} className={p.carteLien} aria-label={`${ta.voir} : ${formatPlage(d.debut, d.fin)}, ${jour.texte}`}>
-      <div className={p.entreDeux}>
-        <span className={ui.horaire}>{formatPlage(d.debut, d.fin)}</span>
-        {jour.urgent ? (
-          <span className={ui.badgeCurcuma}>{jour.texte}</span>
-        ) : (
-          <span className={`${ui.legendeForte} ${ui.galet}`}>{jour.texte}</span>
-        )}
+      <div className={p.teteCarte}>
+        <VignettePoste poste={d.poste} />
+        <div className={p.teteTexte}>
+          <div className={p.entreDeux}>
+            <span className={ui.horaire}>{formatPlage(d.debut, d.fin)}</span>
+            {jour.urgent ? (
+              <span className={ui.badgeCurcuma}>{jour.texte}</span>
+            ) : (
+              <span className={`${ui.legendeForte} ${ui.galet}`}>{jour.texte}</span>
+            )}
+          </div>
+          <span className={ui.corps}>
+            {LIBELLES_POSTE[d.poste].court} · {d.nbExtras} extra{d.nbExtras > 1 ? 's' : ''}
+          </span>
+        </div>
       </div>
-      <span className={ui.corps}>
-        {LIBELLES_POSTE[d.poste].court} · {d.nbExtras} extra{d.nbExtras > 1 ? 's' : ''}
-      </span>
       <div className={p.pied}>
         {phase === 'recherche' && (
           <>

@@ -46,7 +46,7 @@ export function FormInfosContrat({ initiales, onEnregistre }: { initiales: Infos
     setEnvoi(true);
     setErreurEnvoi(null);
     try {
-      await source.enregistrerInfosContrat({ dateNaissance: lireDate(s.dateNaissance)!, lieuNaissance: s.lieuNaissance, nir: s.nir, adresse: s.adresse });
+      await source.enregistrerInfosContrat({ dateNaissance: lireDate(s.dateNaissance)!, lieuNaissance: s.lieuNaissance, nir: s.nir.trim() || null, adresse: s.adresse });
       onEnregistre();
     } catch {
       setErreurEnvoi(textesEcrans.connexion.pasDeReseauExtra);

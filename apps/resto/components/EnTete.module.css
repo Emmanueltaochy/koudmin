@@ -103,6 +103,13 @@
   display: none;
 }
 
+.cloche {
+  position: absolute;
+  z-index: 30;
+  top: 8px;
+  right: 60px;
+}
+
 button.lien,
 button.lienPanneau {
   border: 0;
@@ -115,6 +122,11 @@ button.lienPanneau {
 @media (min-width: 1024px) {
   .entete {
     display: none;
+  }
+  .cloche {
+    position: fixed;
+    top: 20px;
+    right: 32px;
   }
   .lateral {
     position: fixed;

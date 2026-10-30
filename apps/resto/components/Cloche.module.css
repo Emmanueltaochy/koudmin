@@ -1,0 +1,165 @@
+.zone {
+  position: relative;
+}
+
+.bouton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--k-rayon-pilule);
+  background: none;
+  color: var(--k-basalte);
+  cursor: pointer;
+}
+.bouton:hover,
+.bouton[aria-expanded='true'] {
+  background: var(--k-creme);
+}
+
+/* Pastille curcuma (le piment reste réservé au bouton d'action de l'écran). */
+.pastille {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--k-rayon-pilule);
+  background: var(--k-curcuma);
+  color: var(--k-basalte);
+  font: var(--k-badge-font);
+  font-size: 11px;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--k-blanc);
+}
+
+.panneau {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  right: -8px;
+  width: min(380px, calc(100vw - 24px));
+  max-height: min(560px, calc(100dvh - 120px));
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: 0 1px 0 var(--k-trait), 0 24px 48px -16px rgba(33, 28, 24, 0.35);
+  overflow: hidden;
+}
+.panneau[data-position='droite'] {
+  top: 0;
+  left: calc(100% + 12px);
+  right: auto;
+}
+
+.tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+.titre {
+  margin: 0;
+  font: var(--k-sous-titre-font);
+}
+.lienDiscret {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: var(--k-legende-font);
+  color: var(--k-galet);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.liste {
+  margin: 0;
+  padding: 0 8px 8px;
+  list-style: none;
+  overflow-y: auto;
+}
+.avis {
+  display: flex;
+  gap: 12px;
+  padding: 12px 8px;
+  border-radius: var(--k-rayon-champ);
+  color: var(--k-basalte);
+  text-decoration: none;
+}
+.avis:hover {
+  background: var(--k-creme);
+}
+.avis[data-non-lu='true'] {
+  background: color-mix(in srgb, var(--k-curcuma) 14%, var(--k-blanc));
+}
+
+.icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--k-rayon-pilule);
+  background: color-mix(in srgb, var(--k-vacoa) 14%, var(--k-blanc));
+  color: var(--k-vacoa);
+}
+.avis[data-type='desiste'] .icone {
+  background: color-mix(in srgb, var(--k-braise) 12%, var(--k-blanc));
+  color: var(--k-braise);
+}
+.avis[data-type='aNoter'] .icone {
+  background: color-mix(in srgb, var(--k-curcuma) 22%, var(--k-blanc));
+  color: var(--k-basalte);
+}
+
+.texte {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.titreAvis {
+  font: var(--k-corps-fort-font);
+}
+.detail,
+.quand {
+  font: var(--k-legende-font);
+  color: var(--k-galet);
+}
+
+.vide {
+  margin: 0;
+  padding: 8px 16px 24px;
+  font: var(--k-corps-font);
+  color: var(--k-galet);
+}
+
+.bureau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 0;
+  border-top: 1px solid var(--k-trait);
+  background: var(--k-creme);
+  font: var(--k-legende-forte-font);
+  color: var(--k-basalte);
+  text-align: left;
+  cursor: pointer;
+}
+.etatBureau {
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--k-trait);
+  font: var(--k-legende-font);
+  color: var(--k-galet);
+}

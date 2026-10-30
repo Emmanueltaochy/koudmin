@@ -95,8 +95,10 @@ function extra(
     ...(PROFILS[id] ?? { competences: [], experience: null, langues: [], presentation: '' }),
     statut: 'confirmee',
     confirmeLe: new Date().toISOString(),
+    majLe: new Date().toISOString(),
     contratSigneRestaurant: false,
     contratSigneExtra: false,
+    contratSigneExtraLe: null,
     notation: null,
     favori: false,
     ...options,
@@ -121,7 +123,7 @@ function demandesInitiales(): DemandeDemo[] {
   const johan = (o: Partial<ExtraAffecte> = {}) => extra('e3', 'Johan', 'Grondin', '+262692000003', o);
   const fini = { statut: 'terminee' as const, contratSigneRestaurant: true, contratSigneExtra: true };
   return [
-    { ...base, id: 'd001', poste: 'serveur', jour: auj, debut: 1080, fin: 0, nbExtras: 1, statut: 'pourvue', extras: [kevin({ contratSigneExtra: true })] },
+    { ...base, id: 'd001', poste: 'serveur', jour: auj, debut: 1080, fin: 0, nbExtras: 1, statut: 'pourvue', extras: [kevin({ contratSigneExtra: true, confirmeLe: new Date(Date.now() - 3 * 3600e3).toISOString(), contratSigneExtraLe: new Date(Date.now() - 2 * 3600e3).toISOString() })] },
     { ...base, id: 'd100', poste: 'plonge', jour: ajouterJours(auj, -1), debut: 1080, fin: 0, nbExtras: 1, statut: 'terminee', extras: [maelle(fini)] },
     { ...base, id: 'd101', poste: 'serveur', jour: ajouterJours(auj, -9), debut: 1080, fin: 0, nbExtras: 2, statut: 'terminee', extras: [kevin({ ...fini, notation: { present: true, note: 5 }, favori: true }), johan({ ...fini, notation: { present: true, note: 4 } })] },
     { ...base, id: 'd102', poste: 'barman', jour: ajouterJours(auj, -34), debut: 1080, fin: 60, nbExtras: 1, statut: 'terminee', extras: [johan({ ...fini, notation: { present: true, note: 4 } })] },

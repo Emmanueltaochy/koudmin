@@ -183,7 +183,7 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
         await client.from('infos_contrat').select('date_naissance, lieu_naissance, nir, adresse').maybeSingle<{
           date_naissance: string;
           lieu_naissance: string;
-          nir: string;
+          nir: string | null;
           adresse: string;
         }>(),
       );
@@ -195,7 +195,7 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
           extra_id: await moi(),
           date_naissance: i.dateNaissance,
           lieu_naissance: i.lieuNaissance.trim(),
-          nir: i.nir.replace(/\s/g, '').toUpperCase(),
+          nir: i.nir ? i.nir.replace(/\s/g, '').toUpperCase() : null,
           adresse: i.adresse.trim(),
           updated_at: new Date().toISOString(),
         }),

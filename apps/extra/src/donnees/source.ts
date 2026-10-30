@@ -26,7 +26,8 @@ export interface ContratExtra {
 export interface InfosContrat {
   dateNaissance: string;
   lieuNaissance: string;
-  nir: string;
+  /** Facultatif. */
+  nir: string | null;
   adresse: string;
 }
 

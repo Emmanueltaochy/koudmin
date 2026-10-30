@@ -12,6 +12,7 @@ import {
 import type { MissionConfirmee } from '../donnees';
 import { commun, couleurs, rayons } from '../ui/theme';
 import { Texte } from '../ui/Texte';
+import { VignettePoste } from '../ui/VignettePoste';
 
 const tc = textesEcrans.extra.contrat;
 
@@ -29,7 +30,10 @@ export const CarteConfirmee = memo(function CarteConfirmee({
   return (
     <Pressable accessibilityRole="button" onPress={() => onPress(m.id)} style={({ pressed }) => [commun.carte, pressed && { opacity: 0.85 }]}>
       <View style={styles.entete}>
-        <Texte variante="horaire">{formatPlage(m.debut, m.fin)}</Texte>
+        <View style={styles.titre}>
+          <VignettePoste poste={m.poste} taille={40} />
+          <Texte variante="horaire">{formatPlage(m.debut, m.fin)}</Texte>
+        </View>
         {jour.urgent ? (
           <View style={styles.badge}>
             <Texte variante="badge">{jour.texte}</Texte>
@@ -64,6 +68,7 @@ export const CarteConfirmee = memo(function CarteConfirmee({
 
 const styles = StyleSheet.create({
   entete: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  titre: { flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 1 },
   badge: { backgroundColor: couleurs.curcuma, borderRadius: rayons.champ, paddingVertical: 4, paddingHorizontal: 8 },
   pied: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: couleurs.trait },
 });

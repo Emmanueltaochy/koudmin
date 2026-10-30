@@ -19,6 +19,7 @@ import {
 } from '@kivien/core';
 import { commun, couleurs, rayons } from '../ui/theme';
 import { Texte } from '../ui/Texte';
+import { VignettePoste } from '../ui/VignettePoste';
 
 type Props = {
   mission: MissionResume;
@@ -42,7 +43,13 @@ export const CarteMission = memo(function CarteMission({ mission: m, profil, auj
       style={({ pressed }) => [commun.carte, pressed && styles.appuye]}
     >
       <View style={styles.entete}>
-        <Texte variante="horaire">{plage}</Texte>
+        <View style={styles.titre}>
+          <VignettePoste poste={m.poste} taille={44} />
+          <View style={styles.titreTexte}>
+            <Texte variante="horaire">{plage}</Texte>
+            <Texte numberOfLines={1}>{LIBELLES_POSTE[m.poste].mission}</Texte>
+          </View>
+        </View>
         {jour.urgent ? (
           <View style={styles.badge}>
             <Texte variante="badge">{jour.texte}</Texte>
@@ -61,8 +68,6 @@ export const CarteMission = memo(function CarteMission({ mission: m, profil, auj
         </Texte>
         <Texte couleur="galet">· {formatDistance(m.distanceMetres)}</Texte>
       </View>
-
-      <Texte>{LIBELLES_POSTE[m.poste].mission}</Texte>
 
       <View style={styles.salaire}>
         <Texte variante="corpsFort">{formatNet(salaire.netEuros)}</Texte>
@@ -97,7 +102,9 @@ export const CarteMission = memo(function CarteMission({ mission: m, profil, auj
 
 const styles = StyleSheet.create({
   appuye: { opacity: 0.85 },
-  entete: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  entete: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
+  titre: { flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 1 },
+  titreTexte: { flexShrink: 1, gap: 2 },
   badge: {
     backgroundColor: couleurs.curcuma,
     borderRadius: rayons.champ,

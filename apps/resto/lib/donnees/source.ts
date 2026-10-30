@@ -65,8 +65,11 @@ export interface ExtraAffecte extends ProfilPublic {
   telephone: string;
   statut: StatutAffectation;
   confirmeLe: string;
+  /** Dernier changement de l'affectation (désistement, absence). */
+  majLe: string;
   contratSigneRestaurant: boolean;
   contratSigneExtra: boolean;
+  contratSigneExtraLe: string | null;
   /** Notation après mission, null si pas encore notée. */
   notation: { present: boolean; note: number | null } | null;
   favori: boolean;

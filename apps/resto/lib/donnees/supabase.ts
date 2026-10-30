@@ -47,6 +47,7 @@ interface LigneDemande {
     extra_id: string;
     statut: StatutAffectation;
     created_at: string;
+    updated_at: string;
     extras: UnOuPlusieurs<{
       prenom: string;
       nom: string;
@@ -63,7 +64,7 @@ interface LigneDemande {
 
 const SELECTION = `id, restaurant_id, poste, jour, debut, fin, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes,
   adresse, code_postal, commune, retour_assure, nb_extras, consignes, statut, created_at,
-  affectations ( id, extra_id, statut, created_at,
+  affectations ( id, extra_id, statut, created_at, updated_at,
     extras ( prenom, nom, telephone, competences, experience, langues, presentation ),
     contrats ( signe_restaurant_le, signe_extra_le ),
     notations ( present, note ) )`;
@@ -110,8 +111,10 @@ function versDemande(l: LigneDemande, favoris: Set<string>): DemandeSuivi {
         presentation: e?.presentation ?? '',
         statut: a.statut,
         confirmeLe: a.created_at,
+        majLe: a.updated_at,
         contratSigneRestaurant: !!c?.signe_restaurant_le,
         contratSigneExtra: !!c?.signe_extra_le,
+        contratSigneExtraLe: c?.signe_extra_le ?? null,
         notation: n ? { present: n.present, note: n.note } : null,
         favori: favoris.has(a.extra_id),
       };

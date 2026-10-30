@@ -161,7 +161,7 @@ function InfosDPAEListe({ affectationId, jour, debut }: { affectationId: string;
     ['Salarié·e', `${i.prenom} ${i.nom}`],
     ['Date de naissance', i.dateNaissance ? i.dateNaissance.split('-').reverse().join('/') : null],
     ['Lieu de naissance', i.lieuNaissance],
-    ['Numéro de sécurité sociale', i.nir],
+    ['Numéro de sécurité sociale', i.nir ?? 'Non communiqué : la date et le lieu de naissance suffisent'],
     ['Adresse', i.adresse],
     ["Date et heure d'embauche", `${jour.split('-').reverse().join('/')} à ${formatHeure(debut)}`],
     ['Contrat', "CDD d'usage, une journée"],

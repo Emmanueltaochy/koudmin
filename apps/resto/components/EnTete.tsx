@@ -21,6 +21,7 @@ import { textesEcrans } from '@kivien/core';
 import { deconnecter } from '@/lib/auth';
 import { choisirEtablissement, donneesFictives } from '@/lib/donnees';
 import { useDonnees } from '@/lib/useDonnees';
+import { Cloche } from './Cloche';
 import s from './EnTete.module.css';
 
 const tm = textesEcrans.resto.menu;
@@ -157,6 +158,10 @@ export function EnTete() {
           </nav>
         )}
       </header>
+      {/* Une seule cloche : à gauche du menu sur mobile, en haut à droite sur grand écran. */}
+      <div className={s.cloche}>
+        <Cloche />
+      </div>
       <nav aria-label="Navigation principale" className={s.lateral}>
         <Link href="/espace" className={s.marque} aria-label="Kivien, accueil">
           <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" className={s.logo} />

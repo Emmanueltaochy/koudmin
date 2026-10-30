@@ -1,0 +1,21 @@
+.vignette {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 14px;
+  color: var(--k-basalte);
+  background: color-mix(in srgb, var(--k-galet) 16%, var(--k-blanc));
+}
+.vignette[data-famille='salle'],
+.vignette[data-famille='animation'] {
+  background: color-mix(in srgb, var(--k-curcuma) 30%, var(--k-blanc));
+}
+.vignette[data-famille='cuisine'],
+.vignette[data-famille='hebergement'] {
+  background: color-mix(in srgb, var(--k-vacoa) 18%, var(--k-blanc));
+  color: color-mix(in srgb, var(--k-vacoa) 70%, var(--k-basalte));
+}
+.vignette[data-famille='technique'] {
+  background: color-mix(in srgb, var(--k-basalte) 10%, var(--k-blanc));
+}
