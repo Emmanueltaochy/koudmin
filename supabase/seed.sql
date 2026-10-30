@@ -2,7 +2,7 @@
 -- Coordonnées fictives, placées pour retrouver les distances de la maquette depuis l'extra de test.
 
 insert into parametres (date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes)
-values ('2026-01-01', 1231, 2500);
+values ('2026-01-01', 1231, 1900);
 
 -- Comptes de test : mobile et mot de passe kivien974 (comme les données fictives des apps).
 -- Les jetons vides (et non nuls) sont attendus par le service d'authentification.

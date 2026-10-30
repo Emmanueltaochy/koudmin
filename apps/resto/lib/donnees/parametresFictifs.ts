@@ -4,6 +4,6 @@ import type { ParametresTarifaires } from '@kivien/core';
 export const PARAMETRES_FICTIFS: ParametresTarifaires = {
   dateEffet: '2026-01-01',
   tauxHoraireBrutCentimes: 1231,
-  fraisMiseEnRelationHTCentimes: 2500,
+  fraisMiseEnRelationHTCentimes: 1900,
   tvaPourMille: 85,
 };

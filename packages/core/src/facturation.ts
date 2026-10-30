@@ -1,7 +1,7 @@
 import type { StatutAffectation } from './domaine';
 
 /**
- * Règle de facturation : 25 € HT par mise en relation (paramètre), non facturée si l'extra
+ * Règle de facturation : frais HT par mise en relation (paramètre, 19 € en 2026), non facturée si l'extra
  * est absent et non remplacé. Un désistement n'est pas facturé ; son remplaçant l'est.
  */
 export function miseEnRelationFacturee(statut: StatutAffectation): boolean {

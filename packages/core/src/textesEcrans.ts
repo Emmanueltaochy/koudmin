@@ -23,7 +23,7 @@ export const textesEcrans = {
       aNoterCourt: 'À noter',
       ceMois: 'Extras venus ce mois-ci',
       videTitre: 'Votre prochain service commence ici',
-      videTexte: 'Publiez une demande : un extra trouvé en 2 heures maximum, contrat rédigé pour vous.',
+      videTexte: 'Publiez une demande : un extra en 2 heures maximum, environ 20 % moins cher que l’intérim, contrat rédigé pour vous.',
     },
     suivi: {
       retour: 'Accueil',
@@ -137,11 +137,11 @@ export const textesEcrans = {
     inscription: {
       choixTitre: 'Créer un compte',
       choixRestaurant: 'Je cherche des extras',
-      choixRestaurantTexte: 'Hôtellerie, restauration, loisirs, spectacle, déménagement et autres secteurs autorisés.',
+      choixRestaurantTexte: 'Environ 20 % moins cher que l’intérim. Hôtellerie, restauration, loisirs, spectacle, déménagement.',
       choixExtra: 'Je cherche des missions',
       choixExtraTexte: 'Des soirées payées près de chez toi. Inscription gratuite.',
       titre: 'Créer votre compte',
-      sousTitre: 'Un extra en 2 heures, contrat rédigé pour vous.',
+      sousTitre: 'Un extra en 2 heures, environ 20 % moins cher que l’intérim. Contrat rédigé pour vous.',
       etablissement: "Nom de l'établissement",
       secteur: "Secteur d'activité",
       secteurAide: "Le contrat d'extra n'est permis que dans ces secteurs (article D1242-1 du Code du travail).",

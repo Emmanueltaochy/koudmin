@@ -52,10 +52,10 @@ for f in "${fichiers[@]}"; do
     | psql_db --single-transaction
 done
 
-# Paramètres tarifaires initiaux (SMIC 2026, frais 25 € HT, TVA 8,5 %), seulement si la table est vide.
+# Paramètres tarifaires initiaux (SMIC 2026, frais 19 € HT, TVA 8,5 %), seulement si la table est vide.
 psql_db <<'SQL'
 insert into parametres (date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes, tva_pour_mille)
-select '2026-01-01', 1231, 2500, 85
+select '2026-01-01', 1231, 1900, 85
 where not exists (select 1 from parametres);
 SQL
 echo "Migrations à jour."

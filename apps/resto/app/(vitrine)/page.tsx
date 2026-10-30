@@ -273,6 +273,7 @@ export default async function Accueil() {
             </div>
             <span className={s.texte}>{t.tarif.nonFacture}</span>
             <span className={`${s.texte} ${s.galet}`}>{t.tarif.sansEngagement}</span>
+            <span className={s.corpsFort}>{t.tarif.comparaison}</span>
           </div>
           <div className={s.exemple}>
             <span className={`${s.legendeForte} ${s.galet}`}>{t.tarif.exemple}</span>
