@@ -183,7 +183,7 @@ export interface InfosDPAE {
   adresse: string | null;
 }
 
-export type ModePaiement = 'carte_mission' | 'mensuel_carte' | 'mensuel_sepa';
+export type ModePaiement = 'carte_mission' | 'sepa_mission' | 'mensuel_carte' | 'mensuel_sepa';
 
 /** Moyen de paiement des frais Kivien (gérant seulement). */
 export interface MoyenPaiement {

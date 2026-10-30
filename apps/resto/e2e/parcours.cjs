@@ -235,6 +235,11 @@ let pageCourante = null;
   await p.getByRole('button', { name: 'Mettre en place le prélèvement' }).click();
   await p.getByText('Prélèvement SEPA en place.').waitFor();
   await p.getByText('IBAN •••• 1234').waitFor(); ok('paiement : mandat SEPA au retour de la page GoCardless');
+  // Mandat signé : le prélèvement prend le rythme du mode en cours (ici, à chaque mission).
+  if ((await p.getByRole('radio', { name: /Prélèvement SEPA, à chaque mission/ }).getAttribute('aria-checked')) !== 'true') throw new Error('mode SEPA à la mission non coché');
+  ok('paiement : prélèvement SEPA à chaque mission choisi avec le mandat');
+  await p.getByRole('radio', { name: /Facture mensuelle par prélèvement SEPA/ }).click();
+  await p.getByText('Mode de paiement enregistré.').waitFor(); ok('paiement : bascule en facture mensuelle SEPA');
   await p.goto(URL_SITE + '/historique');
   await p.getByRole('heading', { name: 'Historique' }).waitFor();
   await capture('historique');

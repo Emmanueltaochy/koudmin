@@ -340,6 +340,11 @@ values ('00000000-0000-0000-0000-00000000b001', 'cus_essai', 'pm_essai', 'Visa �
 select a.demande_id, p.montant_ht_centimes, p.tva_centimes
 from paiements_a_lancer('00000000-0000-0000-0000-00000000b001') p join affectations a on a.id = p.affectation_id
 order by 1;
+\echo '--- Prélèvement SEPA à chaque mission : seulement avec un mandat valide'
+update moyens_paiement set mode = 'sepa_mission' where restaurant_id = '00000000-0000-0000-0000-00000000b001';
+select count(*) as sans_mandat from paiements_a_lancer('00000000-0000-0000-0000-00000000b001');
+update moyens_paiement set gocardless_mandat = 'MD_essai', mandat_statut = 'active' where restaurant_id = '00000000-0000-0000-0000-00000000b001';
+select moyen, count(*) from paiements_a_lancer('00000000-0000-0000-0000-00000000b001') group by moyen;
 \echo '--- Facture mensuelle : le mois précédent, une seule fois'
 update moyens_paiement set mode = 'mensuel_carte' where restaurant_id = '00000000-0000-0000-0000-00000000b001';
 select mois = to_char(date_trunc('month', jour_reunion())::date - 20, 'YYYY-MM') as mois_precedent, mode, mises_en_relation, montant_ht_centimes, tva_centimes

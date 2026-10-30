@@ -80,6 +80,7 @@ export const textesEcrans = {
       choisirMode: 'Mode de paiement',
       modes: {
         carte_mission: { titre: 'Carte, à chaque mission', texte: "Débit 24 h après la fin de la mission, si tout s'est bien passé." },
+        sepa_mission: { titre: 'Prélèvement SEPA, à chaque mission', texte: "Prélevé 24 h après la fin de la mission, si tout s'est bien passé." },
         mensuel_carte: { titre: 'Facture mensuelle par carte', texte: 'Une facture au début du mois suivant, débitée sur votre carte.' },
         mensuel_sepa: { titre: 'Facture mensuelle par prélèvement SEPA', texte: 'Une facture au début du mois suivant, prélevée sur votre compte.' },
       },

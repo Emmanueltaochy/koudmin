@@ -1,6 +1,6 @@
 // Débits des frais Kivien : lancés toutes les heures (et après l'enregistrement d'un moyen de paiement).
 //   1. Mandats SEPA en attente : relus jusqu'à obtention.
-//   2. Missions finies depuis 24 h, mode « carte à chaque mission » : un débit par extra venu.
+//   2. Missions finies depuis 24 h, modes « à chaque mission » (carte ou SEPA) : un débit par mise en relation.
 //   3. Mois terminés, modes mensuels : un débit (carte) ou un prélèvement (SEPA) par mois.
 //   4. Débits interrompus (coupure entre l'inscription et l'envoi) : renvoyés avec la même clé.
 //   5. Débits en cours (SEPA, carte en traitement) : statut relu chez Stripe ou GoCardless.
@@ -46,6 +46,7 @@ interface AFacturer {
 }
 interface MissionADebiter extends AFacturer {
   affectation_id: string;
+  moyen: 'carte' | 'sepa';
 }
 interface MoisAFacturer extends AFacturer {
   mois: string;
@@ -122,14 +123,15 @@ export async function lancerPrelevements(s: Services, restaurant?: string): Prom
     }
   }
 
-  // 2. Une mission, un débit.
-  if (s.stripe) {
+  // 2. Une mission, un débit (carte ou prélèvement, selon le mode choisi).
+  if (s.stripe || s.gocardless) {
     for (const m of await s.base.rpc<MissionADebiter[]>('paiements_a_lancer', filtre)) {
+      if (!(m.moyen === 'sepa' ? s.gocardless : s.stripe)) continue;
       const p = await s.base.inserer<Paiement>('paiements', {
         restaurant_id: m.restaurant_id,
         type: 'mission',
         affectation_id: m.affectation_id,
-        moyen: 'carte',
+        moyen: m.moyen,
         libelle: m.libelle,
         mises_en_relation: 1,
         montant_ht_centimes: m.montant_ht_centimes,

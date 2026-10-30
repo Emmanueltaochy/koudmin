@@ -9,7 +9,8 @@ import { cors, json, lireEnv, services, SITE } from '../_partage/config.ts';
 import { mandatValide } from '../_partage/gocardless.ts';
 import { COLONNES, lancerPrelevements, reessayer, type Paiement } from '../_partage/prelevements.ts';
 
-const MODES = ['carte_mission', 'mensuel_carte', 'mensuel_sepa'] as const;
+const MODES = ['carte_mission', 'sepa_mission', 'mensuel_carte', 'mensuel_sepa'] as const;
+const SEPA: Mode[] = ['sepa_mission', 'mensuel_sepa'];
 type Mode = (typeof MODES)[number];
 
 interface Moyen {
@@ -95,16 +96,20 @@ Deno.serve(async (req) => {
         if (!s.gocardless || !m.gocardless_demande) throw new Refus('Aucun mandat en cours.');
         const mandat = await s.gocardless.mandatDeLaDemande(m.gocardless_demande);
         if (!mandat) return json(req, { statut: 'attente' });
-        await maj({ gocardless_mandat: mandat.mandat, mandat_statut: mandat.statut, sepa_libelle: mandat.libelle, mode: 'mensuel_sepa' });
+        // Mandat en place : prélèvement au même rythme que le mode actuel (mission ou mois).
+        const mode: Mode = m.mode === 'mensuel_carte' || m.mode === 'mensuel_sepa' ? 'mensuel_sepa' : 'sepa_mission';
+        await maj({ gocardless_mandat: mandat.mandat, mandat_statut: mandat.statut, sepa_libelle: mandat.libelle, mode });
+        if (mode === 'sepa_mission') await lancerPrelevements(s, restaurant);
         return json(req, { statut: 'ok', libelle: mandat.libelle });
       }
       case 'mode': {
         const mode = corps.mode as Mode;
         if (!MODES.includes(mode)) throw new Refus('Mode inconnu.');
-        if (mode !== 'mensuel_sepa' && !m.stripe_carte) throw new Refus('Enregistrez d’abord une carte.');
-        if (mode === 'mensuel_sepa' && !(m.gocardless_mandat && mandatValide(m.mandat_statut))) throw new Refus('Mettez d’abord en place le prélèvement SEPA.');
+        const sepa = SEPA.includes(mode);
+        if (!sepa && !m.stripe_carte) throw new Refus('Enregistrez d’abord une carte.');
+        if (sepa && !(m.gocardless_mandat && mandatValide(m.mandat_statut))) throw new Refus('Mettez d’abord en place le prélèvement SEPA.');
         await maj({ mode });
-        if (mode === 'carte_mission') await lancerPrelevements(s, restaurant);
+        if (mode === 'carte_mission' || mode === 'sepa_mission') await lancerPrelevements(s, restaurant);
         return json(req, { statut: 'ok' });
       }
       case 'reessayer': {

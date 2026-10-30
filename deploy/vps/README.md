@@ -194,8 +194,8 @@ Une migration déjà appliquée ne se modifie jamais : on écrit une nouvelle mi
 
 ## Paiement des frais
 
-Les gérants choisissent sur https://kivien.re/paiement : carte débitée 24 h après chaque mission
-(Stripe), ou facture mensuelle par carte ou par prélèvement SEPA (GoCardless). Un extra absent
+Les gérants choisissent sur https://kivien.re/paiement : débit 24 h après chaque mission, par carte
+(Stripe) ou par prélèvement SEPA (GoCardless), ou facture mensuelle par carte ou par prélèvement. Un extra absent
 (signalé à la notation) n'est jamais débité. Numéros de carte et IBAN sont saisis sur les pages de
 Stripe et de GoCardless : ils ne passent jamais par Kivien.
 

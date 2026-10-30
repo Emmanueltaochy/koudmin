@@ -136,7 +136,7 @@ function fauxStripe(resultat: (cle: string) => ResultatDebit) {
 }
 
 const MOYEN = { restaurant_id: 'r1', stripe_client: 'cus_1', stripe_carte: 'pm_1', gocardless_mandat: null, mandat_statut: null, gocardless_demande: null };
-const MISSION = { affectation_id: 'a1', restaurant_id: 'r1', libelle: 'Kivien · mission', montant_ht_centimes: 1900, tva_centimes: 162 };
+const MISSION = { affectation_id: 'a1', restaurant_id: 'r1', moyen: 'carte', libelle: 'Kivien · mission', montant_ht_centimes: 1900, tva_centimes: 162 };
 
 Deno.test('Prélèvements : une mission débitée une seule fois, TTC 20,62 €', async () => {
   const { b, paiements } = fausseBase({ aLancer: [MISSION], moyens: [MOYEN] });
@@ -196,4 +196,22 @@ Deno.test('Prélèvements : facture mensuelle SEPA seulement avec un mandat vali
   egal(prelevements, ['kivien-p1-1:4123']);
   egal(avecMandat.paiements[0].statut, 'en_cours');
   egal(avecMandat.paiements[0].moyen, 'sepa');
+});
+
+Deno.test('Prélèvements : mode SEPA à chaque mission, prélevé sur le mandat', async () => {
+  const montants: number[] = [];
+  const gc = {
+    mandatDeLaDemande: async () => null,
+    prelever: async (p: { montant: number }) => {
+      montants.push(p.montant);
+      return { statut: 'en_cours', reference: 'PM2' } as ResultatDebit;
+    },
+    etatPrelevement: async () => ({ statut: 'en_cours', reference: 'PM2' }) as ResultatDebit,
+  } as unknown as Services['gocardless'];
+  const { b, paiements } = fausseBase({ aLancer: [{ ...MISSION, moyen: 'sepa' }], moyens: [{ ...MOYEN, gocardless_mandat: 'MD1', mandat_statut: 'active' }] });
+  // Sans Stripe configuré, le prélèvement SEPA part quand même.
+  await lancerPrelevements({ base: b, stripe: null, gocardless: gc });
+  egal(montants, [2062]);
+  egal(paiements[0].moyen, 'sepa');
+  egal(paiements[0].type, 'mission');
 });

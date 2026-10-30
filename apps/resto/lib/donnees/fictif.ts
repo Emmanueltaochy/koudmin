@@ -273,13 +273,15 @@ export function sourceFictive(): SourceResto {
           case 'sepa':
             return { url: '/paiement?retour=sepa' };
           case 'sepa-confirmer':
-            Object.assign(m, { sepa: 'IBAN •••• 1234', sepaEnAttente: false, mandatValide: true, mode: 'mensuel_sepa' });
+            Object.assign(m, { sepa: 'IBAN •••• 1234', sepaEnAttente: false, mandatValide: true, mode: m.mode.startsWith('mensuel') ? 'mensuel_sepa' : 'sepa_mission' });
             return { statut: 'ok' };
-          case 'mode':
-            if (a.mode === 'mensuel_sepa' ? !m.mandatValide : !m.carte)
-              return { statut: 'echoue', erreur: a.mode === 'mensuel_sepa' ? 'Mettez d’abord en place le prélèvement SEPA.' : 'Enregistrez d’abord une carte.' };
+          case 'mode': {
+            const sepa = a.mode === 'sepa_mission' || a.mode === 'mensuel_sepa';
+            if (sepa ? !m.mandatValide : !m.carte)
+              return { statut: 'echoue', erreur: sepa ? 'Mettez d’abord en place le prélèvement SEPA.' : 'Enregistrez d’abord une carte.' };
             m.mode = a.mode;
             return { statut: 'ok' };
+          }
           case 'reessayer': {
             const p = paiementDemo.historique.find((x) => x.id === a.paiement);
             if (p) Object.assign(p, { statut: 'reussi', erreur: null });

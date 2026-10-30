@@ -10,7 +10,7 @@ import { source, type ModePaiement, type MoyenPaiement, type PaiementFrais, type
 import s from './paiement.module.css';
 
 const tp = textesEcrans.resto.paiement;
-const MODES: ModePaiement[] = ['carte_mission', 'mensuel_carte', 'mensuel_sepa'];
+const MODES: ModePaiement[] = ['carte_mission', 'sepa_mission', 'mensuel_carte', 'mensuel_sepa'];
 /** « Kivien · mise en relation du … » → « Mise en relation du … ». */
 const libelle = (l: string) => {
   const t = l.replace(/^Kivien · /, '');
