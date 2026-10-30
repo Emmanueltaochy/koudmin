@@ -133,3 +133,15 @@ describe('heure tapée', () => {
     expect(normaliserHeure(saisie)).toBe(attendu);
   });
 });
+
+describe('semaine du planning', () => {
+  it('ramène chaque jour au lundi de sa semaine', async () => {
+    const { lundiDeLaSemaine, joursDeLaSemaine } = await import('../src');
+    expect(lundiDeLaSemaine('2026-10-30')).toBe('2026-10-26'); // vendredi
+    expect(lundiDeLaSemaine('2026-11-01')).toBe('2026-10-26'); // dimanche
+    expect(lundiDeLaSemaine('2026-10-26')).toBe('2026-10-26');
+    expect(joursDeLaSemaine('2026-12-28')).toEqual([
+      '2026-12-28', '2026-12-29', '2026-12-30', '2026-12-31', '2027-01-01', '2027-01-02', '2027-01-03',
+    ]);
+  });
+});

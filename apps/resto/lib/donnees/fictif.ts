@@ -10,10 +10,12 @@ import type {
   ExtraAffecte,
   Facture,
   Favori,
+  Membre,
   NouvelleDemande,
   Restaurant,
   SourceResto,
 } from './source';
+import { resoudreEtablissement } from './etablissementCourant';
 import { agregerFavoris } from './favoris';
 import { PARAMETRES_FICTIFS } from './parametresFictifs';
 
@@ -28,6 +30,9 @@ const RESTAURANT: Restaurant = {
   id: 'r001',
   nom: 'Le Boucan Grillé',
   telephone: '+262262000001',
+  siret: '73282932000074',
+  secteur: 'hotellerie_restauration',
+  role: 'gerant',
   adresse: {
     libelle: '14 rue du Général de Gaulle, 97434 Saint-Gilles-les-Bains',
     voie: '14 rue du Général de Gaulle',
@@ -38,7 +43,34 @@ const RESTAURANT: Restaurant = {
   },
 };
 
-const CLE = 'kivien-resto-demo-v1';
+/** Second établissement de démonstration : un village vacances (secteur loisirs et vacances). */
+const VILLAGE: Restaurant = {
+  id: 'r002',
+  nom: 'Village vacances Les Filaos',
+  telephone: '+262262000002',
+  siret: '44306184100047',
+  secteur: 'loisirs_vacances',
+  role: 'gerant',
+  adresse: {
+    libelle: '2 rue des Filaos, 97434 Saint-Gilles-les-Bains',
+    voie: '2 rue des Filaos',
+    codePostal: '97434',
+    commune: 'Saint-Gilles-les-Bains',
+    lat: -21.0601,
+    lng: 55.2235,
+  },
+};
+
+const CLE = 'kivien-resto-demo-v2';
+
+/** Demande de démonstration (déjà rattachée à son établissement). */
+type DemandeDemo = DemandeSuivi;
+
+interface EtatDemo {
+  etablissements: Restaurant[];
+  demandes: DemandeDemo[];
+  equipes: Record<string, Membre[]>;
+}
 
 /** Profils publics de démonstration (mêmes personnes que l'app extra). */
 const PROFILS: Record<string, ProfilPublic> = {
@@ -71,9 +103,10 @@ function extra(
   };
 }
 
-function demandesInitiales(): DemandeSuivi[] {
+function demandesInitiales(): DemandeDemo[] {
   const auj = aujourdhuiReunion();
   const base = {
+    restaurantId: RESTAURANT.id,
     tauxHoraireBrutCentimes: PARAMETRES.tauxHoraireBrutCentimes,
     fraisMiseEnRelationHTCentimes: PARAMETRES.fraisMiseEnRelationHTCentimes,
     adresse: '14 rue du Général de Gaulle',
@@ -92,41 +125,138 @@ function demandesInitiales(): DemandeSuivi[] {
     { ...base, id: 'd100', poste: 'plonge', jour: ajouterJours(auj, -1), debut: 1080, fin: 0, nbExtras: 1, statut: 'terminee', extras: [maelle(fini)] },
     { ...base, id: 'd101', poste: 'serveur', jour: ajouterJours(auj, -9), debut: 1080, fin: 0, nbExtras: 2, statut: 'terminee', extras: [kevin({ ...fini, notation: { present: true, note: 5 }, favori: true }), johan({ ...fini, notation: { present: true, note: 4 } })] },
     { ...base, id: 'd102', poste: 'barman', jour: ajouterJours(auj, -34), debut: 1080, fin: 60, nbExtras: 1, statut: 'terminee', extras: [johan({ ...fini, notation: { present: true, note: 4 } })] },
+    { ...base, id: 'd103', poste: 'plonge', jour: ajouterJours(auj, 2), debut: 690, fin: 900, nbExtras: 1, statut: 'pourvue', extras: [maelle()] },
+    {
+      ...base,
+      restaurantId: VILLAGE.id,
+      id: 'd200',
+      poste: 'animation',
+      jour: ajouterJours(auj, 1),
+      debut: 540,
+      fin: 1020,
+      nbExtras: 2,
+      adresse: '2 rue des Filaos',
+      retourAssure: false,
+      consignes: 'Accueil des enfants de 6 à 11 ans. Tenue de sport.',
+      statut: 'publiee',
+      extras: [],
+    },
   ];
+}
+
+function etatInitial(): EtatDemo {
+  return {
+    etablissements: [RESTAURANT, VILLAGE],
+    demandes: demandesInitiales(),
+    equipes: {
+      [RESTAURANT.id]: [
+        { utilisateurId: 'u-moi', telephone: '+262693000001', role: 'gerant', enAttente: false, moi: true },
+        { utilisateurId: 'u-salle', telephone: '+262692112233', role: 'equipe', enAttente: false, moi: false },
+        { utilisateurId: null, telephone: '+262693445566', role: 'equipe', enAttente: true, moi: false },
+      ],
+      [VILLAGE.id]: [{ utilisateurId: 'u-moi', telephone: '+262693000001', role: 'gerant', enAttente: false, moi: true }],
+    },
+  };
 }
 
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function sourceFictive(): SourceResto {
   const ecouteurs = new Set<() => void>();
-  let memoire: DemandeSuivi[] | null = null;
+  let memoire: EtatDemo | null = null;
 
-  function lire(): DemandeSuivi[] {
+  function etat(): EtatDemo {
     if (memoire) return memoire;
     try {
       const brut = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(CLE) : null;
-      memoire = brut ? (JSON.parse(brut) as DemandeSuivi[]) : demandesInitiales();
+      memoire = brut ? (JSON.parse(brut) as EtatDemo) : etatInitial();
     } catch {
-      memoire = demandesInitiales();
+      memoire = etatInitial();
     }
     return memoire;
   }
-  function ecrire(d: DemandeSuivi[]) {
-    memoire = d;
+  function enregistrer(e: EtatDemo) {
+    memoire = e;
     try {
-      sessionStorage.setItem(CLE, JSON.stringify(d));
+      sessionStorage.setItem(CLE, JSON.stringify(e));
     } catch {
       // Navigation privée : la démo reste en mémoire.
     }
     ecouteurs.forEach((f) => f());
   }
+  const courant = () => resoudreEtablissement(etat().etablissements);
+  /** Toutes les demandes (une demande s'ouvre par son lien, quel que soit l'établissement affiché). */
+  const lire = (): DemandeDemo[] => etat().demandes;
+  const ecrire = (demandes: DemandeDemo[]) => enregistrer({ ...etat(), demandes });
+  const ecrireEquipe = (id: string, membres: Membre[]) => enregistrer({ ...etat(), equipes: { ...etat().equipes, [id]: membres } });
+  const dernierGerant = (membres: Membre[]) => !membres.some((m) => m.role === 'gerant' && !m.enAttente);
   function modifierExtra(affectationId: string, f: (e: ExtraAffecte) => ExtraAffecte) {
     ecrire(lire().map((d) => ({ ...d, extras: d.extras.map((e) => (e.affectationId === affectationId ? f(e) : e)) })));
   }
 
   return {
+    async etablissements() {
+      return etat().etablissements;
+    },
     async restaurant() {
-      return RESTAURANT;
+      return courant();
+    },
+    async ajouterEtablissement(e) {
+      await attendre(600);
+      if (etat().etablissements.some((r) => r.siret === e.siret.replace(/\D/g, ''))) return { resultat: 'siret' };
+      const id = `r${Date.now().toString(36)}`;
+      const r: Restaurant = {
+        id,
+        nom: e.nom.trim(),
+        telephone: null,
+        siret: e.siret.replace(/\D/g, ''),
+        secteur: e.secteur,
+        role: 'gerant',
+        adresse: e.adresse,
+      };
+      enregistrer({
+        ...etat(),
+        etablissements: [...etat().etablissements, r],
+        equipes: { ...etat().equipes, [id]: [{ utilisateurId: 'u-moi', telephone: '+262693000001', role: 'gerant', enAttente: false, moi: true }] },
+      });
+      return { resultat: 'ok', id };
+    },
+    async modifierEtablissement(id, m) {
+      await attendre(400);
+      enregistrer({
+        ...etat(),
+        etablissements: etat().etablissements.map((r) => (r.id === id ? { ...r, nom: m.nom.trim(), adresse: m.adresse } : r)),
+      });
+      return 'ok';
+    },
+    async equipe(restaurantId) {
+      return etat().equipes[restaurantId] ?? [];
+    },
+    async inviter(restaurantId, telephone, role) {
+      await attendre(400);
+      const membres = etat().equipes[restaurantId] ?? [];
+      if (membres.some((m) => m.telephone === telephone && !m.enAttente)) return 'dejaMembre';
+      if (['+262692000001', '+262693000002', '+262692000003'].includes(telephone)) return 'compteExtra';
+      ecrireEquipe(restaurantId, [
+        ...membres.filter((m) => m.telephone !== telephone),
+        { utilisateurId: null, telephone, role, enAttente: true, moi: false },
+      ]);
+      return 'ok';
+    },
+    async annulerInvitation(restaurantId, telephone) {
+      ecrireEquipe(restaurantId, (etat().equipes[restaurantId] ?? []).filter((m) => !(m.enAttente && m.telephone === telephone)));
+    },
+    async changerRole(restaurantId, utilisateurId, role) {
+      const membres = (etat().equipes[restaurantId] ?? []).map((m) => (m.utilisateurId === utilisateurId ? { ...m, role } : m));
+      if (dernierGerant(membres)) return 'dernierGerant';
+      ecrireEquipe(restaurantId, membres);
+      return 'ok';
+    },
+    async retirerMembre(restaurantId, utilisateurId) {
+      const membres = (etat().equipes[restaurantId] ?? []).filter((m) => m.utilisateurId !== utilisateurId);
+      if (dernierGerant(membres)) return 'dernierGerant';
+      ecrireEquipe(restaurantId, membres);
+      return 'ok';
     },
     async photoExtra(extraId) {
       // Démonstration : seul Kévin a une photo (visuel de la page d'accueil).
@@ -144,7 +274,8 @@ export function sourceFictive(): SourceResto {
     async publier(n: NouvelleDemande) {
       await attendre(1200);
       const id = `d${Date.now().toString(36)}`;
-      const d: DemandeSuivi = {
+      const d: DemandeDemo = {
+        restaurantId: courant().id,
         id,
         poste: n.poste,
         jour: n.jour,
@@ -178,7 +309,8 @@ export function sourceFictive(): SourceResto {
     },
     async demandes() {
       await attendre(300);
-      return lire();
+      const id = courant().id;
+      return lire().filter((d) => d.restaurantId === id);
     },
     async demande(id) {
       return lire().find((d) => d.id === id) ?? null;
@@ -214,15 +346,19 @@ export function sourceFictive(): SourceResto {
       }));
     },
     async favoris(): Promise<Favori[]> {
-      return agregerFavoris(lire());
+      const id = courant().id;
+      return agregerFavoris(lire().filter((d) => d.restaurantId === id));
     },
     async retirerFavori(extraId) {
-      ecrire(lire().map((d) => ({ ...d, extras: d.extras.map((e) => (e.extraId === extraId ? { ...e, favori: false } : e)) })));
+      const id = courant().id;
+      ecrire(lire().map((d) => (d.restaurantId !== id ? d : { ...d, extras: d.extras.map((e) => (e.extraId === extraId ? { ...e, favori: false } : e)) })));
     },
     async factures(): Promise<Facture[]> {
       const maintenant = Date.now();
       const parMois = new Map<string, number>();
-      for (const d of lire()) {
+      const id = courant().id;
+      if (courant().role !== 'gerant') return [];
+      for (const d of lire().filter((x) => x.restaurantId === id)) {
         if (bornesMission(d.jour, d.debut, d.fin).fin > maintenant) continue;
         const n = d.extras.filter((e) => miseEnRelationFacturee(e.statut)).length;
         if (n) parMois.set(d.jour.slice(0, 7), (parMois.get(d.jour.slice(0, 7)) ?? 0) + n);

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { formatSiret, normaliserSiret, siretValide, validerInscriptionResto } from '../src';
+import {
+  DEFINITION_SECTEURS,
+  formatSiret,
+  LIBELLES_POSTE,
+  normaliserSiret,
+  POSTES,
+  postesDuSecteur,
+  SECTEURS,
+  siretValide,
+  validerInscriptionResto,
+} from '../src';
 
 describe('SIRET', () => {
   it('accepte les numéros dont la clé de Luhn est juste', () => {
@@ -23,15 +33,40 @@ describe('SIRET', () => {
 });
 
 describe('inscription restaurateur', () => {
-  const ok = { etablissement: 'Le Boucan Grillé', adresseChoisie: true, siret: '73282932000074', telephone: '0692 12 34 56', motDePasse: 'kivien974' };
+  const ok = { etablissement: 'Le Boucan Grillé', secteur: 'hotellerie_restauration', adresseChoisie: true, siret: '73282932000074', telephone: '0692 12 34 56', motDePasse: 'kivien974' };
   it('accepte une saisie complète', () => {
     expect(validerInscriptionResto(ok)).toEqual({});
   });
   it('signale chaque champ manquant ou faux', () => {
-    const e = validerInscriptionResto({ etablissement: ' ', adresseChoisie: false, siret: '123', telephone: '0612345678', motDePasse: 'court' });
-    expect(Object.keys(e)).toEqual(['etablissement', 'adresseChoisie', 'siret', 'telephone', 'motDePasse']);
+    const e = validerInscriptionResto({ etablissement: ' ', secteur: 'garage', adresseChoisie: false, siret: '123', telephone: '0612345678', motDePasse: 'court' });
+    expect(Object.keys(e)).toEqual(['etablissement', 'secteur', 'adresseChoisie', 'siret', 'telephone', 'motDePasse']);
   });
   it('ne redemande pas mobile et mot de passe quand le compte est déjà ouvert', () => {
     expect(validerInscriptionResto({ ...ok, telephone: '', motDePasse: '' }, true)).toEqual({});
+  });
+});
+
+describe('secteurs du contrat d’extra', () => {
+  it('chaque métier appartient à au moins un secteur, chaque secteur a des métiers', () => {
+    const couverts = new Set(SECTEURS.flatMap((s) => postesDuSecteur(s)));
+    expect([...couverts].sort()).toEqual([...POSTES].sort());
+    for (const s of SECTEURS) expect(postesDuSecteur(s).length).toBeGreaterThan(0);
+  });
+  it('a un libellé pour chaque métier et chaque secteur', () => {
+    for (const p of POSTES) expect(LIBELLES_POSTE[p].court).toBeTruthy();
+    for (const s of SECTEURS) expect(DEFINITION_SECTEURS[s].libelle).toBeTruthy();
+  });
+  it('reste aligné sur la fonction SQL postes_du_secteur()', async () => {
+    const { readFileSync, readdirSync } = await import('node:fs');
+    const dossier = new URL('../../../supabase/migrations/', import.meta.url);
+    const sql = readdirSync(dossier)
+      .map((f) => readFileSync(new URL(f, dossier), 'utf8'))
+      .join('\n');
+    for (const s of SECTEURS) {
+      const ligne = sql.match(new RegExp(`when '${s}' then array\\[([^\\]]*)\\]`));
+      expect(ligne, s).not.toBeNull();
+      const postes = [...ligne![1]!.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
+      expect(postes, s).toEqual([...postesDuSecteur(s)]);
+    }
   });
 });

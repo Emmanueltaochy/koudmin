@@ -1,0 +1,131 @@
+.navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.personne {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+.identite {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.iconeRecherche {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--k-rayon-pilule);
+  background: var(--k-blanc);
+  color: var(--k-galet);
+  flex-shrink: 0;
+}
+
+/* Créneau : vert vacoa léger pour un extra attendu, pointillé pour une place à pourvoir. */
+.bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--k-rayon-champ);
+  background: color-mix(in srgb, var(--k-vacoa) 12%, var(--k-blanc));
+  color: var(--k-basalte);
+  text-decoration: none;
+}
+.bloc[data-recherche='true'] {
+  background: var(--k-blanc);
+  border: 1px dashed var(--k-galet);
+}
+.bloc:hover {
+  box-shadow: var(--k-ombre-carte);
+}
+.horaire {
+  font: var(--k-horaire-font);
+  letter-spacing: var(--k-horaire-ls);
+}
+
+.blocs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.parJour {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.carteJour {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+}
+
+.defilement {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .parJour {
+    display: none;
+  }
+  .defilement {
+    display: block;
+    overflow-x: auto;
+    border-radius: var(--k-rayon-carte);
+    background: var(--k-blanc);
+    box-shadow: var(--k-ombre-carte);
+  }
+  .grille {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .grille th,
+  .grille td {
+    padding: 12px 8px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--k-trait);
+  }
+  .grille thead th {
+    font: var(--k-legende-forte-font);
+    color: var(--k-galet);
+    text-align: left;
+  }
+  .grille thead th[data-aujourdhui='true'] {
+    color: var(--k-basalte);
+  }
+  .grille td[data-aujourdhui='true'] {
+    background: color-mix(in srgb, var(--k-creme) 60%, transparent);
+  }
+  .grille td {
+    display: table-cell;
+  }
+  .grille td > * + * {
+    margin-top: 8px;
+  }
+  .colonnePersonne {
+    width: 240px;
+    font-weight: inherit;
+  }
+  .grille tbody tr:last-child th,
+  .grille tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}

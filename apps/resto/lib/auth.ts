@@ -1,6 +1,6 @@
 'use client';
 
-import { normaliserMobileReunion } from '@kivien/core';
+import { normaliserMobileReunion, type Secteur } from '@kivien/core';
 import { donneesFictives, source } from './donnees';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AdresseGeo } from './adresse';
@@ -43,7 +43,7 @@ export type ResultatInscription = 'ok' | 'numero' | 'attente' | 'siret' | 'siret
  * Lève une erreur en cas de coupure réseau ou de refus inattendu du serveur.
  */
 export async function inscrireRestaurateur(
-  i: { telephone: string; motDePasse: string; etablissement: string; siret: string; adresse: AdresseGeo },
+  i: { telephone: string; motDePasse: string; etablissement: string; secteur: Secteur; siret: string; adresse: AdresseGeo },
   compteOuvert: boolean,
 ): Promise<ResultatInscription> {
   if (donneesFictives) {
@@ -62,28 +62,47 @@ export async function inscrireRestaurateur(
     }
     if (!data.session) throw new Error('Compte créé sans session : vérification du numéro requise');
   }
-  const { error } = await c.rpc('creer_restaurant', {
-    p_nom: i.etablissement,
-    p_siret: i.siret,
-    p_adresse: i.adresse.voie,
-    p_code_postal: i.adresse.codePostal,
-    p_commune: i.adresse.commune,
-    p_lat: i.adresse.lat,
-    p_lng: i.adresse.lng,
-  });
-  if (!error) return 'ok';
-  if (/déjà un établissement/.test(error.message)) return 'ok';
-  if (/SIRET déjà inscrit/.test(error.message)) return 'siret';
-  if (/SIRET invalide/.test(error.message)) return 'siretInvalide';
-  if (/compte extra/.test(error.message)) return 'extra';
-  if (/hors de La Réunion/.test(error.message)) return 'adresse';
-  throw error;
+  const { resultat } = await source().ajouterEtablissement({ nom: i.etablissement, siret: i.siret, secteur: i.secteur, adresse: i.adresse });
+  return resultat;
 }
 
 /** Compte connecté sans établissement (inscription interrompue) : l'inscription reprend à l'établissement. */
 export async function aUnEtablissement(): Promise<boolean> {
   if (donneesFictives) return true;
-  const { count, error } = await client()!.from('restaurants').select('id', { count: 'exact', head: true });
+  await accepterInvitations();
+  return (await source().etablissements()).length > 0;
+}
+
+/** Les invitations envoyées au mobile du compte deviennent des accès. Renvoie le nombre d'accès ouverts. */
+export async function accepterInvitations(): Promise<number> {
+  if (donneesFictives) return 0;
+  const { data, error } = await client()!.rpc('accepter_invitations');
   if (error) throw error;
-  return (count ?? 0) > 0;
+  return (data as number) ?? 0;
+}
+
+/**
+ * Accès d'une personne invitée : création du compte (ou connexion s'il existe), puis invitations.
+ * « aucune » : pas d'invitation pour ce numéro.
+ */
+export async function rejoindreEtablissement(
+  telephone: string,
+  motDePasse: string,
+): Promise<'ok' | 'numero' | 'identifiants' | 'attente' | 'aucune'> {
+  const e164 = normaliserMobileReunion(telephone);
+  if (!e164) return 'numero';
+  if (donneesFictives) {
+    await new Promise((r) => setTimeout(r, 600));
+    return e164 === '+262693445566' ? 'ok' : 'aucune';
+  }
+  const c = client()!;
+  const { error } = await c.auth.signUp({ phone: e164, password: motDePasse });
+  if (error) {
+    if (error.status === 429) return 'attente';
+    if (error.code !== 'phone_exists' && error.code !== 'user_already_exists') throw error;
+    const r = await connecter(telephone, motDePasse);
+    if (r !== 'ok') return r;
+  }
+  if ((await accepterInvitations()) > 0) return 'ok';
+  return (await source().etablissements()).length > 0 ? 'ok' : 'aucune';
 }

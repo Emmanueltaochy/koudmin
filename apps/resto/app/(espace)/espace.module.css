@@ -1,0 +1,7 @@
+/* Grand écran : le contenu laisse la place au menu de gauche (264 px). */
+@media (min-width: 1024px) {
+  .contenu {
+    margin-left: 264px;
+    padding-top: 40px;
+  }
+}

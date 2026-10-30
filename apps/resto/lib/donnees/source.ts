@@ -3,18 +3,46 @@ import type {
   ParametresTarifaires,
   Poste,
   ProfilPublic,
+  Secteur,
   StatutAffectation,
   StatutDemande,
 } from '@kivien/core';
 import type { AdresseGeo } from '../adresse';
 
+/** « gerant » : accès complet (établissements, utilisateurs, factures). « equipe » : missions. */
+export type Role = 'gerant' | 'equipe';
+
+/** Un établissement auquel l'utilisateur a accès. */
 export interface Restaurant {
   id: string;
   nom: string;
   telephone: string | null;
+  siret: string | null;
+  secteur: Secteur;
+  role: Role;
   /** Adresse habituelle, pour préremplir les demandes. */
   adresse: AdresseGeo | null;
 }
+
+export interface NouvelEtablissement {
+  nom: string;
+  siret: string;
+  secteur: Secteur;
+  adresse: AdresseGeo;
+}
+
+export type ResultatEtablissement = 'ok' | 'siret' | 'siretInvalide' | 'adresse' | 'extra';
+
+/** Personne ayant accès à un établissement, ou invitation en attente (utilisateurId null). */
+export interface Membre {
+  utilisateurId: string | null;
+  telephone: string;
+  role: Role;
+  enAttente: boolean;
+  moi: boolean;
+}
+
+export type ResultatInvitation = 'ok' | 'dejaMembre' | 'compteExtra' | 'reserve';
 
 export interface NouvelleDemande {
   poste: Poste;
@@ -46,6 +74,8 @@ export interface ExtraAffecte extends ProfilPublic {
 
 export interface DemandeSuivi {
   id: string;
+  /** Établissement employeur (contrat, facture). */
+  restaurantId: string;
   poste: Poste;
   jour: JourISO;
   debut: number;
@@ -100,11 +130,23 @@ export interface InfosDPAE {
 
 /** Accès aux données côté restaurateur. Deux implémentations : fictive (démo) et Supabase. */
 export interface SourceResto {
+  /** Établissements de l'utilisateur, avec son rôle dans chacun. */
+  etablissements(): Promise<Restaurant[]>;
+  /** Établissement affiché : celui choisi (etablissementCourant), sinon le premier. */
   restaurant(): Promise<Restaurant>;
+  ajouterEtablissement(e: NouvelEtablissement): Promise<{ resultat: ResultatEtablissement; id?: string }>;
+  modifierEtablissement(id: string, m: { nom: string; adresse: AdresseGeo }): Promise<'ok' | 'adresse'>;
+  equipe(restaurantId: string): Promise<Membre[]>;
+  /** `telephone` au format +26269XXXXXXX. */
+  inviter(restaurantId: string, telephone: string, role: Role): Promise<ResultatInvitation>;
+  annulerInvitation(restaurantId: string, telephone: string): Promise<void>;
+  changerRole(restaurantId: string, utilisateurId: string, role: Role): Promise<'ok' | 'dernierGerant'>;
+  retirerMembre(restaurantId: string, utilisateurId: string): Promise<'ok' | 'dernierGerant'>;
   /** Photo de profil d'un extra affecté à une de vos demandes (JPEG base64), null sans photo. */
   photoExtra(extraId: string): Promise<string | null>;
   parametres(): Promise<ParametresTarifaires>;
   publier(d: NouvelleDemande): Promise<{ id: string }>;
+  /** Demandes de l'établissement affiché. */
   demandes(): Promise<DemandeSuivi[]>;
   demande(id: string): Promise<DemandeSuivi | null>;
   annulerDemande(id: string): Promise<void>;

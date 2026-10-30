@@ -1,11 +1,12 @@
 import { dateLongue, type JourISO } from './dates';
 import { formatEuros } from './montants';
 import { LIBELLES_POSTE, type Poste } from './postes';
+import { DEFINITION_SECTEURS, SECTEUR_PAR_DEFAUT, type Secteur } from './secteurs';
 import { brutParExtraCentimes, CONGES_PAYES_POURCENT } from './salaire';
 import { dureeMinutes, formatDuree, formatPlage } from './temps';
 
 /**
- * Modèle de CDD d'usage (secteur hôtels, cafés, restaurants), prérempli depuis la demande.
+ * Modèle de CDD d'usage, prérempli depuis la demande et le secteur de l'employeur.
  *
  * IMPORTANT : modèle de travail. Le texte doit être relu et validé par un juriste en droit
  * du travail avant la mise en production (mentions obligatoires, classification HCR,
@@ -20,6 +21,8 @@ export interface DonneesContrat {
     lieuNaissance: string | null;
     adresse: string | null;
   };
+  /** Secteur de l'employeur (hôtellerie-restauration si absent). */
+  secteur?: Secteur;
   poste: Poste;
   jour: JourISO;
   debut: number;
@@ -34,6 +37,7 @@ export interface Article {
 }
 
 export function redigerContrat(d: DonneesContrat): { titre: string; articles: Article[] } {
+  const secteur = DEFINITION_SECTEURS[d.secteur ?? SECTEUR_PAR_DEFAUT];
   const minutes = dureeMinutes(d.debut, d.fin) ?? 0;
   const brutSansConges = Math.round((minutes * d.tauxHoraireBrutCentimes) / 60);
   const brutTotal = brutParExtraCentimes(minutes, d.tauxHoraireBrutCentimes);
@@ -57,9 +61,9 @@ export function redigerContrat(d: DonneesContrat): { titre: string; articles: Ar
         titre: 'Motif',
         texte:
           "Contrat à durée déterminée d'usage conclu en application des articles L1242-2 3° et D1242-1 " +
-          "du Code du travail, l'hôtellerie et la restauration étant un secteur où il est d'usage constant " +
+          `du Code du travail, le secteur « ${secteur.libelle} » étant un secteur où il est d'usage constant ` +
           'de ne pas recourir au contrat à durée indéterminée pour ces emplois temporaires. ' +
-          'Convention collective nationale des hôtels, cafés, restaurants (IDCC 1979).',
+          `${secteur.convention ?? "Convention collective : celle applicable à l'employeur"}.`,
       },
       {
         titre: 'Emploi',

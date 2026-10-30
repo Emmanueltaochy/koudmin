@@ -25,7 +25,8 @@ import {
   NB_EXTRAS_MIN,
   ORDRE_CHAMPS,
   phraseDuree,
-  POSTES,
+  postesDuSecteur,
+  SECTEUR_PAR_DEFAUT,
   recapDemande,
   saisieParDefaut,
   textes as t,
@@ -74,12 +75,15 @@ export function FormulaireDemande() {
   const resume = useRef<HTMLDivElement>(null);
   const champDate = useRef<HTMLInputElement>(null);
   const aujourdhui = aujourdhuiReunion();
+  // Métiers du secteur de l'établissement (contrat d'extra permis seulement dans ces métiers).
+  const [postes, setPostes] = useState(postesDuSecteur(SECTEUR_PAR_DEFAUT));
 
   // Paramètres en vigueur (SMIC, frais) et adresse habituelle du restaurant.
   useEffect(() => {
     void (async () => {
       const [p, r] = await Promise.all([source().parametres(), source().restaurant()]);
       setParametres(p);
+      setPostes(postesDuSecteur(r.secteur));
       const base = saisieParDefaut(aujourdhuiReunion(), p.tauxHoraireBrutCentimes);
       if (demo === 'erreur') {
         setSaisie(base);
@@ -214,7 +218,7 @@ export function FormulaireDemande() {
               {td.poste}
             </span>
             <div role="radiogroup" aria-labelledby="lib-poste" className={s.chips}>
-              {POSTES.map((p) => {
+              {postes.map((p) => {
                 const actif = saisie.poste === p;
                 return (
                   <button

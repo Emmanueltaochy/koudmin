@@ -1,4 +1,4 @@
-import type { MissionResume, ProfilExtra, ProfilPublic } from '@kivien/core';
+import type { MissionResume, ProfilExtra, ProfilPublic, Secteur } from '@kivien/core';
 
 export interface Profil extends ProfilExtra, ProfilPublic {
   prenom: string;
@@ -15,6 +15,9 @@ export interface ContratExtra {
   affectationId: string;
   employeur: string;
   adresseEmployeur: string;
+  siretEmployeur: string | null;
+  /** Secteur de l'employeur (texte du contrat). */
+  secteur: Secteur;
   signeExtra: boolean;
   signeRestaurant: boolean;
 }

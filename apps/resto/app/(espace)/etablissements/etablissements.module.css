@@ -1,0 +1,43 @@
+.carte {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--k-rayon-pilule);
+  background: var(--k-creme);
+  font: var(--k-badge-font);
+  letter-spacing: var(--k-badge-ls);
+  color: var(--k-basalte);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 8px;
+}
+.bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ajouter {
+  align-self: flex-start;
+}

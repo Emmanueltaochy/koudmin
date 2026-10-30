@@ -119,11 +119,11 @@ set role authenticated;
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
 select noter_mission((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'confirmee'), true, 5::smallint, true, 'Très bien');
 select count(*) as favoris from favoris;
-select mois = to_char(jour_reunion() - 2, 'YYYY-MM') as bon_mois, mises_en_relation, montant_ht_centimes, tva_pour_mille from factures_restaurant();
+select mois = to_char(jour_reunion() - 2, 'YYYY-MM') as bon_mois, mises_en_relation, montant_ht_centimes, tva_pour_mille from factures_restaurant('00000000-0000-0000-0000-00000000b001');
 \echo '--- Absent : non facturé, retiré des favoris'
 select noter_mission((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d001' and statut = 'terminee'), false, null, true, null);
 select count(*) as favoris from favoris;
-select count(*) as lignes_facture from factures_restaurant();
+select count(*) as lignes_facture from factures_restaurant('00000000-0000-0000-0000-00000000b001');
 \echo '--- Disponibilités de Kévin, invisibles pour Maëlle'
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 insert into disponibilites (extra_id, jour, creneau) values ('00000000-0000-0000-0000-0000000000e1', jour_reunion() + 1, 'soir');
@@ -214,8 +214,11 @@ select creer_restaurant('Chez Lucette', '73282932000075', '12 rue du Port', '974
 \set ON_ERROR_STOP 1
 select creer_restaurant('  Chez Lucette ', '732 829 320 00074', '12 rue du Port', '97420', 'Le Port', -20.93, 55.29) is not null as restaurant_cree;
 select nom, telephone, siret, commune from restaurants;
+\echo '--- Deuxième établissement (centre de vacances) pour le même compte'
+select creer_etablissement('Les Filaos', '44306184100047', 'loisirs_vacances', '1 rue', '97420', 'Le Port', -20.93, 55.29) is not null as second_site;
+select nom, secteur, role from mes_etablissements();
 \set ON_ERROR_STOP 0
-select creer_restaurant('Deuxième', '44306184100047', '1 rue', '97420', 'Le Port', -20.93, 55.29);
+select creer_etablissement('Garage', '55210055400013', 'reparation_auto', '1 rue', '97420', 'Le Port', -20.93, 55.29);
 insert into extras (id, prenom, nom, telephone, commune, lat, lng) values
   ('00000000-0000-0000-0000-0000000000a2', 'Lucette', 'Hoarau', '+262692000077', 'Le Port', -20.93, 55.29);
 \set ON_ERROR_STOP 1
@@ -227,4 +230,44 @@ set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 \set ON_ERROR_STOP 0
 select creer_restaurant('Kévin bar', '44306184100047', '1 rue', '97460', 'Saint-Paul', -21.0, 55.27);
 \set ON_ERROR_STOP 1
+reset role;
+\echo '--- Plusieurs utilisateurs : Lucette invite un mobile en équipe'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a2';
+select inviter_membre(id, '+262692000099', 'equipe') from restaurants where nom = 'Chez Lucette';
+\set ON_ERROR_STOP 0
+select inviter_membre(id, '+262692000001', 'equipe') from restaurants where nom = 'Chez Lucette';
+select inviter_membre(id, '0692000099', 'equipe') from restaurants where nom = 'Chez Lucette';
+\set ON_ERROR_STOP 1
+select telephone, role, en_attente from equipe_etablissement((select id from restaurants where nom = 'Chez Lucette'));
+reset role;
+insert into auth.users (id, phone) values ('00000000-0000-0000-0000-0000000000a4', '262692000099');
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a4';
+\echo '--- Le membre rejoint l''établissement à sa connexion ; il voit ses demandes, pas les factures'
+select accepter_invitations() as rejoint;
+select nom, role from mes_etablissements();
+select count(*) as factures_equipe from factures_restaurant((select id from restaurants where nom = 'Chez Lucette'));
+\set ON_ERROR_STOP 0
+select inviter_membre(id, '+262692000098', 'equipe') from restaurants where nom = 'Chez Lucette';
+\set ON_ERROR_STOP 1
+\echo '--- Demande : métier du secteur accepté, métier hors secteur refusé'
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+select id, 'cuisine', jour_reunion() + 3, 660, 900, '12 rue du Port', 'Le Port', -20.93, 55.29
+from restaurants where nom = 'Chez Lucette' returning poste;
+\set ON_ERROR_STOP 0
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+select id, 'animation', jour_reunion() + 3, 660, 900, '12 rue du Port', 'Le Port', -20.93, 55.29
+from restaurants where nom = 'Chez Lucette';
+\set ON_ERROR_STOP 1
+\echo '--- Le Boucan ne voit pas l''établissement de Lucette'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select count(*) as visibles from restaurants where nom = 'Chez Lucette';
+\echo '--- Le dernier gérant ne peut pas être retiré ; le membre d''équipe, si'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a2';
+\set ON_ERROR_STOP 0
+select retirer_membre(id, '00000000-0000-0000-0000-0000000000a2') from restaurants where nom = 'Chez Lucette';
+\set ON_ERROR_STOP 1
+select retirer_membre(id, '00000000-0000-0000-0000-0000000000a4') from restaurants where nom = 'Chez Lucette';
+select count(*) as membres from equipe_etablissement((select id from restaurants where nom = 'Chez Lucette'));
 reset role;

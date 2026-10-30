@@ -2,7 +2,7 @@ import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
-import { trouverCommune, type MissionResume, type Poste } from '@kivien/core';
+import { estSecteur, SECTEUR_PAR_DEFAUT, trouverCommune, type MissionResume, type Poste } from '@kivien/core';
 import {
   ErreurReseau,
   type CleDispo,
@@ -160,6 +160,8 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
         affectation_id: string;
         employeur: string;
         adresse_employeur: string;
+        siret: string | null;
+        secteur: string;
         signe_extra: boolean;
         signe_restaurant: boolean;
       }[];
@@ -169,6 +171,8 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
             affectationId: l.affectation_id,
             employeur: l.employeur,
             adresseEmployeur: l.adresse_employeur,
+            siretEmployeur: l.siret,
+            secteur: estSecteur(l.secteur) ? l.secteur : SECTEUR_PAR_DEFAUT,
             signeExtra: l.signe_extra,
             signeRestaurant: l.signe_restaurant,
           }

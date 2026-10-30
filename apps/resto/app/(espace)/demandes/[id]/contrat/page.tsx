@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Suspense, useRef, useState } from 'react';
 import { ArrowUpRight, Check, ChevronLeft } from 'lucide-react';
-import { formatHeure, redigerContrat, textesEcrans } from '@kivien/core';
+import { formatHeure, formatSiret, redigerContrat, textesEcrans } from '@kivien/core';
 import { PaveSignature, type PaveSignatureRef } from '@/components/PaveSignature';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
@@ -21,7 +21,9 @@ function Contrat() {
   const { id } = useParams<{ id: string }>();
   const affectationId = useSearchParams().get('affectation');
   const { etat } = useDonnees(async (src) => {
-    const [demande, restaurant] = await Promise.all([src.demande(id), src.restaurant()]);
+    const [demande, etablissements] = await Promise.all([src.demande(id), src.etablissements()]);
+    // L'employeur est l'établissement de la demande, pas forcément celui affiché.
+    const restaurant = etablissements.find((r) => r.id === demande?.restaurantId) ?? (await src.restaurant());
     return { demande, restaurant };
   }, [id]);
   const pave = useRef<PaveSignatureRef>(null);
@@ -48,8 +50,9 @@ function Contrat() {
     employeur: {
       nom: restaurant.nom,
       adresse: restaurant.adresse?.libelle ?? `${d.adresse}, ${d.codePostal ?? ''} ${d.commune}`,
-      siret: null,
+      siret: restaurant.siret ? formatSiret(restaurant.siret) : null,
     },
+    secteur: restaurant.secteur,
     salarie: { prenom: extra.prenom, nom: extra.nom, dateNaissance: null, lieuNaissance: null, adresse: null },
     poste: d.poste,
     jour: d.jour,

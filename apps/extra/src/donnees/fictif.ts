@@ -1,4 +1,4 @@
-import { ajouterJours, aujourdhuiReunion, type MissionResume } from '@kivien/core';
+import { ajouterJours, aujourdhuiReunion, SECTEUR_PAR_DEFAUT, type MissionResume } from '@kivien/core';
 import type {
   CleDispo,
   ContratExtra,
@@ -105,6 +105,8 @@ export function sourceFictive(): SourceDonnees {
         affectationId: `a-${demandeId}`,
         employeur: m.restaurant,
         adresseEmployeur: `${c.lieu.adresse}, ${c.lieu.codePostal} ${m.commune}`,
+        siretEmployeur: null,
+        secteur: SECTEUR_PAR_DEFAUT,
         signeExtra: signes.has(demandeId),
         signeRestaurant: false,
       };

@@ -113,3 +113,13 @@ export function bornesMission(jour: JourISO, debut: number, fin: number): { debu
   const f = minuit + (fin > debut ? fin : fin + 24 * 60) * 60_000;
   return { debut: d, fin: f };
 }
+
+/** Lundi de la semaine du jour donné (semaine du lundi au dimanche). */
+export function lundiDeLaSemaine(jour: JourISO): JourISO {
+  return ajouterJours(jour, -((jourSemaine(jour) + 6) % 7));
+}
+
+/** Les 7 jours d'une semaine, du lundi au dimanche. */
+export function joursDeLaSemaine(lundi: JourISO): JourISO[] {
+  return Array.from({ length: 7 }, (_, i) => ajouterJours(lundi, i));
+}

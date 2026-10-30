@@ -25,8 +25,13 @@ cat "$DIR/scenario.log"
 
 # Le scénario provoque exactement ces refus ; toute autre erreur (ou un refus manquant) fait échouer.
 attendues='Adresse e-mail invalide
-Ce compte a déjà un établissement
 Ce compte est un compte extra
+Ce numéro est un compte extra
+Au moins un gérant requis
+Métier non autorisé pour ce secteur
+Numéro de mobile invalide
+Réservé au gérant
+Secteur non autorisé
 Numéro SIRET invalide
 SIRET déjà inscrit
 new row violates row-level security policy for table "extras"
@@ -44,4 +49,4 @@ if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (14 refus attendus)."
+echo "Scénario SQL conforme (20 refus attendus)."

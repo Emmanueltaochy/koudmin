@@ -5,6 +5,7 @@ import { sourceSupabase } from './supabase';
 import type { SourceResto } from './source';
 
 export * from './source';
+export { choisirEtablissement, ecouterEtablissement } from './etablissementCourant';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const cle = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

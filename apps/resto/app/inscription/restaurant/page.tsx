@@ -10,8 +10,10 @@ import {
   validerInscriptionResto,
   type ErreursInscriptionResto,
   type SaisieInscriptionResto,
+  type Secteur,
 } from '@kivien/core';
 import { ChampAdresse } from '@/components/ChampAdresse';
+import { ChoixSecteur } from '@/components/ChoixSecteur';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
@@ -25,10 +27,10 @@ const tc = textesEcrans.connexion;
 
 type Erreurs = ErreursInscriptionResto & { general?: string };
 
-/** Inscription d'un restaurant, hôtel ou bar : compte actif tout de suite, SIRET obligatoire. */
+/** Inscription d'un établissement : compte actif tout de suite, SIRET et secteur obligatoires. */
 export default function InscriptionRestaurant() {
   const router = useRouter();
-  const [saisie, setSaisie] = useState({ etablissement: '', adresse: '', siret: '', telephone: '', motDePasse: '' });
+  const [saisie, setSaisie] = useState({ etablissement: '', secteur: '' as Secteur | '', adresse: '', siret: '', telephone: '', motDePasse: '' });
   const [adresseGeo, setAdresseGeo] = useState<AdresseGeo | null>(null);
   const [erreurs, setErreurs] = useState<Erreurs>({});
   const [tente, setTente] = useState(false);
@@ -47,6 +49,7 @@ export default function InscriptionRestaurant() {
 
   const pourValidation = (v: typeof saisie, geo: AdresseGeo | null): SaisieInscriptionResto => ({
     etablissement: v.etablissement,
+    secteur: v.secteur,
     adresseChoisie: !!geo && geo.libelle === v.adresse,
     siret: v.siret,
     telephone: v.telephone,
@@ -64,11 +67,18 @@ export default function InscriptionRestaurant() {
     setTente(true);
     const err: Erreurs = validerInscriptionResto(pourValidation(saisie, adresseGeo), compteOuvert);
     setErreurs(err);
-    if (Object.keys(err).length || !adresseGeo) return;
+    if (Object.keys(err).length || !adresseGeo || !saisie.secteur) return;
     setEnvoi(true);
     try {
       const r = await inscrireRestaurateur(
-        { telephone: saisie.telephone, motDePasse: saisie.motDePasse, etablissement: saisie.etablissement, siret: saisie.siret, adresse: adresseGeo },
+        {
+          telephone: saisie.telephone,
+          motDePasse: saisie.motDePasse,
+          etablissement: saisie.etablissement,
+          secteur: saisie.secteur,
+          siret: saisie.siret,
+          adresse: adresseGeo,
+        },
         compteOuvert,
       );
       if (r === 'ok') {
@@ -96,7 +106,7 @@ export default function InscriptionRestaurant() {
     setEnvoi(false);
   }
 
-  const champ = (id: keyof typeof saisie, erreur: string | undefined, aide: string | undefined, props: React.InputHTMLAttributes<HTMLInputElement>) => (
+  const champ = (id: Exclude<keyof typeof saisie, 'secteur'>, erreur: string | undefined, aide: string | undefined, props: React.InputHTMLAttributes<HTMLInputElement>) => (
     <>
       <span className={ui.champ} data-erreur={!!erreur}>
         <input
@@ -130,6 +140,19 @@ export default function InscriptionRestaurant() {
             {ti.etablissement}
           </label>
           {champ('etablissement', erreurs.etablissement, undefined, { autoComplete: 'organization', maxLength: 120 })}
+        </div>
+        <div className={s.bloc}>
+          <label htmlFor="secteur" className={ui.corpsFort}>
+            {ti.secteur}
+          </label>
+          <ChoixSecteur
+            id="secteur"
+            valeur={saisie.secteur}
+            erreur={erreurs.secteur}
+            aide={ti.secteurAide}
+            desactive={envoi}
+            onChange={(secteur) => modifier({ secteur })}
+          />
         </div>
         <div className={s.bloc}>
           <label htmlFor="adresse" className={ui.corpsFort}>

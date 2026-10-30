@@ -6,10 +6,13 @@ const { chromium } = require('playwright');
 const URL_SITE = process.env.URL_SITE ?? 'http://localhost:3000';
 const CAPTURES = process.env.CAPTURES;
 
+let pageCourante = null;
+
 (async () => {
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'fr-FR' });
   const p = await ctx.newPage();
+  pageCourante = p;
   // Heure figée à 14 h (La Réunion), date du jour : les missions « ce soir » restent à venir,
   // le parcours donne le même résultat quelle que soit l'heure du lancement.
   const jourReunion = new Date(Date.now() + 4 * 3600e3).toISOString().slice(0, 10);
@@ -50,12 +53,14 @@ const CAPTURES = process.env.CAPTURES;
   await p.waitForURL(URL_SITE + '/inscription/restaurant');
   await p.getByRole('button', { name: 'Créer mon compte' }).click();
   await p.getByText("Indiquez le nom de l'établissement.").waitFor();
+  await p.getByText("Choisissez le secteur d'activité.").waitFor();
   await p.getByText("Choisissez l'adresse dans la liste.").waitFor();
   await p.getByText('Vérifiez le numéro SIRET : 14 chiffres.').waitFor();
   await p.getByText('Choisissez un mot de passe de 8 caractères minimum.').waitFor(); ok('inscription : champs obligatoires');
   await p.locator('#etablissement').fill('Le Cari Péi');
+  await p.locator('#secteur').selectOption('hotellerie_restauration');
   await p.locator('#adresse').fill('22 rue Labourdonnais Saint-Paul');
-  await p.getByRole('option').first().click();
+  await p.locator('ul[role="listbox"] [role="option"]').first().click();
   await p.locator('#siret').fill('73282932000075');
   await p.locator('#telephone').fill('0692 11 22 33');
   await p.locator('#mot-de-passe').fill('kivien974');
@@ -92,7 +97,7 @@ const CAPTURES = process.env.CAPTURES;
   await p.getByText('1 champ à compléter.').waitFor(); ok('le résumé se met à jour pendant la correction');
   await adresse.fill('22 rue Labourdonnais Saint-Paul');
   await p.getByRole('option').first().waitFor({ timeout: 10000 });
-  await p.getByRole('option').first().click(); ok('proposition d’adresse choisie (Géoplateforme)');
+  await p.locator('ul[role="listbox"] [role="option"]').first().click(); ok('proposition d’adresse choisie (Géoplateforme)');
   await p.getByRole('button', { name: 'Un extra de moins' }).click();
   await p.getByText('Versé par vous à l\'extra', { exact: false }).waitFor(); ok('récapitulatif recalculé pour 1 extra');
   await p.locator('#debut').fill('2000');
@@ -107,7 +112,7 @@ const CAPTURES = process.env.CAPTURES;
   await p.getByText('Recherche en cours').first().waitFor(); ok('suivi : recherche en cours');
   await capture('suivi-recherche');
   await p.getByText('Maëlle a dit mi lé la. Arrivée prévue à 20 h.').waitFor({ timeout: 12000 }); ok('temps réel : « Maëlle a dit mi lé la. Arrivée prévue à 20 h. »');
-  await p.getByText("Plonge, Commis · Moins d'un an de métier · Français, Créole, Anglais").waitFor();
+  await p.getByText("Commis, Plonge · Moins d'un an de métier · Français, Créole, Anglais").waitFor();
   await p.getByText("« Rapide en plonge, à l'aise en cuisine. »").waitFor();
   await p.getByRole('img', { name: 'Photo de Maëlle' }).waitFor(); ok('suivi : profil de Maëlle (postes, expérience, langues, présentation, initiales)');
   await capture('suivi-trouve');
@@ -156,7 +161,7 @@ const CAPTURES = process.env.CAPTURES;
   await p.getByText('TVA 8,5 %').waitFor(); ok('facture : TVA 8,5 %');
   await capture('facture');
   await p.goto(URL_SITE + '/historique');
-  await p.getByText('Le', { exact: false }).first().waitFor();
+  await p.getByRole('heading', { name: 'Historique' }).waitFor();
   await capture('historique');
 
   // Photo de l'extra côté restaurateur
@@ -184,10 +189,69 @@ const CAPTURES = process.env.CAPTURES;
   await p.getByRole('button', { name: 'Se connecter' }).click();
   await p.waitForURL(URL_SITE + '/espace'); ok('connexion par mot de passe (démo)');
 
+  // Suivi : appeler ou écrire à l'extra en un geste.
+  await p.goto(URL_SITE + '/demandes/d001');
+  if ((await p.getByRole('link', { name: 'Écrire' }).getAttribute('href')) !== 'sms:+262692000001') throw new Error('lien Écrire');
+  ok('suivi : boutons Appeler et Écrire (SMS)');
+
+  // Planning de la semaine : Kévin ce soir, avec ses boutons de contact.
+  await p.setViewportSize({ width: 1440, height: 900 });
+  await p.goto(URL_SITE + '/espace');
+  const menu = p.locator('nav[aria-label="Navigation principale"]').last();
+  await menu.getByRole('link', { name: 'Planning', exact: true }).click();
+  await p.waitForURL(URL_SITE + '/planning');
+  await p.getByRole('table').getByText('Kévin Hoarau').waitFor();
+  await p.getByRole('table').getByRole('link', { name: 'Appeler Kévin' }).waitFor(); ok('planning : grille de la semaine, contact de Kévin');
+  await capture('planning');
+  await p.getByRole('button', { name: 'Semaine suivante' }).click();
+  await p.getByRole('button', { name: 'Cette semaine' }).waitFor(); ok('planning : semaine suivante');
+
+  // Plusieurs établissements : le village vacances n'a que les métiers de son secteur.
+  await menu.locator('select').selectOption({ label: 'Village vacances Les Filaos' });
+  await menu.getByRole('link', { name: 'Accueil', exact: true }).click();
+  await p.getByRole('heading', { name: 'Village vacances Les Filaos' }).waitFor(); ok('choix de l’établissement : Les Filaos affiché');
+  await menu.getByRole('link', { name: 'Demander un extra', exact: true }).click();
+  await p.getByRole('radio', { name: 'Animation' }).waitFor();
+  if (await p.getByRole('radio', { name: 'Salle' }).count()) throw new Error('métier hors secteur proposé');
+  ok('demande : métiers du secteur loisirs et vacances seulement');
+  await menu.getByRole('link', { name: 'Établissements', exact: true }).click();
+  await p.getByText('Centres de loisirs et de vacances').waitFor();
+  await p.getByRole('button', { name: 'Ajouter un établissement' }).click();
+  await p.locator('section').getByRole('button', { name: 'Ajouter un établissement' }).click();
+  await p.getByText("Choisissez le secteur d'activité.").waitFor(); ok('établissements : ajout, champs obligatoires');
+  await p.locator('#nouvel-nom').fill('Ti Kaz Bar');
+  await p.locator('#nouvel-secteur').selectOption('hotellerie_restauration');
+  await p.locator('#nouvel-siret').fill('35600000000042');
+  await p.locator('#nouvel-adresse').fill('22 rue Labourdonnais Saint-Paul');
+  await p.locator('ul[role="listbox"] [role="option"]').first().click();
+  await p.locator('section').getByRole('button', { name: 'Ajouter un établissement' }).click();
+  await p.getByText('Établissement ajouté.').waitFor();
+  await p.locator('main').getByText('Ti Kaz Bar').waitFor(); ok('établissements : Ti Kaz Bar ajouté et affiché');
+  await capture('etablissements');
+  await menu.locator('select').selectOption({ label: 'Le Boucan Grillé' });
+
+  // Utilisateurs : invitation par mobile, puis la personne invitée crée son accès.
+  await menu.getByRole('link', { name: 'Utilisateurs', exact: true }).click();
+  await p.getByText('0693 44 55 66').waitFor();
+  await p.locator('#invitation-mobile').fill('0692 99 88 77');
+  await p.getByRole('button', { name: 'Inviter' }).click();
+  await p.getByText('Invitation enregistrée.', { exact: false }).waitFor();
+  await p.getByText('0692 99 88 77').waitFor(); ok('utilisateurs : invitation enregistrée, en attente');
+  await p.locator('#invitation-mobile').fill('0692 00 00 01');
+  await p.getByRole('button', { name: 'Inviter' }).click();
+  await p.getByText('Ce numéro est un compte extra.').waitFor(); ok('utilisateurs : compte extra refusé');
+  await capture('utilisateurs');
+  await p.goto(URL_SITE + '/invitation');
+  await p.locator('#telephone').fill('0693 44 55 66');
+  await p.locator('#mot-de-passe').fill('kivien974');
+  await p.getByRole('button', { name: 'Créer mon accès' }).click();
+  await p.waitForURL(URL_SITE + '/espace'); ok('invitation : accès créé, espace ouvert');
+  await p.setViewportSize({ width: 390, height: 844 });
+
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/inscription', '/inscription/restaurant', '/connexion', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
@@ -202,7 +266,8 @@ const CAPTURES = process.env.CAPTURES;
   }
   console.log('aucune erreur console');
   await b.close();
-})().catch((e) => {
+})().catch(async (e) => {
   console.log('ÉCHEC ' + e.message.split('\n')[0]);
+  if (CAPTURES && pageCourante) await pageCourante.screenshot({ path: `${CAPTURES}/echec.png`, fullPage: true }).catch(() => undefined);
   process.exit(1);
 });

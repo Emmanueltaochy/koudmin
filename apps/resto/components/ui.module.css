@@ -136,7 +136,8 @@
   padding: 0 15px;
 }
 .champ input,
-.champ textarea {
+.champ textarea,
+.champ select {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -148,6 +149,11 @@
 .champ textarea::placeholder {
   color: var(--k-galet);
   font: var(--k-corps-font);
+}
+.champ select {
+  min-height: calc(var(--k-champ-hauteur) - 2px);
+  color: var(--k-basalte);
+  cursor: pointer;
 }
 .messageErreur {
   font: var(--k-legende-forte-font);
@@ -240,4 +246,24 @@
 
 .icone {
   flex: none;
+}
+
+/* Bouton rond à icône seule (appeler, écrire) : cible tactile de 44 px. */
+.contactCompact {
+  display: inline-flex;
+  gap: 8px;
+}
+.boutonIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--k-rayon-pilule);
+  border: 1px solid var(--k-galet);
+  background: var(--k-blanc);
+  color: var(--k-basalte);
+}
+.boutonIcone:hover {
+  border-color: var(--k-basalte);
 }

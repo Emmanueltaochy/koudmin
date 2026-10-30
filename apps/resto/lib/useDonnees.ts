@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ErreurReseau, source, type SourceResto } from './donnees';
+import { ecouterEtablissement, ErreurReseau, source, type SourceResto } from './donnees';
 
 export type Etat<T> =
   | { statut: 'chargement' }
@@ -30,7 +30,13 @@ export function useDonnees<T>(charger: (s: SourceResto) => Promise<T>, cles: unk
 
   useEffect(() => {
     void recharger();
-    return source().ecouter(() => void recharger(true));
+    const arreter = source().ecouter(() => void recharger(true));
+    // Autre établissement choisi : rechargement complet.
+    const arreterChoix = ecouterEtablissement(() => void recharger());
+    return () => {
+      arreter();
+      arreterChoix();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, cles);
 

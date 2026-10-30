@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { EnTete } from '@/components/EnTete';
 import { Garde } from '@/components/Garde';
+import s from './espace.module.css';
 
 export default function EspaceLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +9,7 @@ export default function EspaceLayout({ children }: { children: React.ReactNode }
       <Suspense>
         <EnTete />
       </Suspense>
-      <main>{children}</main>
+      <main className={s.contenu}>{children}</main>
     </Garde>
   );
 }

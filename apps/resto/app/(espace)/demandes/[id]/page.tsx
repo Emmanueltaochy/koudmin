@@ -3,14 +3,13 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronLeft, Clock, FileText, MapPin, Phone, Shirt } from 'lucide-react';
+import { Check, ChevronLeft, Clock, FileText, MapPin, Shirt } from 'lucide-react';
 import {
   dateLongue,
   dureeMinutes,
   formatEuros,
   formatHeure,
   formatHT,
-  formatMobileReunion,
   formatPlage,
   legendeFrais,
   legendeSalaires,
@@ -24,6 +23,7 @@ import {
 } from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { AvatarExtra } from '@/components/AvatarExtra';
+import { ContactExtra } from '@/components/ContactExtra';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import { source, type DemandeSuivi } from '@/lib/donnees';
@@ -139,10 +139,7 @@ export default function SuiviDemande() {
                     : ts.contratASigner}
               </span>
               <div className={s.actions}>
-                <a href={`tel:${e.telephone}`} className={ui.boutonSecondaire}>
-                  <Phone size={18} strokeWidth={2} aria-hidden />
-                  {ts.appeler} {formatMobileReunion(e.telephone)}
-                </a>
+                <ContactExtra prenom={e.prenom} telephone={e.telephone} />
                 {phase === 'aNoter' && !e.notation && (
                   <Link href={`/demandes/${d.id}/notation?affectation=${e.affectationId}`} className={ui.lien}>
                     {ts.noter}
