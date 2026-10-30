@@ -157,7 +157,7 @@ def lire_page(url):
 def courriel_du_site(site):
     if not re.match(r"^https?://", site):
         site = "https://" + site
-    hote = (urllib.parse.urlparse(site).hostname or "").removeprefix("www.")
+    hote = re.sub(r"^www\.", "", urllib.parse.urlparse(site).hostname or "")
     if re.search(r"(facebook|instagram|tripadvisor|booking|airbnb|google)\.", hote):
         return None
     base = site.rstrip("/")
