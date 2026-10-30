@@ -77,6 +77,22 @@ const SELECTION = `id, restaurant_id, poste, intitule, description_poste, jour, 
     contrats ( signe_restaurant_le, signe_extra_le ),
     notations ( present, note ) )`;
 
+/**
+ * Toutes les lignes d'une fonction de la base : le serveur en renvoie 1 000 au plus par appel
+ * (PGRST_DB_MAX_ROWS), d'où la lecture par pages.
+ */
+async function toutesLesLignes<T>(page: (debut: number, fin: number) => PromiseLike<{ data: unknown; error: { message: string } | null }>): Promise<T[]> {
+  const TAILLE = 1000;
+  const lignes: T[] = [];
+  for (let debut = 0; ; debut += TAILLE) {
+    const r = await page(debut, debut + TAILLE - 1);
+    if (r.error) verifier(r);
+    const morceau = (r.data ?? []) as T[];
+    lignes.push(...morceau);
+    if (morceau.length < TAILLE) return lignes;
+  }
+}
+
 function verifier<T>(r: { data: T | null; error: { message: string } | null }): T {
   if (r.error) {
     if (/network|fetch/i.test(r.error.message)) throw new ErreurReseau(r.error.message);
@@ -287,7 +303,7 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         return verifier({ data, error }) as TableauAdmin;
       },
       async etablissements() {
-        const l = verifier(await client.rpc('admin_etablissements')) as {
+        const l = (await toutesLesLignes((debut, fin) => client.rpc('admin_etablissements').range(debut, fin))) as {
           id: string; nom: string; commune: string | null; lat: number | null; lng: number | null; secteur: string; siret: string | null;
           telephone: string | null; inscrit_le: string; utilisateurs: number; demandes: number; places_pourvues: number;
           frais_ht_centimes: number; derniere_demande: string | null;
@@ -299,7 +315,7 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         }));
       },
       async extras() {
-        const l = verifier(await client.rpc('admin_extras')) as {
+        const l = (await toutesLesLignes((debut, fin) => client.rpc('admin_extras').range(debut, fin))) as {
           id: string; prenom: string; nom: string; telephone: string; commune: string; competences: Poste[] | null; experience: string | null;
           a_voiture: boolean; inscrit_le: string; missions: number; absences: number; desistements: number; note_moyenne: number | null;
           dispo_7_jours: boolean; avec_photo: boolean;
@@ -325,11 +341,11 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
             : null;
         },
         async prospects() {
-          const l = verifier(await client.rpc('admin_prospects')) as {
+          const l = await toutesLesLignes<{
             id: string; nom: string; categorie: Prospect['categorie']; commune: string | null; adresse: string | null;
             lat: number | null; lng: number | null; telephone: string | null; email: string | null; source_email: Prospect['sourceEmail']; site: string | null;
             statut: Prospect['statut']; notes: string | null; desinscrit: boolean; dernier_envoi: string | null; envois: number;
-          }[];
+          }>((debut, fin) => client.rpc('admin_prospects').range(debut, fin));
           return l.map((p) => ({
             id: p.id, nom: p.nom, categorie: p.categorie, commune: p.commune, adresse: p.adresse, lat: p.lat, lng: p.lng,
             telephone: p.telephone, email: p.email, sourceEmail: p.source_email, site: p.site, statut: p.statut, notes: p.notes, desinscrit: p.desinscrit,
