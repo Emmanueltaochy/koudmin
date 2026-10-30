@@ -52,7 +52,7 @@ $P -d k -f "$RACINE/supabase/tests/stub-supabase.sql" 2>/dev/null
 for f in "$RACINE"/supabase/migrations/*.sql; do $P -d k -f "$f"; done
 sleep 1
 
-export KIVIEN_PSQL="psql -h $DIR -p $PORT -U postgres -d k" KIVIEN_SOURCE="$RACINE"
+export KIVIEN_PSQL="psql -h $DIR -p $PORT -U postgres -d k" KIVIEN_SOURCE="$RACINE" KIVIEN_OVERPASS_PAUSE=0
 export no_proxy="127.0.0.1,localhost${no_proxy:+,$no_proxy}" NO_PROXY="127.0.0.1,localhost${NO_PROXY:+,$NO_PROXY}"
 
 echo "--- 1. Premier serveur en panne, le second répond ; e-mail trouvé sur la page contact"
@@ -77,4 +77,10 @@ $P -d k -c "insert into recherches_prospects default values"
 KIVIEN_OVERPASS="http://127.0.0.1:$PORT_WEB/overpass" bash "$RACINE/deploy/vps/recherche-prospects.sh" --si-demande
 [ "$($P -d k -At -c "select statut from recherches_prospects order by demandee_le desc limit 1")" = terminee ] \
   || { echo "ÉCHEC : demande non traitée" >&2; exit 1; }
+echo "--- 4. Recherche en échec depuis plus de 30 min : relancée seule par le minuteur"
+$P -d k -c "update recherches_prospects set demandee_le = now() - interval '2 hours'"
+$P -d k -c "insert into recherches_prospects (statut, demandee_le, fin_le, erreur) values ('echouee', now() - interval '1 hour', now() - interval '1 hour', 'HTTP Error 504')"
+KIVIEN_OVERPASS="http://127.0.0.1:$PORT_WEB/overpass" bash "$RACINE/deploy/vps/recherche-prospects.sh" --si-demande
+[ "$($P -d k -At -c "select statut from recherches_prospects order by demandee_le desc limit 1")" = terminee ] \
+  || { echo "ÉCHEC : recherche échouée non relancée" >&2; exit 1; }
 echo "Recherche des établissements conforme."

@@ -4,8 +4,8 @@
 #
 # Une recherche peut durer plusieurs minutes : elle tourne ici, jamais dans le navigateur.
 #   --si-demande  (minuteur kivien-recherche-prospects.timer, chaque minute) : ne fait quelque chose
-#                 que si un administrateur a cliqué « Chercher », ou si rien n'a été cherché depuis
-#                 7 jours (rafraîchissement) ;
+#                 que si un administrateur a cliqué « Chercher », si rien n'a été cherché depuis
+#                 7 jours (rafraîchissement), ou pour relancer une recherche échouée (30 min après) ;
 #   --bilan       affiche la dernière recherche (appelé à chaque déploiement : visible dans GitHub) ;
 #   sans option   lance une recherche tout de suite.
 #
@@ -17,6 +17,7 @@ case "$MODE" in --si-demande | --bilan | maintenant) ;; *) echo "Usage : $0 [--s
 SOURCE=${KIVIEN_SOURCE:-/opt/kivien/source}
 
 MODE="$MODE" COMMUNES="$SOURCE/packages/core/src/communes.ts" KIVIEN_PSQL=${KIVIEN_PSQL:-} KIVIEN_OVERPASS=${KIVIEN_OVERPASS:-} \
+KIVIEN_OVERPASS_PAUSE=${KIVIEN_OVERPASS_PAUSE:-} \
 python3 -I - <<'PY'
 import html, json, math, os, re, secrets, subprocess, sys, time, urllib.parse, urllib.request
 
@@ -27,16 +28,19 @@ SERVEURS = os.environ.get("KIVIEN_OVERPASS", "").split() or [
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
 ]
-# Zone désignée de plusieurs façons : selon les données, la limite porte l'un ou l'autre code.
-ZONE = '(area["ISO3166-1"="RE"];area["ISO3166-2"="FR-974"];area["ISO3166-2"="FR-RE"];)->.a;'
-REQUETES = [
-    "[out:json][timeout:170];" + ZONE + """(
-  nwr["amenity"~"^(restaurant|bar|pub|biergarten|cafe|ice_cream|fast_food|food_court|nightclub)$"]["name"](area.a);
-);out center tags;""",
-    "[out:json][timeout:170];" + ZONE + """(
-  nwr["tourism"~"^(hotel|resort|motel|guest_house|hostel|camp_site|chalet|apartment)$"]["name"](area.a);
-);out center tags;""",
+# Petites requêtes (une par type, dans le cadre de l'île) : une seule grosse requête sur toute la
+# zone administrative dépasse le délai des serveurs publics (erreurs 502 / 504 du 30/10).
+CADRE = "-21.40,55.20,-20.85,55.85"
+SELECTEURS = [
+    '["amenity"="restaurant"]',
+    '["amenity"~"^(bar|pub|biergarten|nightclub)$"]',
+    '["amenity"~"^(cafe|ice_cream)$"]',
+    '["amenity"~"^(fast_food|food_court)$"]',
+    '["tourism"~"^(hotel|resort|motel)$"]',
+    '["tourism"~"^(guest_house|hostel|camp_site|chalet|apartment)$"]',
 ]
+REQUETES = [f"[out:json][timeout:60][bbox:{CADRE}];nwr{sel}[\"name\"];out center tags;" for sel in SELECTEURS]
+PAUSE = float(os.environ.get("KIVIEN_OVERPASS_PAUSE") or 30)
 PAR_AMENITY = {"restaurant": "restaurant", "bar": "bar", "pub": "bar", "biergarten": "bar", "cafe": "cafe",
                "ice_cream": "cafe", "fast_food": "restauration_rapide", "food_court": "restauration_rapide",
                "nightclub": "nuit"}
@@ -72,6 +76,12 @@ sql("""update recherches_prospects set statut = 'echouee', fin_le = now(), erreu
 if MODE == "--si-demande":
     rid = sql("select id from recherches_prospects where statut = 'demandee' order by demandee_le limit 1;")
     if not rid and not sql("select 1 from recherches_prospects where demandee_le > now() - interval '7 days' limit 1;"):
+        rid = sql("insert into recherches_prospects default values returning id;")
+    # Dernière recherche en échec (serveurs saturés) : relancée 30 min après, 6 fois par jour au plus.
+    if not rid and sql("""select 1 from (select statut, fin_le from recherches_prospects order by demandee_le desc limit 1) d
+                          where statut = 'echouee' and fin_le < now() - interval '30 minutes'
+                            and (select count(*) from recherches_prospects where statut = 'echouee'
+                                 and demandee_le > now() - interval '1 day') < 6;"""):
         rid = sql("insert into recherches_prospects default values returning id;")
     if not rid:
         raise SystemExit(0)
@@ -125,20 +135,24 @@ def fiche(e):
 
 
 def overpass(requete):
+    """Une requête, essayée sur chaque serveur ; un second tour après une pause si tous ont échoué."""
     echecs = []
-    for serveur in SERVEURS:
-        try:
-            demande = urllib.request.Request(serveur, data=urllib.parse.urlencode({"data": requete}).encode(),
-                                             headers={"User-Agent": AGENT, "Accept": "application/json"})
-            with urllib.request.urlopen(demande, timeout=200) as r:
-                reponse = json.load(r)
-            if reponse.get("remark") and not reponse.get("elements"):
-                raise RuntimeError(reponse["remark"][:120])
-            return reponse.get("elements") or []
-        except Exception as x:  # noqa: BLE001 — chaque échec est noté, le serveur suivant est essayé
-            echecs.append(f"{urllib.parse.urlparse(serveur).hostname} : {str(x)[:120]}")
-            time.sleep(5)
-    raise RuntimeError(" ; ".join(echecs))
+    for tour in range(2):
+        for serveur in SERVEURS:
+            try:
+                demande = urllib.request.Request(serveur, data=urllib.parse.urlencode({"data": requete}).encode(),
+                                                 headers={"User-Agent": AGENT, "Accept": "application/json"})
+                with urllib.request.urlopen(demande, timeout=120) as r:
+                    reponse = json.load(r)
+                if reponse.get("remark") and not reponse.get("elements"):
+                    raise RuntimeError(reponse["remark"][:120])
+                return reponse.get("elements") or []
+            except Exception as x:  # noqa: BLE001 — chaque échec est noté, le serveur suivant est essayé
+                echecs.append(f"{urllib.parse.urlparse(serveur).hostname} : {str(x)[:120]}")
+                time.sleep(min(PAUSE, 5))
+        if tour == 0:
+            time.sleep(PAUSE)
+    raise RuntimeError(" ; ".join(echecs[-len(SERVEURS):]))
 
 
 # --- E-mails sur les sites des établissements -------------------------------------------------
@@ -178,6 +192,7 @@ try:
     elements = []
     for requete in REQUETES:
         elements += overpass(requete)
+        time.sleep(min(PAUSE, 2))  # usage raisonnable des serveurs publics
     fiches, vus = [], set()
     for e in elements:
         f = fiche(e)
