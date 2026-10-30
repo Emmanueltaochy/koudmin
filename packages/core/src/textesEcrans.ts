@@ -50,6 +50,7 @@ export const textesEcrans = {
       photoDe: 'Photo de',
       presentationExtra: 'En quelques mots',
       ecrire: 'Écrire',
+      contratEtDpae: 'Contrat et DPAE',
     },
     menu: {
       missions: 'Missions',

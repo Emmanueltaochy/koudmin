@@ -136,6 +136,10 @@ let pageCourante = null;
   if (lien !== 'https://www.net-entreprises.fr/declaration/dpae/') throw new Error('lien DPAE ' + lien);
   ok('lien DPAE vers net-entreprises.fr');
   await capture('contrat-signe');
+  // Contrat signé : on le retrouve depuis le suivi, avec les infos de la DPAE.
+  await p.goto(URL_SITE + new URL(p.url()).pathname.replace(/\/contrat$/, ''));
+  await p.getByRole('link', { name: 'Contrat et DPAE' }).first().click();
+  await p.getByRole('link', { name: 'Faire la DPAE' }).waitFor(); ok('suivi : contrat signé et DPAE accessibles');
 
   // Notation de la mission d'hier
   await p.goto(URL_SITE + '/espace');

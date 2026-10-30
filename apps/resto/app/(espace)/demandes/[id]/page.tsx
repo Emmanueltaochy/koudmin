@@ -145,6 +145,11 @@ export default function SuiviDemande() {
                     {ts.noter}
                   </Link>
                 )}
+                {e.contratSigneRestaurant && (
+                  <Link href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`} className={ui.lien}>
+                    <FileText size={16} strokeWidth={2} aria-hidden /> {ts.contratEtDpae}
+                  </Link>
+                )}
                 {!e.contratSigneRestaurant && e !== premierASigner && e.statut === 'confirmee' && (
                   <Link href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`} className={ui.lien}>
                     {ts.signerContrat}
