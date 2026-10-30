@@ -95,7 +95,7 @@ export function sourceFictive(): SourceDonnees {
     async mesMissions(): Promise<MissionConfirmee[]> {
       return missionsFictives()
         .filter((m) => confirmees.has(m.id))
-        .map((m) => ({ ...m, contratSigne: signes.has(m.id) }));
+        .map((m) => ({ ...m, contratSigne: signes.has(m.id), annulee: false }));
     },
     async contrat(demandeId): Promise<ContratExtra | null> {
       const m = missionsFictives().find((x) => x.id === demandeId);

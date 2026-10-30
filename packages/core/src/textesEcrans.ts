@@ -330,6 +330,8 @@ export const textesEcrans = {
       erreurLecture: 'Coche la case pour confirmer.',
     },
     missionsConfirmees: 'Tes missions confirmées',
+    missionAnnulee: "L'entreprise a annulé la mission.",
+    missionAnnuleeAide: 'Rien à faire de ton côté. Tu peux choisir une autre mission.',
     bandeau: {
       titre: (n: number) => (n > 0 ? `${n} mission${n > 1 ? 's' : ''} près de chez toi` : 'Des missions près de chez toi'),
       texte: 'Tu choisis, tu dis mi lé la, ton contrat arrive tout seul.',

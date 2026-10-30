@@ -271,3 +271,17 @@ select retirer_membre(id, '00000000-0000-0000-0000-0000000000a2') from restauran
 select retirer_membre(id, '00000000-0000-0000-0000-0000000000a4') from restaurants where nom = 'Chez Lucette';
 select count(*) as membres from equipe_etablissement((select id from restaurants where nom = 'Chez Lucette'));
 reset role;
+\echo '--- Annulation après acceptation : Kévin voit la mission annulée et ne peut plus signer'
+select d.id as dcuisine from demandes d join restaurants r on r.id = d.restaurant_id
+where r.nom = 'Chez Lucette' and d.poste = 'cuisine' \gset
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select accepter_mission(:'dcuisine');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a2';
+update demandes set statut = 'annulee' where id = :'dcuisine';
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select restaurant, annulee from mes_missions() where restaurant = 'Chez Lucette';
+\set ON_ERROR_STOP 0
+select signer_contrat((select affectation_id from contrat_extra(:'dcuisine')), repeat('k', 200));
+\set ON_ERROR_STOP 1
+reset role;

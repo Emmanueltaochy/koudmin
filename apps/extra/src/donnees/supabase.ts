@@ -152,8 +152,8 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       };
     },
     async mesMissions(): Promise<MissionConfirmee[]> {
-      const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean })[];
-      return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe }));
+      const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean; annulee: boolean })[];
+      return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe, annulee: l.annulee }));
     },
     async contrat(demandeId): Promise<ContratExtra | null> {
       const lignes = verifier(await client.rpc('contrat_extra', { p_demande: demandeId })) as {

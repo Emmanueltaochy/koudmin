@@ -9,6 +9,8 @@ export interface Profil extends ProfilExtra, ProfilPublic {
 
 export interface MissionConfirmee extends MissionResume {
   contratSigne: boolean;
+  /** Demande annulée par l'entreprise après l'acceptation. */
+  annulee: boolean;
 }
 
 export interface ContratExtra {

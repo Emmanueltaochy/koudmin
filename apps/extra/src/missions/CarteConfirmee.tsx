@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Ban from 'lucide-react-native/icons/ban';
 import Check from 'lucide-react-native/icons/check';
 import Pencil from 'lucide-react-native/icons/pencil';
 import {
@@ -15,6 +16,7 @@ import { Texte } from '../ui/Texte';
 import { VignettePoste } from '../ui/VignettePoste';
 
 const tc = textesEcrans.extra.contrat;
+const te = textesEcrans.extra;
 
 /** Mission confirmée : horaire, lieu, et l'étape suivante (contrat à signer ou signé). */
 export const CarteConfirmee = memo(function CarteConfirmee({
@@ -27,6 +29,38 @@ export const CarteConfirmee = memo(function CarteConfirmee({
   onPress: (id: string) => void;
 }) {
   const jour = etiquetteJour(m.jour, m.debut, aujourdhui);
+  // Annulée par l'entreprise : carte grisée, sans action, jusqu'à l'heure de fin prévue.
+  if (m.annulee) {
+    return (
+      <View style={[commun.carte, styles.annulee]} accessibilityLabel={`${formatPlage(m.debut, m.fin)}, ${m.restaurant}. ${te.missionAnnulee}`}>
+        <View style={styles.entete}>
+          <View style={styles.titre}>
+            <VignettePoste poste={m.poste} taille={40} />
+            <Texte variante="horaire" couleur="galet" style={styles.barre}>
+              {formatPlage(m.debut, m.fin)}
+            </Texte>
+          </View>
+          <Texte variante="legendeForte" couleur="galet">
+            {jour.texte}
+          </Texte>
+        </View>
+        <Texte couleur="galet">
+          {LIBELLES_POSTE[m.poste].mission} · {m.restaurant}
+        </Texte>
+        <View style={styles.pied}>
+          <Ban size={16} color={couleurs.braise} strokeWidth={2} />
+          <View style={styles.texteAnnule}>
+            <Texte variante="legendeForte" couleur="braise">
+              {te.missionAnnulee}
+            </Texte>
+            <Texte variante="legende" couleur="galet">
+              {te.missionAnnuleeAide}
+            </Texte>
+          </View>
+        </View>
+      </View>
+    );
+  }
   return (
     <Pressable accessibilityRole="button" onPress={() => onPress(m.id)} style={({ pressed }) => [commun.carte, pressed && { opacity: 0.85 }]}>
       <View style={styles.entete}>
@@ -69,6 +103,9 @@ export const CarteConfirmee = memo(function CarteConfirmee({
 const styles = StyleSheet.create({
   entete: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   titre: { flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 1 },
+  annulee: { opacity: 0.6, backgroundColor: couleurs.creme },
+  barre: { textDecorationLine: 'line-through' },
+  texteAnnule: { flexShrink: 1, gap: 2 },
   badge: { backgroundColor: couleurs.curcuma, borderRadius: rayons.champ, paddingVertical: 4, paddingHorizontal: 8 },
   pied: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: couleurs.trait },
 });

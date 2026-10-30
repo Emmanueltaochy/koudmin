@@ -29,6 +29,7 @@ Ce compte est un compte extra
 Ce numéro est un compte extra
 Au moins un gérant requis
 Métier non autorisé pour ce secteur
+Mission annulée
 Numéro de mobile invalide
 Réservé au gérant
 Secteur non autorisé
@@ -49,4 +50,4 @@ if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (20 refus attendus)."
+echo "Scénario SQL conforme (21 refus attendus)."
