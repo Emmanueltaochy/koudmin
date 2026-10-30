@@ -12,7 +12,7 @@ export const textes = {
   resto: {
     demande: {
       titre: 'Trouver un extra',
-      sousTitre: 'Un extra trouvé en 2 heures maximum.',
+      sousTitre: 'Les extras proches sont prévenus dès la publication.',
       poste: 'Poste',
       date: 'Date',
       horaires: 'Horaires',
@@ -50,7 +50,7 @@ export const textes = {
       horsLigneTexte: "Les missions s'afficheront dès que la connexion revient.",
       horsLigneAction: 'Réessayer',
       congesCompris: 'brut, congés payés compris',
-      onglets: { missions: 'Missions', dispos: 'Dispos', profil: 'Profil' },
+      onglets: { missions: 'Missions', dispos: 'Dispos', gains: 'Gains', profil: 'Profil' },
     },
     detail: {
       adresseApres: 'Adresse exacte après confirmation.',

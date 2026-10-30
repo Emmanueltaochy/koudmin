@@ -1,4 +1,4 @@
-import type { MissionResume, ProfilExtra, ProfilPublic, Secteur } from '@kivien/core';
+import type { MissionGain, MissionResume, ProfilExtra, ProfilPublic, Secteur } from '@kivien/core';
 
 export interface Profil extends ProfilExtra, ProfilPublic {
   prenom: string;
@@ -82,6 +82,8 @@ export interface SourceDonnees {
   ecouterMissions(rappel: () => void): () => void;
 
   mesMissions(): Promise<MissionConfirmee[]>;
+  /** Missions avec contrat, passées et à venir (« Mes gains »). */
+  mesGains(): Promise<MissionGain[]>;
   contrat(demandeId: string): Promise<ContratExtra | null>;
   infosContrat(): Promise<InfosContrat | null>;
   enregistrerInfosContrat(i: InfosContrat): Promise<void>;

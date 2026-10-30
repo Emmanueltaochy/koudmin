@@ -5,6 +5,7 @@ import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import Calendar from 'lucide-react-native/icons/calendar';
 import List from 'lucide-react-native/icons/list';
 import User from 'lucide-react-native/icons/user';
+import Wallet from 'lucide-react-native/icons/wallet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textes as t } from '@kivien/core';
 import { source } from '../../donnees';
@@ -17,6 +18,7 @@ const o = t.extra.missions.onglets;
 const ONGLETS: Record<string, { libelle: string; icone: ComponentType<IconeProps> }> = {
   index: { libelle: o.missions, icone: List },
   dispos: { libelle: o.dispos, icone: Calendar },
+  gains: { libelle: o.gains, icone: Wallet },
   profil: { libelle: o.profil, icone: User },
 };
 
@@ -69,6 +71,7 @@ export default function Onglets() {
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="dispos" />
+      <Tabs.Screen name="gains" />
       <Tabs.Screen name="profil" />
     </Tabs>
   );

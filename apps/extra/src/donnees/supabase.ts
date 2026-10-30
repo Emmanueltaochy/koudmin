@@ -155,6 +155,17 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean; annulee: boolean })[];
       return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe, annulee: l.annulee }));
     },
+    async mesGains() {
+      const lignes = verifier(await client.rpc('mes_gains')) as {
+        demande_id: string; restaurant: string; commune: string; poste: Poste; jour: string; debut: number; fin: number;
+        taux_horaire_brut_centimes: number; effectuee: boolean; contrat_signe_extra: boolean; contrat_signe_restaurant: boolean;
+      }[];
+      return lignes.map((l) => ({
+        demandeId: l.demande_id, restaurant: l.restaurant, commune: l.commune, poste: l.poste, jour: l.jour, debut: l.debut, fin: l.fin,
+        tauxHoraireBrutCentimes: l.taux_horaire_brut_centimes, effectuee: l.effectuee,
+        contratSigneExtra: l.contrat_signe_extra, contratSigneRestaurant: l.contrat_signe_restaurant,
+      }));
+    },
     async contrat(demandeId): Promise<ContratExtra | null> {
       const lignes = verifier(await client.rpc('contrat_extra', { p_demande: demandeId })) as {
         affectation_id: string;

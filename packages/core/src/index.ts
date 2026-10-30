@@ -22,3 +22,4 @@ export * from './siret';
 export * from './secteurs';
 export * from './inscriptionResto';
 export * from './zones';
+export * from './gains';

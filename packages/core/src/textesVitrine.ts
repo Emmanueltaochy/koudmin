@@ -13,6 +13,8 @@ import { brutParExtraCentimes, CONGES_PAYES_POURCENT, netEstimeEuros } from './s
 const h = (s: string) => s.replace(/ (h|€|HT)(?=\s|$|[.,:])/g, `${NBSP}$1`).replace(/(\d\u00a0h) (\d)/g, `$1${NBSP}$2`);
 
 export const textesVitrine = {
+  lancement: 'Lancement officiel dans quelques jours',
+  lancementTexte: 'Inscriptions ouvertes dès maintenant, pour les établissements comme pour les extras.',
   nav: {
     trouver: 'Trouver un extra',
     devenir: 'Devenir extra',
@@ -28,7 +30,7 @@ export const textesVitrine = {
     bouton: 'Trouver un extra',
     sousBouton: "Contrat d'extra rédigé pour vous. Environ 20 % moins cher que l’intérim.",
     chiffreDelai: h('2 h'),
-    legendeDelai: 'maximum pour trouver',
+    legendeDelai: 'notre objectif pour trouver',
     legendeFrais: 'la mise en relation',
     chiffreAbsence: h('0 €'),
     legendeAbsence: "en cas d'absence",
@@ -59,6 +61,8 @@ export const textesVitrine = {
       { titre: 'Pas de voiture ?', texte: 'Les missions avec retour assuré par le restaurant passent en premier.' },
     ],
     bouton: "Télécharger l'app",
+    bientot: 'Arrive bientôt sur iPhone et Android',
+    inscriptionOuverte: 'En attendant, inscris-toi sur le site',
     badge: 'Ce soir',
     ecranTitre: 'Missions',
     mission1Horaire: h('18 h – minuit'),
@@ -107,7 +111,7 @@ export const textesVitrine = {
     surtitre: 'GARANTIES',
     titre: 'Si ça coince, on gère.',
     liste: [
-      { grand: h('2 h'), titre: 'Un extra trouvé vite', texte: h("Entre votre demande et l'extra confirmé, 2 heures maximum.") },
+      { grand: h('2 h'), titre: 'Objectif : un extra trouvé vite', texte: h("Les extras proches sont prévenus dès la publication. Notre objectif : 2 heures entre votre demande et l'extra confirmé.") },
       { grand: 'Remplacé', titre: 'Garantie de remplacement', texte: "Si l'extra se désiste, on cherche tout de suite quelqu'un d'autre." },
       { grand: h('0 €'), titre: 'Non facturé en cas d’absence', texte: "Pas d'extra, pas de remplacement : vous ne payez rien." },
     ],

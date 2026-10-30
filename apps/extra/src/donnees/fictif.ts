@@ -97,6 +97,21 @@ export function sourceFictive(): SourceDonnees {
         .filter((m) => confirmees.has(m.id))
         .map((m) => ({ ...m, contratSigne: signes.has(m.id), annulee: false }));
     },
+    async mesGains() {
+      // Démonstration : deux missions déjà faites, puis les missions confirmées dans la session.
+      const auj = aujourdhuiReunion();
+      const passees = [
+        { demandeId: 'g1', restaurant: 'Le Boucan Grillé', commune: 'Saint-Gilles-les-Bains', poste: 'serveur' as const, jour: ajouterJours(auj, -6), debut: 1080, fin: 0 },
+        { demandeId: 'g2', restaurant: 'Chez Tatie Lucette', commune: 'Saint-Paul', poste: 'plonge' as const, jour: ajouterJours(auj, -20), debut: 1140, fin: 1410 },
+      ].map((m) => ({ ...m, tauxHoraireBrutCentimes: 1231, effectuee: true, contratSigneExtra: true, contratSigneRestaurant: true }));
+      const aVenir = missionsFictives()
+        .filter((m) => confirmees.has(m.id))
+        .map((m) => ({
+          demandeId: m.id, restaurant: m.restaurant, commune: m.commune, poste: m.poste, jour: m.jour, debut: m.debut, fin: m.fin,
+          tauxHoraireBrutCentimes: m.tauxHoraireBrutCentimes, effectuee: false, contratSigneExtra: signes.has(m.id), contratSigneRestaurant: false,
+        }));
+      return [...aVenir, ...passees];
+    },
     async contrat(demandeId): Promise<ContratExtra | null> {
       const m = missionsFictives().find((x) => x.id === demandeId);
       const c = COMPLEMENTS[demandeId];

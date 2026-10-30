@@ -41,10 +41,14 @@ function ColonnePhotos({ photos, sens }: { photos: typeof PHOTOS_HAUT.monte; sen
 export default async function Accueil() {
   const p = await parametresPublics();
   const m = montantsVitrine(p.tauxHoraireBrutCentimes, p.fraisMiseEnRelationHTCentimes);
-  const partenaires = PARTENAIRES.length ? PARTENAIRES : Array.from({ length: 5 }, () => null);
+  const partenaires = PARTENAIRES;
 
   return (
     <div className={s.page}>
+      <div className={s.lancement} role="note">
+        <strong className={s.lancementTitre}>{t.lancement}</strong>
+        <span className={s.lancementTexte}>{t.lancementTexte}</span>
+      </div>
       <div className={s.pile}>
         <section className={s.promesse} aria-label="Kivien">
           <header className={s.entete}>
@@ -109,6 +113,7 @@ export default async function Accueil() {
           </div>
         </section>
 
+        {PARTENAIRES.length > 0 && (
         <section className={s.confiance} aria-label={t.confiance.titre}>
           <span className={s.confianceTitre}>{t.confiance.titre}</span>
           <div className={s.logos}>
@@ -119,6 +124,7 @@ export default async function Accueil() {
             ))}
           </div>
         </section>
+        )}
 
         <section id="etapes" className={s.etapes}>
           <div className={s.intro}>
@@ -156,10 +162,15 @@ export default async function Accueil() {
               ))}
             </div>
             <div className={s.boutons}>
-              <a href={LIENS_VITRINE.telechargerApp} className={s.boutonBasalte}>
+              {/* Stores pas encore ouverts : bouton grisé, inscription déjà possible sur le site. */}
+              <span className={`${s.boutonBasalte} ${s.boutonGrise}`} aria-disabled="true">
                 {t.app.bouton}
-              </a>
+                <span className={s.bientot}>{t.app.bientot}</span>
+              </span>
             </div>
+            <a href="/extras" className={s.lienInscription}>
+              {t.app.inscriptionOuverte}
+            </a>
             <span className={`${s.legende} ${s.galet}`}>{m.noteApp}</span>
           </div>
           <div className={s.blocCurcuma}>

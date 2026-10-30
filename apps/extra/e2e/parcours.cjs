@@ -93,6 +93,13 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByLabel('Retour').last().click();
   await p.getByText('Missions', { exact: true }).filter({ visible: true }).first().waitFor();
   await p.getByText('Contrat signé', { exact: true }).filter({ visible: true }).first().waitFor(); await etape('liste : contrat signé sur la mission confirmée');
+  // Mes gains : missions avec contrat, au mois, à l'année, à venir.
+  await p.getByRole('tab', { name: /Gains/ }).click();
+  await p.getByText('Ce mois-ci').filter({ visible: true }).first().waitFor();
+  await p.getByText('Mission par mission').filter({ visible: true }).first().waitFor();
+  await p.getByText('Chez Tatie Lucette').filter({ visible: true }).first().waitFor(); await etape('gains : totaux et missions avec contrat');
+  if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/gains.png`, fullPage: true });
+  await p.getByRole('tab', { name: /Missions/ }).click();
 
   // Dispos
   await p.getByText('Dispos', { exact: true }).click();

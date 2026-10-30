@@ -309,3 +309,8 @@ set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 select admin_tableau();
 \set ON_ERROR_STOP 1
 reset role;
+\echo '--- Mes gains : missions avec contrat de Kévin (annulées exclues)'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select restaurant, poste, effectuee, contrat_signe_extra from mes_gains() order by jour, debut;
+reset role;
