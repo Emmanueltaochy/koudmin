@@ -104,6 +104,25 @@ export interface CampagneProspection {
   envoyes: number;
   enAttente: number;
   echecs: number;
+  /** Établissements qui ont cliqué dans l'e-mail, puis qui ont créé leur compte. */
+  clics: number;
+  inscriptions: number;
+}
+
+/** Suivi d'un envoi : reçu, cliqué, pages vues, compte créé. */
+export interface SuiviEnvoi {
+  envoiId: string;
+  nom: string;
+  commune: string | null;
+  email: string;
+  statut: 'en_attente' | 'envoye' | 'echoue' | 'annule';
+  envoyeLe: string | null;
+  erreur: string | null;
+  premierClic: string | null;
+  derniereVisite: string | null;
+  pagesVues: number;
+  pages: string[];
+  inscritLe: string | null;
 }
 
 /** Recherche des établissements faite par le VPS (OpenStreetMap, puis sites web). */
@@ -127,8 +146,13 @@ export interface SourceProspection {
   modifier(id: string, m: { email: string | null; telephone: string | null; statut: StatutProspect; notes: string | null }): Promise<'ok' | 'email'>;
   lancerCampagne(sujet: string, message: string, ids: string[]): Promise<number>;
   campagnes(): Promise<CampagneProspection[]>;
+  suiviCampagne(id: string): Promise<SuiviEnvoi[]>;
   /** Lien de désinscription (page publique). */
   seDesinscrire(jeton: string): Promise<boolean>;
+  /** Visiteur venu d'un e-mail (page publique) : clic sur le lien, puis pages vues. */
+  noterVisite(jeton: string, type: 'clic' | 'page', page: string): Promise<void>;
+  /** Compte établissement créé après un e-mail. */
+  noterInscription(jeton: string, restaurantId: string): Promise<void>;
 }
 
 export interface SourceAdmin {

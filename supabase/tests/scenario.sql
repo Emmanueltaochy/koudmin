@@ -415,3 +415,24 @@ set role authenticated;
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
 select statut, ajoutes, emails_trouves from admin_derniere_recherche();
 reset role;
+\echo '--- Suivi de campagne : clic, pages vues, compte créé'
+select jeton as jeton_lagon from envois_prospection where email = 'reception@lagon.re' \gset
+set role anon;
+select noter_visite_prospection(:'jeton_lagon', 'clic', '/');
+select noter_visite_prospection(:'jeton_lagon', 'page', '/');
+select noter_visite_prospection(:'jeton_lagon', 'page', '/');
+select noter_visite_prospection(:'jeton_lagon', 'page', '/inscription/restaurant');
+select noter_visite_prospection('00000000-0000-0000-0000-000000000000', 'clic', '/');
+select noter_visite_prospection(:'jeton_lagon', 'inscription', null);
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select noter_inscription_prospection(:'jeton_lagon', '00000000-0000-0000-0000-00000000b001');
+select noter_inscription_prospection(:'jeton_lagon', '00000000-0000-0000-0000-00000000b001');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select sujet, total, clics, inscriptions from admin_campagnes();
+select nom, statut, premier_clic is not null as a_clique, pages_vues, pages, inscrit_le is not null as compte_cree
+from admin_suivi_campagne((select id from admin_campagnes() limit 1)) order by nom;
+select nom, statut from admin_prospects() where nom = 'Hôtel du Lagon';
+reset role;
+select count(*) as visites_comptees from visites_prospection;

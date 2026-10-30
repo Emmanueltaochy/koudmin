@@ -19,6 +19,7 @@ import {
   type Membre,
   type MoyenPaiement,
   type Prospect,
+  type SuiviEnvoi,
   type PaiementFrais,
   type ReponsePaiement,
   type Restaurant,
@@ -376,9 +377,31 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           return verifier(await client.rpc('admin_lancer_campagne', { p_sujet: sujet, p_message: message, p_prospects: ids })) as number;
         },
         async campagnes() {
-          const l = verifier(await client.rpc('admin_campagnes')) as
-            { id: string; sujet: string; cree_le: string; total: number; envoyes: number; en_attente: number; echecs: number }[];
-          return l.map((c) => ({ id: c.id, sujet: c.sujet, creeLe: c.cree_le, total: c.total, envoyes: c.envoyes, enAttente: c.en_attente, echecs: c.echecs }));
+          const l = verifier(await client.rpc('admin_campagnes')) as {
+            id: string; sujet: string; cree_le: string; total: number; envoyes: number; en_attente: number; echecs: number;
+            clics: number; inscriptions: number;
+          }[];
+          return l.map((c) => ({
+            id: c.id, sujet: c.sujet, creeLe: c.cree_le, total: c.total, envoyes: c.envoyes, enAttente: c.en_attente, echecs: c.echecs,
+            clics: c.clics, inscriptions: c.inscriptions,
+          }));
+        },
+        async suiviCampagne(id) {
+          const l = await toutesLesLignes<{
+            envoi_id: string; nom: string; commune: string | null; email: string; statut: SuiviEnvoi['statut']; envoye_le: string | null;
+            erreur: string | null; premier_clic: string | null; derniere_visite: string | null; pages_vues: number; pages: string[] | null;
+            inscrit_le: string | null;
+          }>((debut, fin) => client.rpc('admin_suivi_campagne', { p_campagne: id }).range(debut, fin));
+          return l.map((e) => ({
+            envoiId: e.envoi_id, nom: e.nom, commune: e.commune, email: e.email, statut: e.statut, envoyeLe: e.envoye_le, erreur: e.erreur,
+            premierClic: e.premier_clic, derniereVisite: e.derniere_visite, pagesVues: e.pages_vues, pages: e.pages ?? [], inscritLe: e.inscrit_le,
+          }));
+        },
+        async noterVisite(jeton, type, page) {
+          await client.rpc('noter_visite_prospection', { p_jeton: jeton, p_type: type, p_page: page });
+        },
+        async noterInscription(jeton, restaurantId) {
+          await client.rpc('noter_inscription_prospection', { p_jeton: jeton, p_restaurant: restaurantId });
         },
         async seDesinscrire(jeton) {
           return verifier(await client.rpc('se_desinscrire_prospection', { p_jeton: jeton })) as boolean;

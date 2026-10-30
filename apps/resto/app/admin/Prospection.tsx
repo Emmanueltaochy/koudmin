@@ -20,7 +20,7 @@ import {
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
-import { source, type CampagneProspection, type Prospect, type RechercheProspects } from '@/lib/donnees';
+import { source, type CampagneProspection, type Prospect, type RechercheProspects, type SuiviEnvoi } from '@/lib/donnees';
 import s from './admin.module.css';
 
 const tp = textesEcrans.resto.admin.prospection;
@@ -57,6 +57,49 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
   return <button type="button" className={ui.lienDiscret} onClick={() => setEdition(true)}>{tp.ajouterEmail}</button>;
 }
 
+/** Suivi d'une campagne, établissement par établissement. */
+function TableauSuivi({ envois }: { envois: SuiviEnvoi[] | 'chargement' }) {
+  const quand = (iso: string | null) =>
+    iso ? new Date(iso).toLocaleString('fr-FR', { timeZone: 'Indian/Reunion', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–';
+  if (envois === 'chargement') return <div className={p.squelette} aria-busy />;
+  if (!envois.length) return <p className={`${ui.legende} ${ui.galet}`}>{tp.aucunSuivi}</p>;
+  return (
+    <div className={s.defilement}>
+      <table className={s.tableau}>
+        <thead>
+          <tr>
+            <th scope="col">{textesEcrans.resto.admin.colonnes.etablissement}</th>
+            <th scope="col">{tp.suiviColonnes.envoi}</th>
+            <th scope="col">{tp.suiviColonnes.clic}</th>
+            <th scope="col">{tp.suiviColonnes.pages}</th>
+            <th scope="col">{tp.suiviColonnes.compte}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {envois.map((e) => (
+            <tr key={e.envoiId}>
+              <th scope="row" className={s.cellTexte}>
+                {e.nom}
+                <span className={s.sousLigne}>{e.email}</span>
+              </th>
+              <td>
+                {tp.statutsEnvoi[e.statut]}
+                {e.envoyeLe && <span className={s.sousLigne}>{quand(e.envoyeLe)}</span>}
+              </td>
+              <td>{quand(e.premierClic)}</td>
+              <td className={s.cellTexte}>
+                {e.pagesVues || '–'}
+                {e.pages.length > 0 && <span className={s.sousLigne}>{e.pages.join(', ')}</span>}
+              </td>
+              <td>{e.inscritLe ? <span className={s.statut} data-statut="pourvue">{tp.compteCree}</span> : '–'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 /** Prospection : établissements de l'île (OpenStreetMap ou saisie), suivi et campagnes e-mail. */
 export function Prospection() {
   const [fiches, setFiches] = useState<Prospect[] | 'chargement' | 'erreur'>('chargement');
@@ -70,6 +113,15 @@ export function Prospection() {
   const [sujet, setSujet] = useState('');
   const [message, setMessage] = useState('');
   const [envoi, setEnvoi] = useState<{ enCours: boolean; texte: string | null }>({ enCours: false, texte: null });
+  const [ouverte, setOuverte] = useState<string | null>(null);
+  const [suivi, setSuivi] = useState<SuiviEnvoi[] | 'chargement'>('chargement');
+
+  async function basculerSuivi(id: string) {
+    if (ouverte === id) return setOuverte(null);
+    setOuverte(id);
+    setSuivi('chargement');
+    setSuivi(await source().admin.prospection.suiviCampagne(id).catch(() => []));
+  }
 
   const charger = useCallback(async () => {
     const src = source().admin.prospection;
@@ -281,6 +333,7 @@ export function Prospection() {
       {campagnes.length > 0 && (
         <section className={p.section} aria-labelledby="campagnes">
           <h2 id="campagnes" className={ui.sousTitre}>{tp.campagnes}</h2>
+          <p className={`${ui.legende} ${ui.galet}`}>{tp.suiviAide}</p>
           <ul className={p.liste}>
             {campagnes.map((c) => (
               <li key={c.id} className={`${s.carte} ${s.campagneLigne}`}>
@@ -290,6 +343,13 @@ export function Prospection() {
                   {c.enAttente > 0 && ` · ${tp.attente(c.enAttente)}`}
                   {c.echecs > 0 && ` · ${tp.echecs(c.echecs)}`}
                 </span>
+                <span className={ui.corpsFort}>
+                  {tp.clics(c.clics)} · {tp.comptesCrees(c.inscriptions)}
+                </span>
+                <button type="button" className={`${ui.lien} ${s.voirSuivi}`} onClick={() => void basculerSuivi(c.id)} aria-expanded={ouverte === c.id}>
+                  {ouverte === c.id ? tp.masquerSuivi : tp.voirSuivi}
+                </button>
+                {ouverte === c.id && <TableauSuivi envois={suivi} />}
               </li>
             ))}
           </ul>

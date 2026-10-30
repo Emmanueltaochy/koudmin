@@ -359,6 +359,7 @@ export function sourceFictive(): SourceResto {
           if (cibles.length) {
             prospectionDemo.campagnes.unshift({
               id: `c${Date.now()}`, sujet, creeLe: new Date().toISOString(), total: cibles.length, envoyes: 0, enAttente: cibles.length, echecs: 0,
+              clics: 0, inscriptions: 0,
             });
             for (const p of cibles) p.envois = 1;
           }
@@ -367,6 +368,19 @@ export function sourceFictive(): SourceResto {
         async campagnes() {
           return prospectionDemo.campagnes.map((c) => ({ ...c }));
         },
+        async suiviCampagne() {
+          // Démonstration : un établissement a cliqué, visité trois pages et créé son compte.
+          const il = (min: number) => new Date(Date.now() - min * 60e3).toISOString();
+          return prospectionDemo.prospects
+            .filter((p) => p.envois > 0)
+            .map((p, i) => ({
+              envoiId: `e-${p.id}`, nom: p.nom, commune: p.commune, email: p.email ?? '', statut: 'envoye' as const, envoyeLe: il(120),
+              erreur: null, premierClic: i === 0 ? il(90) : null, derniereVisite: i === 0 ? il(80) : null, pagesVues: i === 0 ? 3 : 0,
+              pages: i === 0 ? ['/', '/extras', '/inscription/restaurant'] : [], inscritLe: i === 0 ? il(80) : null,
+            }));
+        },
+        async noterVisite() {},
+        async noterInscription() {},
         async seDesinscrire(jeton) {
           return jeton === 'demo';
         },

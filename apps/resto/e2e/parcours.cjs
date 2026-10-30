@@ -96,6 +96,10 @@ let pageCourante = null;
   await p.getByRole('button', { name: "Programmer l'envoi à 3 établissements" }).click();
   await p.getByText('3 e-mails programmés.').waitFor();
   await p.getByText('0 sur 3 envoyé · 3 en attente', { exact: false }).waitFor(); ok('prospection : campagne programmée, suivi des envois');
+  await p.getByText('0 clic · 0 compte créé').waitFor();
+  await p.getByRole('button', { name: 'Voir le suivi' }).click();
+  await p.locator('table').last().getByRole('row', { name: /Le Cap Méchant/ }).getByText('Compte créé', { exact: true }).waitFor();
+  await p.getByText('/, /extras, /inscription/restaurant').waitFor(); ok('prospection : suivi par établissement (clic, pages vues, compte créé)');
   await capture('prospection');
 
   // Création de compte restaurateur : SIRET obligatoire, compte actif tout de suite.
@@ -371,7 +375,7 @@ let pageCourante = null;
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/paiement', '/desinscription?j=demo', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/paiement', '/desinscription?j=demo', '/decouvrir/00000000-0000-0000-0000-000000000001', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

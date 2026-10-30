@@ -376,3 +376,6 @@
   flex-direction: column;
   gap: 4px;
 }
+.voirSuivi {
+  align-self: flex-start;
+}

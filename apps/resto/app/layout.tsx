@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import '@kivien/ui-tokens/tokens.css';
 import './globals.css';
+import { SuiviPages } from '@/components/SuiviPages';
 
 const bricolage = localFont({
   src: './polices/BricolageGrotesque-variable-latin.woff2',
@@ -35,7 +36,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`${bricolage.variable} ${figtree.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <SuiviPages />
+      </body>
     </html>
   );
 }

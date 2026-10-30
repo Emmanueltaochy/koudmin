@@ -20,7 +20,8 @@ import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import type { AdresseGeo } from '@/lib/adresse';
 import { aUnEtablissement, changerEmail, connecte, inscrireRestaurateur } from '@/lib/auth';
-import { donneesFictives } from '@/lib/donnees';
+import { donneesFictives, source } from '@/lib/donnees';
+import { noterInscription } from '@/lib/suivi';
 import s from '../inscription.module.css';
 
 const ti = textesEcrans.resto.inscription;
@@ -86,6 +87,8 @@ export default function InscriptionRestaurant() {
       if (r === 'ok') {
         // Lien de confirmation envoyé sur l'adresse ; l'inscription ne dépend pas de son envoi.
         if (!compteOuvert) await changerEmail(normaliserEmail(saisie.email)).catch(() => undefined);
+        // Venu d'un e-mail de prospection : le compte est rattaché à la campagne.
+        await source().restaurant().then((resto) => noterInscription(resto.id)).catch(() => undefined);
         router.replace('/espace');
         return;
       }

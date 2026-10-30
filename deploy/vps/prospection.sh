@@ -68,12 +68,19 @@ def personnaliser(texte, e):
     return texte.replace("{nom}", e.get("nom") or "").replace("{commune}", e.get("commune") or "La Réunion")
 
 
-def en_html(texte):
-    """Texte de la campagne → HTML simple : paragraphes, listes « - », liens."""
+def en_html(texte, suivi):
+    """Texte de la campagne → HTML simple : paragraphes, listes « - », liens. Les liens vers
+    kivien.re passent par le lien de suivi de l'envoi (le texte affiché ne change pas)."""
     blocs = []
+
+    def cible(m):
+        url = m.group(1)
+        href = suivi if url.rstrip("/") == site.rstrip("/") else url
+        return f'<a href="{html.escape(href)}" style="color:#9E3215;">{url}</a>'
+
     for bloc in re.split(r"\n\s*\n", texte.strip()):
         lignes = [l.strip() for l in bloc.splitlines() if l.strip()]
-        lien = lambda s: re.sub(r"(https?://[^\s<]+)", r'<a href="\1" style="color:#9E3215;">\1</a>', html.escape(s))
+        lien = lambda s: re.sub(r"(https?://[^\s<]+)", cible, html.escape(s))
         if lignes and all(l.startswith("- ") for l in lignes):
             items = "".join(f'<li style="margin:0 0 6px;">{lien(l[2:])}</li>' for l in lignes)
             blocs.append(f'<ul style="margin:0 0 16px;padding-left:20px;">{items}</ul>')
@@ -84,9 +91,12 @@ def en_html(texte):
 
 def message(e):
     desinscription = f"{site}/desinscription?j={e['jeton']}"
+    # Lien de suivi : note le clic, puis ouvre kivien.re (pages vues et compte créé rattachés à l'envoi).
+    suivi = f"{site}/decouvrir/{e['jeton']}"
     corps = personnaliser(e["message"], e)
     pied = (f"Vous recevez ce message car {e.get('nom') or 'votre établissement'} est référencé publiquement "
-            f"comme établissement à La Réunion. Pour ne plus recevoir nos messages : {desinscription}")
+            f"comme établissement à La Réunion. Les clics sur les liens de ce message sont mesurés, pour savoir "
+            f"si Kivien vous intéresse. Pour ne plus recevoir nos messages : {desinscription}")
     m = EmailMessage()
     m["From"] = formataddr(("Kivien", boite))
     m["To"] = e["email"]
@@ -99,8 +109,8 @@ def message(e):
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF6EE;padding:24px 12px;font-family:Helvetica,Arial,sans-serif;color:#211C18;">
 <tr><td align="center"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:16px;padding:28px 24px;">
 <tr><td style="padding-bottom:20px;"><img src="{site}/email/kivien-logo-email.png" alt="kivien" height="24" width="58" style="display:block;height:24px;width:58px;border:0;"></td></tr>
-<tr><td style="font-size:16px;line-height:1.55;color:#211C18;">{en_html(corps)}</td></tr>
-<tr><td style="padding-top:8px;"><a href="{site}" style="display:inline-block;background:#C2401E;color:#FFFFFF;text-decoration:none;font-weight:700;font-size:16px;padding:14px 24px;border-radius:12px;">Découvrir Kivien</a></td></tr>
+<tr><td style="font-size:16px;line-height:1.55;color:#211C18;">{en_html(corps, suivi)}</td></tr>
+<tr><td style="padding-top:8px;"><a href="{suivi}" style="display:inline-block;background:#C2401E;color:#FFFFFF;text-decoration:none;font-weight:700;font-size:16px;padding:14px 24px;border-radius:12px;">Découvrir Kivien</a></td></tr>
 </table>
 <p style="max-width:560px;font-size:12px;line-height:1.5;color:#7A726B;margin:16px 0 0;">{html.escape(EDITEUR)}<br><a href="mailto:{boite}" style="color:#7A726B;">{boite}</a> · <a href="{site}" style="color:#7A726B;">kivien.re</a><br>
 {html.escape(pied.split(' Pour ne plus')[0])} <a href="{desinscription}" style="color:#7A726B;">Se désinscrire</a></p>
