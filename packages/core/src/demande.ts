@@ -63,7 +63,7 @@ export function saisieParDefaut(aujourdhui: JourISO, smicCentimes: number): Sais
     taux: montantSaisie(smicCentimes),
     adresse: '',
     retourAssure: false,
-    nbExtras: 2,
+    nbExtras: 1,
     consignes: '',
   };
 }
