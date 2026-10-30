@@ -1,7 +1,24 @@
 // Tests des fonctions de paiement (Deno), sans réseau : Stripe, GoCardless et la base sont simulés.
-// Lancement : deno test deploy/vps/tests/
+// Lancement : DENO_NO_PACKAGE_JSON=1 deno test --no-config deploy/vps/tests/
 
-import { deepStrictEqual as egal, ok, rejects } from 'node:assert/strict';
+// Assertions minimales, sans dépendance (ni Node, ni bibliothèque à télécharger).
+function egal(reel: unknown, attendu: unknown) {
+  const a = JSON.stringify(reel);
+  const b = JSON.stringify(attendu);
+  if (a !== b) throw new Error(`Attendu ${b}\nObtenu  ${a}`);
+}
+function ok(v: unknown, message = 'Condition fausse') {
+  if (!v) throw new Error(message);
+}
+async function rejects(p: Promise<unknown>, motif: RegExp) {
+  try {
+    await p;
+  } catch (e) {
+    if (motif.test(e instanceof Error ? e.message : String(e))) return;
+    throw new Error(`Erreur inattendue : ${e}`);
+  }
+  throw new Error('Une erreur était attendue');
+}
 import type { Base } from '../supabase/volumes/functions/_partage/base.ts';
 import { clientGoCardless, statutPrelevement } from '../supabase/volumes/functions/_partage/gocardless.ts';
 import { lancerPrelevements, reessayer, type Paiement, type Services } from '../supabase/volumes/functions/_partage/prelevements.ts';

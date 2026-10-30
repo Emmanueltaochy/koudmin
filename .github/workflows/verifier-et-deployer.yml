@@ -52,9 +52,13 @@ jobs:
           shellcheck -S warning deploy/vps/*.sh
 
       - name: Fonctions de paiement (Stripe, GoCardless), types et tests
+        # Fonctions Deno autonomes : le package.json du monorepo est ignoré (et jamais modifié).
+        env:
+          DENO_NO_PACKAGE_JSON: '1'
         run: |
-          npx -y deno@2.9.6 check deploy/vps/supabase/volumes/functions/paiement/index.ts deploy/vps/supabase/volumes/functions/prelevements/index.ts
-          npx -y deno@2.9.6 test deploy/vps/tests/
+          npx -y deno@2.9.6 check --no-config deploy/vps/supabase/volumes/functions/paiement/index.ts deploy/vps/supabase/volumes/functions/prelevements/index.ts
+          npx -y deno@2.9.6 test --no-config deploy/vps/tests/
+          git diff --exit-code package.json
 
       - name: Build du site restaurateur
         run: pnpm --filter @kivien/resto build
