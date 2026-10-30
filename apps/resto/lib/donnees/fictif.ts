@@ -6,6 +6,8 @@ import {
   type ProfilPublic,
 } from '@kivien/core';
 import type {
+  MoyenPaiement,
+  PaiementFrais,
   DemandeSuivi,
   ExtraAffecte,
   Facture,
@@ -165,6 +167,20 @@ function etatInitial(): EtatDemo {
 
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+const paiementDemo: { moyen: MoyenPaiement; historique: PaiementFrais[] } = {
+  moyen: { mode: 'carte_mission', carte: null, sepa: null, sepaEnAttente: false, mandatValide: false },
+  historique: [
+    {
+      id: 'p2', type: 'mission', libelle: 'Kivien · mise en relation du 21/10/2026 · Le Boucan Grillé', moyen: 'carte',
+      montantTTCCentimes: 2062, statut: 'echoue', erreur: 'Votre carte a été refusée.', creeLe: '2026-10-22T18:00:00Z',
+    },
+    {
+      id: 'p1', type: 'mission', libelle: 'Kivien · mise en relation du 14/10/2026 · Le Boucan Grillé', moyen: 'carte',
+      montantTTCCentimes: 2062, statut: 'reussi', erreur: null, creeLe: '2026-10-15T18:00:00Z',
+    },
+  ],
+};
+
 export function sourceFictive(): SourceResto {
   const ecouteurs = new Set<() => void>();
   let memoire: EtatDemo | null = null;
@@ -233,6 +249,44 @@ export function sourceFictive(): SourceResto {
         etablissements: etat().etablissements.map((r) => (r.id === id ? { ...r, nom: m.nom.trim(), adresse: m.adresse } : r)),
       });
       return 'ok';
+    },
+    paiement: {
+      // Démonstration : pas de vraie banque ; les pages Stripe et GoCardless sont simulées.
+      async moyen() {
+        return { ...paiementDemo.moyen };
+      },
+      async historique() {
+        return paiementDemo.historique.map((p) => ({ ...p }));
+      },
+      async aRegler() {
+        return paiementDemo.moyen.carte || paiementDemo.moyen.sepa ? { misesEnRelation: 0, ttcCentimes: 0 } : { misesEnRelation: 1, ttcCentimes: 2062 };
+      },
+      async agir(_id, a) {
+        await attendre(500);
+        const m = paiementDemo.moyen;
+        switch (a.action) {
+          case 'carte':
+            return { url: '/paiement?retour=carte&session=cs_demo' };
+          case 'carte-confirmer':
+            m.carte = 'Visa •••• 4242 · 12/28';
+            return { statut: 'ok' };
+          case 'sepa':
+            return { url: '/paiement?retour=sepa' };
+          case 'sepa-confirmer':
+            Object.assign(m, { sepa: 'IBAN •••• 1234', sepaEnAttente: false, mandatValide: true, mode: 'mensuel_sepa' });
+            return { statut: 'ok' };
+          case 'mode':
+            if (a.mode === 'mensuel_sepa' ? !m.mandatValide : !m.carte)
+              return { statut: 'echoue', erreur: a.mode === 'mensuel_sepa' ? 'Mettez d’abord en place le prélèvement SEPA.' : 'Enregistrez d’abord une carte.' };
+            m.mode = a.mode;
+            return { statut: 'ok' };
+          case 'reessayer': {
+            const p = paiementDemo.historique.find((x) => x.id === a.paiement);
+            if (p) Object.assign(p, { statut: 'reussi', erreur: null });
+            return { statut: 'reussi' };
+          }
+        }
+      },
     },
     admin: {
       // Démonstration : chiffres d'un premier mois d'activité.

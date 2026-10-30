@@ -51,6 +51,11 @@ jobs:
           for f in deploy/vps/*.sh; do bash -n "$f"; done
           shellcheck -S warning deploy/vps/*.sh
 
+      - name: Fonctions de paiement (Stripe, GoCardless), types et tests
+        run: |
+          npx -y deno@2.9.6 check deploy/vps/supabase/volumes/functions/paiement/index.ts deploy/vps/supabase/volumes/functions/prelevements/index.ts
+          npx -y deno@2.9.6 test deploy/vps/tests/
+
       - name: Build du site restaurateur
         run: pnpm --filter @kivien/resto build
 

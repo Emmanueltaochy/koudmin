@@ -179,6 +179,10 @@ Journal des mises à jour sur le VPS : `/var/log/kivien-mises-a-jour.log`. Mise 
 | Historique des sauvegardes | `journalctl -u kivien-sauvegarde --since -7d` |
 | Journaux d'un service | `cd /opt/kivien/supabase && docker compose logs --tail 100 auth` |
 | Redémarrer | `cd /opt/kivien/supabase && docker compose restart` |
+| Brancher les paiements (clés de test) | `sudo /opt/kivien/source/deploy/vps/configurer-paiement.sh` |
+| Passer les paiements en réel | `sudo /opt/kivien/source/deploy/vps/configurer-paiement.sh reel` |
+| Lancer les débits maintenant | `sudo kivien-prelevements` |
+| Historique des débits | `journalctl -u kivien-prelevements --since -2d` |
 
 Restaurer une sauvegarde (après arrêt des services qui écrivent) :
 
@@ -187,6 +191,21 @@ docker exec -i supabase-db pg_restore -h localhost -U postgres -d postgres --cle
 ```
 
 Une migration déjà appliquée ne se modifie jamais : on écrit une nouvelle migration.
+
+## Paiement des frais
+
+Les gérants choisissent sur https://kivien.re/paiement : carte débitée 24 h après chaque mission
+(Stripe), ou facture mensuelle par carte ou par prélèvement SEPA (GoCardless). Un extra absent
+(signalé à la notation) n'est jamais débité. Numéros de carte et IBAN sont saisis sur les pages de
+Stripe et de GoCardless : ils ne passent jamais par Kivien.
+
+- `configurer-paiement.sh` demande la clé secrète Stripe et le jeton GoCardless (saisie masquée),
+  les vérifie, les range dans `.env` et ajoute `docker-compose.kivien-paiement.yml`.
+- Les fonctions sont dans `supabase/volumes/functions/` (`paiement` pour le site, `prelevements`
+  pour le minuteur `kivien-prelevements.timer`, toutes les heures à la minute 7).
+- Chaque débit est inscrit dans la table `paiements` avant l'envoi, avec une clé d'idempotence :
+  relancer ne débite jamais deux fois.
+- Passage en réel : seules les missions à partir de ce jour-là sont débitées.
 
 ## Reste à faire avant l'ouverture
 

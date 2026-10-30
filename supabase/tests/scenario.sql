@@ -323,3 +323,42 @@ set role authenticated;
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 select restaurant, poste, effectuee, contrat_signe_extra from mes_gains() order by jour, debut;
 reset role;
+\echo '--- Paiement : débit 24 h après la mission (extra venu), jamais pour un absent'
+update reglages_paiement set debut = jour_reunion() - 90;
+insert into demandes (id, restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng, nb_extras)
+values ('00000000-0000-0000-0000-00000000d900', '00000000-0000-0000-0000-00000000b001', 'serveur', jour_reunion() - 3, 1080, 1320, 'x', 'Saint-Paul', -21.0, 55.27, 2),
+       ('00000000-0000-0000-0000-00000000d901', '00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion(), 0, 1, 'x', 'Saint-Paul', -21.0, 55.27, 1),
+       ('00000000-0000-0000-0000-00000000d902', '00000000-0000-0000-0000-00000000b001', 'serveur', date_trunc('month', jour_reunion())::date - 20, 1080, 1320, 'x', 'Saint-Paul', -21.0, 55.27, 1);
+insert into affectations (demande_id, extra_id, statut) values
+  ('00000000-0000-0000-0000-00000000d900', '00000000-0000-0000-0000-0000000000e1', 'terminee'),
+  ('00000000-0000-0000-0000-00000000d900', '00000000-0000-0000-0000-0000000000e2', 'absente'),
+  ('00000000-0000-0000-0000-00000000d901', '00000000-0000-0000-0000-0000000000e1', 'confirmee'),
+  ('00000000-0000-0000-0000-00000000d902', '00000000-0000-0000-0000-0000000000e2', 'terminee');
+select count(*) as sans_moyen from paiements_a_lancer('00000000-0000-0000-0000-00000000b001');
+insert into moyens_paiement (restaurant_id, stripe_client, stripe_carte, carte_libelle)
+values ('00000000-0000-0000-0000-00000000b001', 'cus_essai', 'pm_essai', 'Visa •••• 4242 · 12/28');
+select a.demande_id, p.montant_ht_centimes, p.tva_centimes
+from paiements_a_lancer('00000000-0000-0000-0000-00000000b001') p join affectations a on a.id = p.affectation_id
+order by 1;
+\echo '--- Facture mensuelle : le mois précédent, une seule fois'
+update moyens_paiement set mode = 'mensuel_carte' where restaurant_id = '00000000-0000-0000-0000-00000000b001';
+select mois = to_char(date_trunc('month', jour_reunion())::date - 20, 'YYYY-MM') as mois_precedent, mode, mises_en_relation, montant_ht_centimes, tva_centimes
+from mois_a_facturer('00000000-0000-0000-0000-00000000b001');
+insert into paiements (restaurant_id, type, mois, moyen, libelle, mises_en_relation, montant_ht_centimes, tva_centimes, montant_ttc_centimes)
+select restaurant_id, 'mensuel', mois, 'carte', libelle, mises_en_relation, montant_ht_centimes, tva_centimes, montant_ht_centimes + tva_centimes
+from mois_a_facturer('00000000-0000-0000-0000-00000000b001');
+select count(*) as encore_a_facturer from mois_a_facturer('00000000-0000-0000-0000-00000000b001');
+\echo '--- Le gérant voit son moyen de paiement et ce qui reste à régler ; un extra non'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select mode, carte_libelle from moyens_paiement;
+select count(*) as paiements_visibles from paiements;
+select mises_en_relation >= 1 as reste_a_regler from a_regler('00000000-0000-0000-0000-00000000b001');
+\set ON_ERROR_STOP 0
+select count(*) from paiements_a_lancer();
+\set ON_ERROR_STOP 1
+update moyens_paiement set stripe_carte = 'pm_pirate';
+select stripe_carte from moyens_paiement;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select count(*) as moyens_visibles_extra from moyens_paiement;
+reset role;

@@ -141,6 +141,8 @@ fichiers=docker-compose.yml:docker-compose.kivien.yml
 [ -n "$(lire SMS_PROVIDER || true)" ] && fichiers=$fichiers:docker-compose.kivien-sms.yml
 # E-mails : surcharge ajoutée une fois la boîte d'envoi branchée (configurer-email.sh).
 [ "$(lire SMTP_HOST || true)" = smtp.hostinger.com ] && fichiers=$fichiers:docker-compose.kivien-email.yml
+# Paiements : surcharge ajoutée une fois les clés Stripe ou GoCardless rangées (configurer-paiement.sh).
+[ -n "$(lire STRIPE_SECRET_KEY || true)$(lire GOCARDLESS_ACCESS_TOKEN || true)" ] && fichiers=$fichiers:docker-compose.kivien-paiement.yml
 
 regler COMPOSE_FILE "$fichiers"
 regler COMPOSE_PROJECT_NAME kivien
@@ -196,6 +198,8 @@ if ! docker compose up -d --wait --wait-timeout 600 >> "$JOURNAL" 2>&1; then
   done
   arret "un service n'a pas démarré (journaux ci-dessus, détail dans $JOURNAL)."
 fi
+# Fonctions (paiements) : relancées pour charger la version du dépôt copiée dans volumes/functions.
+docker compose restart functions >> "$JOURNAL" 2>&1 || true
 docker compose ps --format '   {{.Name}} : {{.Status}}'
 
 # ---------------------------------------------------------------------------
@@ -279,8 +283,31 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 UNIT
+# Débits des frais Kivien, toutes les heures (sans effet tant que les paiements ne sont pas configurés).
+install -m 0700 "$SOURCE/deploy/vps/prelevements.sh" /usr/local/sbin/kivien-prelevements
+cat > /etc/systemd/system/kivien-prelevements.service <<'UNIT'
+[Unit]
+Description=Débits des frais Kivien (Stripe, GoCardless)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kivien-prelevements
+UNIT
+cat > /etc/systemd/system/kivien-prelevements.timer <<'UNIT'
+[Unit]
+Description=Débits des frais Kivien toutes les heures
+
+[Timer]
+OnCalendar=*-*-* *:07:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+UNIT
 systemctl daemon-reload
 systemctl enable --now kivien-sauvegarde.timer >> "$JOURNAL" 2>&1
+systemctl enable --now kivien-prelevements.timer >> "$JOURNAL" 2>&1
 info "prochaine sauvegarde : $(systemctl show kivien-sauvegarde.timer -p NextElapseUSecRealtime --value)"
 /usr/local/sbin/kivien-sauvegarde | tee -a "$JOURNAL" || arret "la première sauvegarde a échoué."
 

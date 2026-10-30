@@ -183,6 +183,53 @@ export interface InfosDPAE {
   adresse: string | null;
 }
 
+export type ModePaiement = 'carte_mission' | 'mensuel_carte' | 'mensuel_sepa';
+
+/** Moyen de paiement des frais Kivien (gérant seulement). */
+export interface MoyenPaiement {
+  mode: ModePaiement;
+  /** « Visa •••• 4242 · 12/28 », null sans carte. */
+  carte: string | null;
+  /** « IBAN •••• 1234 », null sans mandat. */
+  sepa: string | null;
+  /** Mandat demandé, en attente de la page GoCardless. */
+  sepaEnAttente: boolean;
+  mandatValide: boolean;
+}
+
+export interface PaiementFrais {
+  id: string;
+  type: 'mission' | 'mensuel';
+  libelle: string;
+  moyen: 'carte' | 'sepa';
+  montantTTCCentimes: number;
+  statut: 'en_cours' | 'reussi' | 'echoue';
+  erreur: string | null;
+  creeLe: string;
+}
+
+export type ActionPaiement =
+  | { action: 'carte' }
+  | { action: 'carte-confirmer'; session: string }
+  | { action: 'sepa' }
+  | { action: 'sepa-confirmer' }
+  | { action: 'mode'; mode: ModePaiement }
+  | { action: 'reessayer'; paiement: string };
+
+/** Réponse de la fonction serveur « paiement » : lien vers Stripe ou GoCardless, ou statut. */
+export interface ReponsePaiement {
+  url?: string;
+  statut?: 'ok' | 'attente' | 'reussi' | 'echoue' | 'en_cours';
+  erreur?: string | null;
+}
+
+export interface SourcePaiement {
+  moyen(restaurantId: string): Promise<MoyenPaiement>;
+  historique(restaurantId: string): Promise<PaiementFrais[]>;
+  aRegler(restaurantId: string): Promise<{ misesEnRelation: number; ttcCentimes: number }>;
+  agir(restaurantId: string, a: ActionPaiement): Promise<ReponsePaiement>;
+}
+
 /** Accès aux données côté restaurateur. Deux implémentations : fictive (démo) et Supabase. */
 export interface SourceResto {
   /** Établissements de l'utilisateur, avec son rôle dans chacun. */
@@ -200,6 +247,7 @@ export interface SourceResto {
   /** null : compte sans accès administrateur. */
   statistiques(): Promise<Statistiques | null>;
   admin: SourceAdmin;
+  paiement: SourcePaiement;
   /** Photo de profil d'un extra affecté à une de vos demandes (JPEG base64), null sans photo. */
   photoExtra(extraId: string): Promise<string | null>;
   parametres(): Promise<ParametresTarifaires>;

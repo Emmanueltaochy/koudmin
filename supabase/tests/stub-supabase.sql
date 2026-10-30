@@ -1,5 +1,5 @@
 -- Imite le minimum de Supabase : rôles, schéma auth, auth.uid(), publication realtime.
-create role anon; create role authenticated;
+create role anon; create role authenticated; create role service_role bypassrls;
 create schema auth;
 create table auth.users (id uuid primary key, phone text, aud text, role text, encrypted_password text,
   phone_confirmed_at timestamptz, confirmation_token text, recovery_token text, email_change_token_new text,

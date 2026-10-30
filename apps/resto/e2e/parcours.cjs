@@ -213,6 +213,28 @@ let pageCourante = null;
   await p.getByText('Voir la facture').first().click();
   await p.getByText('TVA 8,5 %').waitFor(); ok('facture : TVA 8,5 %');
   await capture('facture');
+
+  // Paiement des frais : carte (page Stripe simulée), mode, prélèvement SEPA, paiement refusé relancé.
+  await p.goto(URL_SITE + '/paiement');
+  await p.getByRole('heading', { name: 'Paiement', exact: true }).waitFor();
+  await p.getByText('Frais Kivien : 19,00 € HT par mise en relation', { exact: false }).waitFor(); ok('paiement : frais lus dans les paramètres');
+  await p.getByText('Enregistrez un moyen de paiement pour régler vos missions.').waitFor(); ok('paiement : missions en attente sans moyen de paiement');
+  await p.getByRole('radio', { name: /Facture mensuelle par prélèvement SEPA/ }).click();
+  await p.getByText('Mettez d’abord en place le prélèvement SEPA.').waitFor(); ok('paiement : mode SEPA refusé sans mandat');
+  await p.getByRole('button', { name: 'Enregistrer une carte' }).click();
+  await p.getByText('Carte enregistrée.').waitFor();
+  await p.getByText('Visa •••• 4242 · 12/28').waitFor(); ok('paiement : carte enregistrée au retour de la page Stripe');
+  await p.getByRole('radio', { name: /Facture mensuelle par carte/ }).click();
+  await p.getByText('Mode de paiement enregistré.').waitFor();
+  if ((await p.getByRole('radio', { name: /Facture mensuelle par carte/ }).getAttribute('aria-checked')) !== 'true') throw new Error('mode non coché');
+  ok('paiement : facture mensuelle par carte choisie');
+  await p.getByText('Votre carte a été refusée.').waitFor();
+  await p.getByRole('button', { name: 'Réessayer' }).click();
+  await p.getByText('Payé').nth(1).waitFor(); ok('paiement : paiement refusé relancé, payé');
+  await capture('paiement');
+  await p.getByRole('button', { name: 'Mettre en place le prélèvement' }).click();
+  await p.getByText('Prélèvement SEPA en place.').waitFor();
+  await p.getByText('IBAN •••• 1234').waitFor(); ok('paiement : mandat SEPA au retour de la page GoCardless');
   await p.goto(URL_SITE + '/historique');
   await p.getByRole('heading', { name: 'Historique' }).waitFor();
   await capture('historique');
@@ -319,7 +341,7 @@ let pageCourante = null;
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/paiement', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

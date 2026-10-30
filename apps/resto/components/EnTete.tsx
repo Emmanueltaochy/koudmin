@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import {
   Building2,
   CalendarDays,
+  CreditCard,
   FileText,
   History,
   House,
@@ -57,6 +58,7 @@ const GROUPES: { titre: string; liens: Lien[] }[] = [
     liens: [
       { href: '/etablissements', libelle: tm.etablissements, icone: Building2 },
       { href: '/utilisateurs', libelle: tm.utilisateurs, icone: Users },
+      { href: '/paiement', libelle: tm.paiement, icone: CreditCard, gerant: true },
       { href: '/compte', libelle: tm.monCompte, icone: UserCog },
     ],
   },

@@ -1,11 +1,13 @@
 # api.kivien.re → passerelle Supabase (127.0.0.1:__PORT__). Généré par deploy/vps/installer.sh.
-# Seules l'authentification, l'API REST et le temps réel sont publics.
+# Seules l'authentification, l'API REST, le temps réel et la fonction « paiement » sont publics.
+# La fonction « prelevements » (débits horaires) n'est appelée qu'en local par le VPS.
 # Le tableau de bord (Studio) n'est accessible que par tunnel SSH.
 
 # Contre les essais de mots de passe en série, par adresse IP. Large, car beaucoup de mobiles
 # réunionnais sortent par la même adresse chez leur opérateur.
 limit_req_zone $binary_remote_addr zone=kivien_connexion:10m rate=30r/m;
 limit_req_zone $binary_remote_addr zone=kivien_inscription:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=kivien_paiement:10m rate=20r/m;
 
 server {
     listen 80;
@@ -66,6 +68,20 @@ server {
         proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 60s;
+    }
+
+    # Page Paiement de l'espace pro : enregistrement de carte ou de mandat, choix du mode.
+    location = /functions/v1/paiement {
+        limit_req zone=kivien_paiement burst=10 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:__PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 90s;
     }
 
     location ~ ^/(auth|rest)/v1/ {

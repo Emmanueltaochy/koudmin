@@ -1,0 +1,105 @@
+.carte {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+}
+.aRegler {
+  background: color-mix(in srgb, var(--k-curcuma) 22%, var(--k-blanc));
+}
+.action {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* Choix du mode : trois cartes, la choisie cernée de basalte. */
+.modes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mode {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 1px solid var(--k-trait);
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  color: var(--k-basalte);
+  text-align: left;
+  cursor: pointer;
+}
+.mode[aria-checked='true'] {
+  border: 2px solid var(--k-basalte);
+  padding: 11px 15px;
+}
+.mode:disabled {
+  cursor: wait;
+}
+.coche {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--k-galet);
+  border-radius: 50%;
+}
+.mode[aria-checked='true'] .coche {
+  border-color: var(--k-basalte);
+  background: var(--k-basalte);
+  color: var(--k-creme);
+}
+.modeTexte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Historique des paiements. */
+.ligne {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 14px 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+}
+.ligneTexte {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ligneMontant {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.statut {
+  padding: 3px 10px;
+  border-radius: var(--k-rayon-pilule);
+  background: var(--k-creme);
+  font: var(--k-badge-font);
+}
+.statut[data-statut='reussi'] {
+  background: color-mix(in srgb, var(--k-vacoa) 18%, var(--k-blanc));
+  color: var(--k-vacoa);
+}
+.statut[data-statut='echoue'] {
+  background: color-mix(in srgb, var(--k-braise) 12%, var(--k-blanc));
+  color: var(--k-braise);
+}

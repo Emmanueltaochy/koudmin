@@ -16,6 +16,9 @@ import {
   type Facture,
   type Favori,
   type Membre,
+  type MoyenPaiement,
+  type PaiementFrais,
+  type ReponsePaiement,
   type Restaurant,
   type Role,
   type TableauAdmin,
@@ -222,6 +225,58 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       if (refus(error, /hors de La Réunion/)) return 'adresse';
       verifier({ data: null, error });
       return 'ok';
+    },
+    paiement: {
+      async moyen(restaurantId) {
+        const l = verifier(
+          await client
+            .from('moyens_paiement')
+            .select('mode, carte_libelle, sepa_libelle, gocardless_demande, gocardless_mandat, mandat_statut')
+            .eq('restaurant_id', restaurantId)
+            .maybeSingle(),
+        ) as {
+          mode: MoyenPaiement['mode']; carte_libelle: string | null; sepa_libelle: string | null;
+          gocardless_demande: string | null; gocardless_mandat: string | null; mandat_statut: string | null;
+        } | null;
+        const valide = !!l?.mandat_statut && ['pending_customer_approval', 'pending_submission', 'submitted', 'active'].includes(l.mandat_statut);
+        return {
+          mode: l?.mode ?? 'carte_mission',
+          carte: l?.carte_libelle ?? null,
+          sepa: l?.gocardless_mandat ? (l.sepa_libelle ?? 'Prélèvement SEPA') : null,
+          sepaEnAttente: !!l?.gocardless_demande && !l.gocardless_mandat,
+          mandatValide: valide,
+        };
+      },
+      async historique(restaurantId) {
+        const l = verifier(
+          await client
+            .from('paiements')
+            .select('id, type, libelle, moyen, montant_ttc_centimes, statut, erreur, cree_le')
+            .eq('restaurant_id', restaurantId)
+            .order('cree_le', { ascending: false })
+            .limit(100),
+        ) as { id: string; type: PaiementFrais['type']; libelle: string; moyen: PaiementFrais['moyen']; montant_ttc_centimes: number;
+               statut: PaiementFrais['statut']; erreur: string | null; cree_le: string }[];
+        return l.map((p) => ({
+          id: p.id, type: p.type, libelle: p.libelle, moyen: p.moyen, montantTTCCentimes: p.montant_ttc_centimes,
+          statut: p.statut, erreur: p.erreur, creeLe: p.cree_le,
+        }));
+      },
+      async aRegler(restaurantId) {
+        const [l] = verifier(await client.rpc('a_regler', { p_restaurant: restaurantId })) as
+          { mises_en_relation: number; montant_ht_centimes: number; tva_centimes: number }[];
+        return { misesEnRelation: l?.mises_en_relation ?? 0, ttcCentimes: (l?.montant_ht_centimes ?? 0) + (l?.tva_centimes ?? 0) };
+      },
+      async agir(restaurantId, a) {
+        const { data, error } = await client.functions.invoke('paiement', { body: { ...a, restaurant: restaurantId } });
+        if (error) {
+          // Refus expliqué par la fonction (« Enregistrez d'abord une carte. ») : relu dans la réponse.
+          const reponse = (error as { context?: Response }).context;
+          const corps = reponse ? ((await reponse.json().catch(() => null)) as { erreur?: string } | null) : null;
+          return { erreur: corps?.erreur ?? null, statut: 'echoue' };
+        }
+        return data as ReponsePaiement;
+      },
     },
     admin: {
       async tableau(jours) {

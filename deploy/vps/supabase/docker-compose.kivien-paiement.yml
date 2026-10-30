@@ -1,0 +1,11 @@
+# Kivien : paiement des frais par les établissements (Stripe pour la carte, GoCardless pour le
+# prélèvement SEPA). Ajouté à COMPOSE_FILE par configurer-paiement.sh, qui range les clés dans .env.
+# Les clés ne vont qu'au service des fonctions : ni au site, ni à l'app.
+
+services:
+  functions:
+    environment:
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      GOCARDLESS_ACCESS_TOKEN: ${GOCARDLESS_ACCESS_TOKEN:-}
+      GOCARDLESS_ENV: ${GOCARDLESS_ENV:-sandbox}
+      KIVIEN_SITE: ${SITE_URL:-https://kivien.re}
