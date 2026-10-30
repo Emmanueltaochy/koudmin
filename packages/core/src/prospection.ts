@@ -20,16 +20,28 @@ export const LIBELLES_CATEGORIE_PROSPECT: Record<CategorieProspect, string> = {
 export const STATUTS_PROSPECT = ['a_contacter', 'contacte', 'interesse', 'inscrit', 'pas_interesse'] as const;
 export type StatutProspect = (typeof STATUTS_PROSPECT)[number];
 
-/** Requête Overpass : restauration, bars, hôtels et hébergements nommés de l'île. */
-export const REQUETE_OVERPASS = `[out:json][timeout:120];
-area["ISO3166-1"="RE"][admin_level=2]->.re;
-(
-  nwr(area.re)["amenity"~"^(restaurant|bar|pub|biergarten|cafe|ice_cream|fast_food|food_court|nightclub)$"]["name"];
-  nwr(area.re)["tourism"~"^(hotel|resort|motel|guest_house|hostel|camp_site|chalet|apartment)$"]["name"];
-);
-out tags center;`;
+/** Cadre de l'île (sud, ouest, nord, est) : plus léger qu'une recherche par limite administrative. */
+const CADRE_REUNION = '-21.40,55.20,-20.85,55.85';
 
-export const SERVEUR_OVERPASS = 'https://overpass-api.de/api/interpreter';
+/**
+ * Requêtes Overpass, en deux parts pour rester légères : restauration et bars, puis hébergements.
+ * Seuls les lieux nommés sont retenus.
+ */
+export const REQUETES_OVERPASS = [
+  `[out:json][timeout:90][bbox:${CADRE_REUNION}];
+nwr["amenity"~"^(restaurant|bar|pub|biergarten|cafe|ice_cream|fast_food|food_court|nightclub)$"]["name"];
+out tags center;`,
+  `[out:json][timeout:90][bbox:${CADRE_REUNION}];
+nwr["tourism"~"^(hotel|resort|motel|guest_house|hostel|camp_site|chalet|apartment)$"]["name"];
+out tags center;`,
+];
+
+/** Serveurs Overpass publics, essayés dans l'ordre quand l'un est saturé. */
+export const SERVEURS_OVERPASS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
 
 const PAR_AMENITY: Record<string, CategorieProspect> = {
   restaurant: 'restaurant',

@@ -61,7 +61,7 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
 export function Prospection() {
   const [fiches, setFiches] = useState<Prospect[] | 'chargement' | 'erreur'>('chargement');
   const [campagnes, setCampagnes] = useState<CampagneProspection[]>([]);
-  const [import_, setImport] = useState<{ enCours: boolean; message: string | null; ok: boolean }>({ enCours: false, message: null, ok: true });
+  const [import_, setImport] = useState<{ enCours: boolean; message: string | null; ok: boolean; detail?: string }>({ enCours: false, message: null, ok: true });
   const [recherche, setRecherche] = useState('');
   const [categorie, setCategorie] = useState<CategorieProspect | ''>('');
   const [zone, setZone] = useState<Zone | ''>('');
@@ -101,8 +101,9 @@ export function Prospection() {
       const r = await src.importer(await src.chercherOsm());
       setImport({ enCours: false, message: tp.importFait(r.ajoutes, r.misAJour), ok: true });
       await charger();
-    } catch {
-      setImport({ enCours: false, message: tp.importErreur, ok: false });
+    } catch (e) {
+      // Le détail (serveur, code HTTP) permet de savoir si OpenStreetMap est saturé ou injoignable.
+      setImport({ enCours: false, message: tp.importErreur, ok: false, detail: e instanceof Error ? e.message : String(e) });
     }
   }
 
@@ -153,6 +154,7 @@ export function Prospection() {
         {import_.message && (
           <span className={import_.ok ? ui.corps : ui.messageErreur} role="status">{import_.message}</span>
         )}
+        {import_.detail && <span className={`${ui.legende} ${ui.galet}`}>{tp.importDetail(import_.detail)}</span>}
         <span className={`${ui.legende} ${ui.galet}`}>{tp.attribution}</span>
       </div>
 

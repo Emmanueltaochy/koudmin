@@ -173,6 +173,7 @@ export const textesEcrans = {
         importEnCours: 'Recherche en cours : une à deux minutes.',
         importFait: (ajoutes: number, majs: number) => `${ajoutes} établissement${ajoutes > 1 ? 's' : ''} ajouté${ajoutes > 1 ? 's' : ''}, ${majs} mis à jour.`,
         importErreur: "OpenStreetMap ne répond pas pour l'instant. Réessayez dans quelques minutes.",
+        importDetail: (detail: string) => `Détail technique : ${detail}`,
         attribution: '© les contributeurs d’OpenStreetMap (ODbL)',
         total: 'Établissements',
         avecEmail: 'Avec e-mail',

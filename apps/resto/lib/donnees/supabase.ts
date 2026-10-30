@@ -3,9 +3,10 @@ import {
   aujourdhuiReunion,
   estSecteur,
   prospectsDepuisOverpass,
-  REQUETE_OVERPASS,
+  REQUETES_OVERPASS,
   SECTEUR_PAR_DEFAUT,
-  SERVEUR_OVERPASS,
+  SERVEURS_OVERPASS,
+  type ElementOsm,
   type ParametresTarifaires,
   type Poste,
   type StatutAffectation,
@@ -315,13 +316,33 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       },
       prospection: {
         async chercherOsm() {
-          const r = await fetch(SERVEUR_OVERPASS, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `data=${encodeURIComponent(REQUETE_OVERPASS)}`,
-          });
-          if (!r.ok) throw new ErreurReseau(`Overpass ${r.status}`);
-          return prospectsDepuisOverpass(await r.json());
+          // Chaque requête est essayée sur les serveurs publics à la suite (souvent saturés).
+          const elements: ElementOsm[] = [];
+          for (const requete of REQUETES_OVERPASS) {
+            const echecs: string[] = [];
+            let reponse: { elements?: ElementOsm[]; remark?: string } | null = null;
+            for (const serveur of SERVEURS_OVERPASS) {
+              try {
+                const r = await fetch(serveur, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                  body: `data=${encodeURIComponent(requete)}`,
+                  signal: AbortSignal.timeout(100_000),
+                });
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                const json = (await r.json()) as { elements?: ElementOsm[]; remark?: string };
+                // Overpass signale un dépassement de temps dans « remark », avec une liste vide.
+                if (json.remark && !json.elements?.length) throw new Error(json.remark.slice(0, 80));
+                reponse = json;
+                break;
+              } catch (e) {
+                echecs.push(`${new URL(serveur).host} : ${e instanceof Error ? e.message : 'erreur'}`);
+              }
+            }
+            if (!reponse) throw new ErreurReseau(echecs.join(' ; '));
+            elements.push(...(reponse.elements ?? []));
+          }
+          return prospectsDepuisOverpass({ elements });
         },
         async prospects() {
           const l = verifier(await client.rpc('admin_prospects')) as {
