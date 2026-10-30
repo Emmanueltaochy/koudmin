@@ -183,6 +183,9 @@ Journal des mises à jour sur le VPS : `/var/log/kivien-mises-a-jour.log`. Mise 
 | Passer les paiements en réel | `sudo /opt/kivien/source/deploy/vps/configurer-paiement.sh reel` |
 | Lancer les débits maintenant | `sudo kivien-prelevements` |
 | Historique des débits | `journalctl -u kivien-prelevements --since -2d` |
+| Envoyer un lot de prospection maintenant | `sudo kivien-prospection` |
+| Historique des envois de prospection | `journalctl -u kivien-prospection --since -2d` |
+| Changer le plafond d'e-mails de prospection par jour | `PROSPECTION_PAR_JOUR=60` dans `/opt/kivien/supabase/.env` |
 
 Restaurer une sauvegarde (après arrêt des services qui écrivent) :
 

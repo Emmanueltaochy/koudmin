@@ -1,11 +1,14 @@
 import type {
+  CategorieProspect,
   JourISO,
   ParametresTarifaires,
   Poste,
   ProfilPublic,
+  ProspectOsm,
   Secteur,
   StatutAffectation,
   StatutDemande,
+  StatutProspect,
 } from '@kivien/core';
 import type { AdresseGeo } from '../adresse';
 
@@ -72,11 +75,53 @@ export interface DemandeAdmin {
 }
 
 /** Accès de l'espace administrateur (null : compte sans droit administrateur). */
+export interface Prospect {
+  id: string;
+  nom: string;
+  categorie: CategorieProspect;
+  commune: string | null;
+  adresse: string | null;
+  lat: number | null;
+  lng: number | null;
+  telephone: string | null;
+  email: string | null;
+  site: string | null;
+  statut: StatutProspect;
+  notes: string | null;
+  desinscrit: boolean;
+  dernierEnvoi: string | null;
+  envois: number;
+}
+
+export interface CampagneProspection {
+  id: string;
+  sujet: string;
+  creeLe: string;
+  total: number;
+  envoyes: number;
+  enAttente: number;
+  echecs: number;
+}
+
+/** Espace prospection (administrateurs) : fiches, import OpenStreetMap, campagnes e-mail. */
+export interface SourceProspection {
+  /** Établissements de l'île dans OpenStreetMap (requête depuis le navigateur). */
+  chercherOsm(): Promise<ProspectOsm[]>;
+  prospects(): Promise<Prospect[]>;
+  importer(fiches: ProspectOsm[]): Promise<{ ajoutes: number; misAJour: number }>;
+  modifier(id: string, m: { email: string | null; telephone: string | null; statut: StatutProspect; notes: string | null }): Promise<'ok' | 'email'>;
+  lancerCampagne(sujet: string, message: string, ids: string[]): Promise<number>;
+  campagnes(): Promise<CampagneProspection[]>;
+  /** Lien de désinscription (page publique). */
+  seDesinscrire(jeton: string): Promise<boolean>;
+}
+
 export interface SourceAdmin {
   tableau(jours: number): Promise<TableauAdmin | null>;
   etablissements(): Promise<EtablissementAdmin[]>;
   extras(): Promise<ExtraAdmin[]>;
   demandes(limite?: number): Promise<DemandeAdmin[]>;
+  prospection: SourceProspection;
 }
 
 /** Compteur de l'équipe Kivien : extras et établissements inscrits, sans donnée personnelle. */

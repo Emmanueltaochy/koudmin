@@ -2,7 +2,10 @@ import { createClient, type RealtimeChannel, type SupabaseClient } from '@supaba
 import {
   aujourdhuiReunion,
   estSecteur,
+  prospectsDepuisOverpass,
+  REQUETE_OVERPASS,
   SECTEUR_PAR_DEFAUT,
+  SERVEUR_OVERPASS,
   type ParametresTarifaires,
   type Poste,
   type StatutAffectation,
@@ -17,6 +20,7 @@ import {
   type Favori,
   type Membre,
   type MoyenPaiement,
+  type Prospect,
   type PaiementFrais,
   type ReponsePaiement,
   type Restaurant,
@@ -308,6 +312,60 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           desistements: e.desistements, noteMoyenne: e.note_moyenne === null ? null : Number(e.note_moyenne),
           dispo7Jours: e.dispo_7_jours, avecPhoto: e.avec_photo,
         }));
+      },
+      prospection: {
+        async chercherOsm() {
+          const r = await fetch(SERVEUR_OVERPASS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `data=${encodeURIComponent(REQUETE_OVERPASS)}`,
+          });
+          if (!r.ok) throw new ErreurReseau(`Overpass ${r.status}`);
+          return prospectsDepuisOverpass(await r.json());
+        },
+        async prospects() {
+          const l = verifier(await client.rpc('admin_prospects')) as {
+            id: string; nom: string; categorie: Prospect['categorie']; commune: string | null; adresse: string | null;
+            lat: number | null; lng: number | null; telephone: string | null; email: string | null; site: string | null;
+            statut: Prospect['statut']; notes: string | null; desinscrit: boolean; dernier_envoi: string | null; envois: number;
+          }[];
+          return l.map((p) => ({
+            id: p.id, nom: p.nom, categorie: p.categorie, commune: p.commune, adresse: p.adresse, lat: p.lat, lng: p.lng,
+            telephone: p.telephone, email: p.email, site: p.site, statut: p.statut, notes: p.notes, desinscrit: p.desinscrit,
+            dernierEnvoi: p.dernier_envoi, envois: p.envois,
+          }));
+        },
+        async importer(fiches) {
+          // Par paquets : un import de toute l'île reste sous la taille maximale d'une requête.
+          let ajoutes = 0;
+          let misAJour = 0;
+          for (let i = 0; i < fiches.length; i += 1000) {
+            const [r] = verifier(await client.rpc('admin_importer_prospects', { p_lignes: fiches.slice(i, i + 1000) })) as
+              { ajoutes: number; mis_a_jour: number }[];
+            ajoutes += r?.ajoutes ?? 0;
+            misAJour += r?.mis_a_jour ?? 0;
+          }
+          return { ajoutes, misAJour };
+        },
+        async modifier(id, m) {
+          const { error } = await client.rpc('admin_modifier_prospect', {
+            p_id: id, p_email: m.email, p_telephone: m.telephone, p_statut: m.statut, p_notes: m.notes,
+          });
+          if (error && /e-mail invalide/i.test(error.message)) return 'email';
+          verifier({ data: null, error });
+          return 'ok';
+        },
+        async lancerCampagne(sujet, message, ids) {
+          return verifier(await client.rpc('admin_lancer_campagne', { p_sujet: sujet, p_message: message, p_prospects: ids })) as number;
+        },
+        async campagnes() {
+          const l = verifier(await client.rpc('admin_campagnes')) as
+            { id: string; sujet: string; cree_le: string; total: number; envoyes: number; en_attente: number; echecs: number }[];
+          return l.map((c) => ({ id: c.id, sujet: c.sujet, creeLe: c.cree_le, total: c.total, envoyes: c.envoyes, enAttente: c.en_attente, echecs: c.echecs }));
+        },
+        async seDesinscrire(jeton) {
+          return verifier(await client.rpc('se_desinscrire_prospection', { p_jeton: jeton })) as boolean;
+        },
       },
       async demandes(limite = 100) {
         const l = verifier(await client.rpc('admin_demandes', { p_limite: limite })) as {

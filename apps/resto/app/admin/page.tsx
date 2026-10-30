@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { BarChart3, Building2, ClipboardList, LogOut, MapPinned, Users, type LucideIcon } from 'lucide-react';
+import { BarChart3, Building2, ClipboardList, LogOut, MapPinned, Megaphone, Users, type LucideIcon } from 'lucide-react';
 import { textesEcrans } from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
@@ -9,13 +9,14 @@ import ui from '@/components/ui.module.css';
 import { connecte, connecterAdmin, deconnecter } from '@/lib/auth';
 import { source } from '@/lib/donnees';
 import { ListeDemandes, ListeEtablissements, ListeExtras } from './Listes';
+import { Prospection } from './Prospection';
 import { Recrutement } from './Recrutement';
 import { VueEnsemble } from './VueEnsemble';
 import s from './admin.module.css';
 
 const ta = textesEcrans.resto.admin;
 
-type Onglet = 'vue' | 'demandes' | 'extras' | 'etablissements' | 'recrutement';
+type Onglet = 'vue' | 'demandes' | 'extras' | 'etablissements' | 'recrutement' | 'prospection';
 /** Menu de gauche : piloter (chiffres), suivre l'activité, développer le réseau. */
 const GROUPES: { titre: string; onglets: { id: Onglet; icone: LucideIcon }[] }[] = [
   { titre: ta.groupes.pilotage, onglets: [{ id: 'vue', icone: BarChart3 }] },
@@ -26,6 +27,7 @@ const GROUPES: { titre: string; onglets: { id: Onglet; icone: LucideIcon }[] }[]
       { id: 'extras', icone: Users },
       { id: 'etablissements', icone: Building2 },
       { id: 'recrutement', icone: MapPinned },
+      { id: 'prospection', icone: Megaphone },
     ],
   },
 ];
@@ -149,6 +151,7 @@ export default function Admin() {
             {onglet === 'extras' && <ListeExtras />}
             {onglet === 'etablissements' && <ListeEtablissements />}
             {onglet === 'recrutement' && <Recrutement />}
+            {onglet === 'prospection' && <Prospection />}
           </main>
           </div>
         </>

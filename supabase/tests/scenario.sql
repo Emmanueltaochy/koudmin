@@ -367,3 +367,35 @@ select stripe_carte from moyens_paiement;
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 select count(*) as moyens_visibles_extra from moyens_paiement;
 reset role;
+\echo '--- Prospection : import OpenStreetMap, e-mail saisi conservé, campagne, désinscription'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select * from admin_importer_prospects('[
+  {"osm_id": "node/1", "nom": "Le Bistrot", "categorie": "restaurant", "commune": "Saint-Paul", "lat": -21.0, "lng": 55.27, "email": " Contact@Bistrot.re "},
+  {"osm_id": "node/2", "nom": "Bar Sans Mail", "categorie": "bar", "commune": "Saint-Denis", "lat": -20.88, "lng": 55.45},
+  {"osm_id": "way/3", "nom": "Hôtel du Lagon", "categorie": "hotel", "email": "pas-une-adresse"}
+]'::jsonb);
+select admin_modifier_prospect(id, 'reception@lagon.re', null, 'a_contacter', 'Rappeler lundi') from admin_prospects() where nom = 'Hôtel du Lagon';
+select * from admin_importer_prospects('[{"osm_id": "way/3", "nom": "Hôtel du Lagon", "categorie": "hotel"}]'::jsonb);
+select nom, categorie, email, statut, notes from admin_prospects() order by nom;
+\set ON_ERROR_STOP 0
+select admin_modifier_prospect(id, 'faux@', null, 'contacte', null) from admin_prospects() where nom = 'Bar Sans Mail';
+\set ON_ERROR_STOP 1
+select admin_lancer_campagne('Kivien arrive', 'Bonjour {nom}, Kivien ouvre dans quelques jours.', array(select id from admin_prospects())) as envois;
+select admin_lancer_campagne('Kivien arrive', 'Bonjour {nom}, deuxième message trop rapproché.', array(select id from admin_prospects())) as envois_30_jours;
+select sujet, total, en_attente from admin_campagnes();
+reset role;
+select jeton as jeton_bistrot from envois_prospection where email = 'contact@bistrot.re' \gset
+set role anon;
+select se_desinscrire_prospection(:'jeton_bistrot') as desinscrit;
+select se_desinscrire_prospection('00000000-0000-0000-0000-000000000000') as jeton_inconnu;
+reset role;
+select email, statut from envois_prospection order by email;
+\set ON_ERROR_STOP 0
+set role anon;
+select count(*) from prospects;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select count(*) from admin_prospects();
+\set ON_ERROR_STOP 1
+reset role;

@@ -47,11 +47,14 @@ new row for relation "photos_extras" violates check constraint "photos_extras_im
 new row violates row-level security policy for table "extras"
 permission denied for table abonnes_lettre
 new row for relation "demandes" violates check constraint "poste_libre_intitule"
-permission denied for function paiements_a_lancer'
+permission denied for function paiements_a_lancer
+Adresse e-mail invalide
+Réservé aux administrateurs Kivien
+permission denied for table prospects'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   echo "ÉCHEC : erreurs SQL inattendues" >&2
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (25 refus attendus)."
+echo "Scénario SQL conforme (28 refus attendus)."

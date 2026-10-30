@@ -150,6 +150,13 @@ export const textesVitrine = {
     zonesTexte: 'Nord, Ouest, Sud, Est : tu vois les missions les plus proches de chez toi en premier. Pas de voiture ? Celles avec retour assuré passent en tête.',
     finTitre: 'Ta première mission t’attend.',
   },
+  desinscription: {
+    titre: 'Désinscription',
+    enCours: 'Désinscription en cours.',
+    ok: 'C’est fait : vous ne recevrez plus nos messages de présentation.',
+    inconnu: 'Ce lien n’est plus valable. Écrivez à bonjour@kivien.re pour ne plus recevoir nos messages.',
+    retour: 'Retour à l’accueil',
+  },
   lettre: {
     titre: 'Les nouvelles de Kivien',
     texte: 'Une lettre par mois : nouvelles communes, conseils, changement du SMIC.',

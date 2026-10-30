@@ -24,3 +24,4 @@ export * from './inscriptionResto';
 export * from './zones';
 export * from './gains';
 export * from './email';
+export * from './prospection';

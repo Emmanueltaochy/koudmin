@@ -320,3 +320,59 @@
     background: var(--k-creme);
   }
 }
+
+/* Prospection : import, filtres, saisie d'e-mail, campagne. */
+.importer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+.choix {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--k-galet);
+  border-radius: var(--k-rayon-champ);
+  background: var(--k-blanc);
+  font: var(--k-corps-font);
+  color: var(--k-basalte);
+  max-width: 100%;
+}
+.emailForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.emailForm input {
+  min-height: 36px;
+  min-width: 180px;
+  padding: 0 8px;
+  border: 1px solid var(--k-galet);
+  border-radius: var(--k-rayon-champ);
+  font: var(--k-corps-font);
+}
+.campagne {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.zoneTexte {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--k-galet);
+  border-radius: var(--k-rayon-champ);
+  font: var(--k-corps-font);
+  resize: vertical;
+}
+.campagneLigne {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

@@ -4,9 +4,12 @@ import {
   bornesMission,
   miseEnRelationFacturee,
   type ProfilPublic,
+  type ProspectOsm,
 } from '@kivien/core';
 import type {
+  CampagneProspection,
   MoyenPaiement,
+  Prospect,
   PaiementFrais,
   DemandeSuivi,
   ExtraAffecte,
@@ -167,6 +170,15 @@ function etatInitial(): EtatDemo {
 
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+const PROSPECTS_OSM_DEMO: ProspectOsm[] = [
+  { osm_id: 'node/101', nom: 'Le Cap Méchant', categorie: 'restaurant', commune: 'Saint-Philippe', adresse: '1 rue du Cap', lat: -21.37, lng: 55.72, telephone: '+262 262 37 00 61', email: 'contact@capmechant.re', site: null },
+  { osm_id: 'node/102', nom: 'Ti Bar Lagon', categorie: 'bar', commune: 'Saint-Gilles-les-Bains', adresse: null, lat: -21.05, lng: 55.22, telephone: null, email: null, site: null },
+  { osm_id: 'way/103', nom: 'Hôtel des Hauts', categorie: 'hotel', commune: 'Cilaos', adresse: '12 chemin des Trois Mares', lat: -21.13, lng: 55.47, telephone: '+262 262 31 00 00', email: 'reception@hoteldeshauts.re', site: 'https://hoteldeshauts.re' },
+  { osm_id: 'node/104', nom: 'Snack Chez Ti Jean', categorie: 'restauration_rapide', commune: 'Saint-Denis', adresse: null, lat: -20.88, lng: 55.45, telephone: '+262 692 00 11 22', email: null, site: null },
+];
+
+const prospectionDemo: { prospects: Prospect[]; campagnes: CampagneProspection[] } = { prospects: [], campagnes: [] };
+
 const paiementDemo: { moyen: MoyenPaiement; historique: PaiementFrais[] } = {
   moyen: { mode: 'carte_mission', carte: null, sepa: null, sepaEnAttente: false, mandatValide: false },
   historique: [
@@ -291,6 +303,51 @@ export function sourceFictive(): SourceResto {
       },
     },
     admin: {
+      prospection: {
+        // Démonstration : échantillon fixe à la place d'OpenStreetMap, aucun e-mail n'est envoyé.
+        async chercherOsm() {
+          await attendre(600);
+          return PROSPECTS_OSM_DEMO;
+        },
+        async prospects() {
+          return prospectionDemo.prospects.map((p) => ({ ...p }));
+        },
+        async importer(fiches) {
+          let ajoutes = 0;
+          for (const f of fiches) {
+            if (prospectionDemo.prospects.some((p) => p.id === f.osm_id)) continue;
+            ajoutes++;
+            prospectionDemo.prospects.push({
+              id: f.osm_id, nom: f.nom, categorie: f.categorie, commune: f.commune, adresse: f.adresse, lat: f.lat, lng: f.lng,
+              telephone: f.telephone, email: f.email, site: f.site, statut: 'a_contacter', notes: null, desinscrit: false,
+              dernierEnvoi: null, envois: 0,
+            });
+          }
+          return { ajoutes, misAJour: fiches.length - ajoutes };
+        },
+        async modifier(id, m) {
+          if (m.email && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(m.email)) return 'email';
+          const p = prospectionDemo.prospects.find((x) => x.id === id);
+          if (p) Object.assign(p, { ...m, email: m.email?.trim().toLowerCase() || null });
+          return 'ok';
+        },
+        async lancerCampagne(sujet, _message, ids) {
+          const cibles = prospectionDemo.prospects.filter((p) => ids.includes(p.id) && p.email && !p.desinscrit && p.envois === 0);
+          if (cibles.length) {
+            prospectionDemo.campagnes.unshift({
+              id: `c${Date.now()}`, sujet, creeLe: new Date().toISOString(), total: cibles.length, envoyes: 0, enAttente: cibles.length, echecs: 0,
+            });
+            for (const p of cibles) p.envois = 1;
+          }
+          return cibles.length;
+        },
+        async campagnes() {
+          return prospectionDemo.campagnes.map((c) => ({ ...c }));
+        },
+        async seDesinscrire(jeton) {
+          return jeton === 'demo';
+        },
+      },
       // Démonstration : chiffres d'un premier mois d'activité.
       async tableau(jours) {
         const mois = (n: number) => new Date(Date.now() - n * 31 * 86400e3).toISOString().slice(0, 7);

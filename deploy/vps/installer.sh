@@ -305,9 +305,31 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 UNIT
+# E-mails de prospection (espace admin) : petits lots, jours ouvrés, heures de bureau à La Réunion.
+install -m 0700 "$SOURCE/deploy/vps/prospection.sh" /usr/local/sbin/kivien-prospection
+cat > /etc/systemd/system/kivien-prospection.service <<'UNIT'
+[Unit]
+Description=E-mails de prospection Kivien
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kivien-prospection
+UNIT
+cat > /etc/systemd/system/kivien-prospection.timer <<'UNIT'
+[Unit]
+Description=E-mails de prospection Kivien, en semaine de 8 h à 18 h (La Réunion)
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 08..17:00/15:00 Indian/Reunion
+
+[Install]
+WantedBy=timers.target
+UNIT
 systemctl daemon-reload
 systemctl enable --now kivien-sauvegarde.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prelevements.timer >> "$JOURNAL" 2>&1
+systemctl enable --now kivien-prospection.timer >> "$JOURNAL" 2>&1
 info "prochaine sauvegarde : $(systemctl show kivien-sauvegarde.timer -p NextElapseUSecRealtime --value)"
 /usr/local/sbin/kivien-sauvegarde | tee -a "$JOURNAL" || arret "la première sauvegarde a échoué."
 

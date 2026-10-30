@@ -72,6 +72,28 @@ let pageCourante = null;
   await p.getByRole('row', { name: /Le Boucan Grillé/ }).first().waitFor(); ok('admin : dernières demandes');
   await p.getByRole('button', { name: 'Recrutement', exact: true }).click();
   await p.getByRole('row', { name: /^Ouest/ }).first().waitFor(); ok('admin : recrutement par zone');
+  // Prospection : import (échantillon OpenStreetMap en démonstration), e-mail ajouté à la main, campagne.
+  await p.getByRole('button', { name: 'Prospection', exact: true }).click();
+  await p.getByRole('button', { name: 'Chercher les établissements sur OpenStreetMap' }).click();
+  await p.getByText('4 établissements ajoutés, 0 mis à jour.').waitFor(); ok('prospection : import OpenStreetMap');
+  await p.getByRole('row', { name: /Ti Bar Lagon/ }).getByRole('button', { name: 'Ajouter un e-mail' }).click();
+  await p.getByLabel('Ajouter un e-mail').fill('pas-une-adresse');
+  await p.getByRole('button', { name: 'Enregistrer' }).click();
+  await p.getByText('Adresse e-mail invalide.').waitFor();
+  await p.getByLabel('Ajouter un e-mail').fill('contact@tibarlagon.re');
+  await p.getByRole('button', { name: 'Enregistrer' }).click();
+  await p.getByText('contact@tibarlagon.re').waitFor(); ok('prospection : e-mail ajouté à la main, adresse vérifiée');
+  await p.getByLabel('Toute l’île').selectOption('sud');
+  await p.getByText('2 établissements avec e-mail dans la sélection').waitFor(); ok('prospection : filtre par zone (Sud : Saint-Philippe, Cilaos)');
+  await p.getByLabel('Toute l’île').selectOption('');
+  await p.getByText('3 établissements avec e-mail dans la sélection').waitFor();
+  if (!(await p.locator('textarea').inputValue()).replace(/\s/g, ' ').includes('19,00 € HT par mise en relation')) throw new Error('frais absents du message');
+  ok('prospection : message de lancement avec les frais en vigueur');
+  p.once('dialog', (d) => d.accept());
+  await p.getByRole('button', { name: "Programmer l'envoi à 3 établissements" }).click();
+  await p.getByText('3 e-mails programmés.').waitFor();
+  await p.getByText('0 sur 3 envoyé · 3 en attente', { exact: false }).waitFor(); ok('prospection : campagne programmée, suivi des envois');
+  await capture('prospection');
 
   // Création de compte restaurateur : SIRET obligatoire, compte actif tout de suite.
   await p.goto(URL_SITE + '/');
@@ -346,7 +368,7 @@ let pageCourante = null;
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/paiement', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/paiement', '/desinscription?j=demo', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
