@@ -373,6 +373,14 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           verifier({ data: null, error });
           return 'ok';
         },
+        async ajouter(f) {
+          const { error } = await client.rpc('admin_ajouter_prospect', {
+            p_nom: f.nom, p_categorie: f.categorie, p_commune: f.commune, p_telephone: f.telephone, p_email: f.email,
+          });
+          if (error && /e-mail invalide/i.test(error.message)) return 'email';
+          verifier({ data: null, error });
+          return 'ok';
+        },
         async lancerCampagne(sujet, message, ids) {
           return verifier(await client.rpc('admin_lancer_campagne', { p_sujet: sujet, p_message: message, p_prospects: ids })) as number;
         },

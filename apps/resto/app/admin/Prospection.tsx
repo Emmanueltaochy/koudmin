@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Mail, MapPinned, Phone, Send } from 'lucide-react';
+import { Mail, MapPinned, Phone, Plus, Send } from 'lucide-react';
 import {
   CATEGORIES_PROSPECT,
   formatEuros,
@@ -44,17 +44,81 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
       <form onSubmit={enregistrer} className={s.emailForm} noValidate>
         <input type="email" aria-label={tp.ajouterEmail} value={email} onChange={(e) => { setEmail(e.target.value); setErreur(false); }} autoFocus />
         <button type="submit" className={ui.lien}>{tp.enregistrer}</button>
-        {erreur && <span className={`${ui.legende} ${ui.braise}`}>{tp.emailInvalide}</span>}
+        {erreur ? (
+          <span className={`${ui.legende} ${ui.braise}`}>{tp.emailInvalide}</span>
+        ) : (
+          x.email && <span className={`${ui.legende} ${ui.galet}`}>{tp.emailAide}</span>
+        )}
       </form>
     );
   if (x.email)
     return (
       <span>
-        <a href={`mailto:${x.email}`} className={ui.lienDiscret}>{x.email}</a>
+        <a href={`mailto:${x.email}`} className={ui.lienDiscret}>{x.email}</a>{' '}
+        <button type="button" className={ui.lienDiscret} onClick={() => setEdition(true)} aria-label={`${tp.modifierEmail} : ${x.nom}`}>
+          {tp.modifierEmail}
+        </button>
         <span className={s.sousLigne}>{x.desinscrit ? tp.desinscrit : x.sourceEmail ? tp.sourceEmail[x.sourceEmail] : ''}</span>
       </span>
     );
   return <button type="button" className={ui.lienDiscret} onClick={() => setEdition(true)}>{tp.ajouterEmail}</button>;
+}
+
+/** Ajout d'un établissement à la main (absent d'OpenStreetMap, ou fiche d'essai). */
+function AjoutProspect({ onAjoute, onFerme }: { onAjoute: (nom: string) => void; onFerme: () => void }) {
+  const tn = tp.nouveau;
+  const [f, setF] = useState({ nom: '', categorie: 'restaurant' as CategorieProspect, commune: '', telephone: '', email: '' });
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [envoi, setEnvoi] = useState(false);
+  async function ajouter(e: FormEvent) {
+    e.preventDefault();
+    if (!f.nom.trim()) return setErreur(tn.nomObligatoire);
+    setEnvoi(true);
+    const r = await source()
+      .admin.prospection.ajouter({
+        nom: f.nom.trim(), categorie: f.categorie, commune: f.commune.trim() || null,
+        telephone: f.telephone.trim() || null, email: f.email.trim() || null,
+      })
+      .catch(() => null);
+    setEnvoi(false);
+    if (r === 'email') return setErreur(tp.emailInvalide);
+    if (r !== 'ok') return setErreur(t.extra.missions.horsLigneTitre);
+    onAjoute(f.nom.trim());
+  }
+  const champ = (cle: 'nom' | 'commune' | 'telephone' | 'email', libelle: string, type = 'text', facultatif = true) => (
+    <label className={s.bloc}>
+      <span className={ui.corpsFort}>
+        {libelle} {facultatif && <span className={`${ui.legende} ${ui.galet}`}>· {tn.facultatif}</span>}
+      </span>
+      <span className={ui.champ}>
+        <input id={`prospect-${cle}`} type={type} value={f[cle]} onChange={(e) => { setF({ ...f, [cle]: e.target.value }); setErreur(null); }} />
+      </span>
+    </label>
+  );
+  return (
+    <form onSubmit={ajouter} className={`${s.carte} ${s.campagne}`} noValidate aria-labelledby="nouveau-prospect">
+      <h2 id="nouveau-prospect" className={ui.sousTitre}>{tn.titre}</h2>
+      <p className={`${ui.legende} ${ui.galet}`}>{tn.aide}</p>
+      {champ('nom', tn.nom, 'text', false)}
+      <label className={s.bloc}>
+        <span className={ui.corpsFort}>{tn.categorie}</span>
+        <select className={s.choix} value={f.categorie} onChange={(e) => setF({ ...f, categorie: e.target.value as CategorieProspect })}>
+          {CATEGORIES_PROSPECT.map((c) => <option key={c} value={c}>{LIBELLES_CATEGORIE_PROSPECT[c]}</option>)}
+        </select>
+      </label>
+      {champ('commune', tn.commune)}
+      {champ('telephone', tn.telephone, 'tel')}
+      {champ('email', tn.email, 'email')}
+      {erreur && <p className={ui.messageErreur} role="alert">{erreur}</p>}
+      <div className={s.importer}>
+        <button type="submit" className={ui.boutonPrincipal} disabled={envoi}>
+          {envoi && <Spinner />}
+          {tn.ajouter}
+        </button>
+        <button type="button" className={ui.lien} onClick={onFerme}>{tn.annuler}</button>
+      </div>
+    </form>
+  );
 }
 
 /** Suivi d'une campagne, établissement par établissement. */
@@ -114,6 +178,8 @@ export function Prospection() {
   const [message, setMessage] = useState('');
   const [envoi, setEnvoi] = useState<{ enCours: boolean; texte: string | null }>({ enCours: false, texte: null });
   const [ouverte, setOuverte] = useState<string | null>(null);
+  const [ajout, setAjout] = useState(false);
+  const [ajoute, setAjoute] = useState<string | null>(null);
   const [suivi, setSuivi] = useState<SuiviEnvoi[] | 'chargement'>('chargement');
 
   async function basculerSuivi(id: string) {
@@ -230,6 +296,26 @@ export function Prospection() {
         )}
         <span className={`${ui.legende} ${ui.galet}`}>{tp.attribution}</span>
       </div>
+
+      {ajout ? (
+        <AjoutProspect
+          onFerme={() => setAjout(false)}
+          onAjoute={(nom) => {
+            setAjout(false);
+            setAjoute(tp.nouveau.ajoute(nom));
+            setRecherche(nom);
+            void charger();
+          }}
+        />
+      ) : (
+        <div className={s.importer}>
+          <button type="button" className={ui.boutonSecondaire} onClick={() => { setAjout(true); setAjoute(null); }}>
+            <Plus size={18} strokeWidth={2} aria-hidden />
+            {tp.ajouterEtablissement}
+          </button>
+          {ajoute && <span className={ui.corps} role="status">{ajoute}</span>}
+        </div>
+      )}
 
       <div className={s.chiffres}>
         {[

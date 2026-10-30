@@ -51,11 +51,12 @@ permission denied for function paiements_a_lancer
 Adresse e-mail invalide
 Réservé aux administrateurs Kivien
 permission denied for table prospects
-permission denied for function importer_prospects'
+permission denied for function importer_prospects
+Nom obligatoire'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   echo "ÉCHEC : erreurs SQL inattendues" >&2
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (29 refus attendus)."
+echo "Scénario SQL conforme (30 refus attendus)."

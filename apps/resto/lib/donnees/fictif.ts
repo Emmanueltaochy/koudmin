@@ -354,6 +354,15 @@ export function sourceFictive(): SourceResto {
           if (p) Object.assign(p, { ...m, email: m.email?.trim().toLowerCase() || null, sourceEmail: m.email ? 'manuel' : null });
           return 'ok';
         },
+        async ajouter(f) {
+          if (f.email && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(f.email.trim())) return 'email';
+          prospectionDemo.prospects.push({
+            id: `m${Date.now()}`, nom: f.nom.trim(), categorie: f.categorie, commune: f.commune, adresse: null, lat: null, lng: null,
+            telephone: f.telephone, email: f.email?.trim().toLowerCase() || null, sourceEmail: f.email ? 'manuel' : null, site: null,
+            statut: 'a_contacter', notes: null, desinscrit: false, dernierEnvoi: null, envois: 0,
+          });
+          return 'ok';
+        },
         async lancerCampagne(sujet, _message, ids) {
           const cibles = prospectionDemo.prospects.filter((p) => ids.includes(p.id) && p.email && !p.desinscrit && p.envois === 0);
           if (cibles.length) {

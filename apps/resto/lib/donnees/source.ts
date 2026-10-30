@@ -144,6 +144,8 @@ export interface SourceProspection {
   prospects(): Promise<Prospect[]>;
   importer(fiches: ProspectOsm[]): Promise<{ ajoutes: number; misAJour: number }>;
   modifier(id: string, m: { email: string | null; telephone: string | null; statut: StatutProspect; notes: string | null }): Promise<'ok' | 'email'>;
+  /** Établissement ajouté à la main (absent d'OpenStreetMap, ou fiche d'essai). */
+  ajouter(f: { nom: string; categorie: CategorieProspect; commune: string | null; telephone: string | null; email: string | null }): Promise<'ok' | 'email'>;
   lancerCampagne(sujet: string, message: string, ids: string[]): Promise<number>;
   campagnes(): Promise<CampagneProspection[]>;
   suiviCampagne(id: string): Promise<SuiviEnvoi[]>;

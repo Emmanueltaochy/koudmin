@@ -436,3 +436,12 @@ from admin_suivi_campagne((select id from admin_campagnes() limit 1)) order by n
 select nom, statut from admin_prospects() where nom = 'Hôtel du Lagon';
 reset role;
 select count(*) as visites_comptees from visites_prospection;
+\echo '--- Prospection : établissement ajouté à la main'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select admin_ajouter_prospect('Test Emmanuel', 'restaurant', 'L''Étang-Salé', null, ' Moi@Exemple.re ') is not null as ajoute;
+select nom, categorie, email, source_email from admin_prospects() where nom = 'Test Emmanuel';
+\set ON_ERROR_STOP 0
+select admin_ajouter_prospect('  ', 'bar', null, null, null);
+\set ON_ERROR_STOP 1
+reset role;
