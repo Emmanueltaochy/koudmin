@@ -87,7 +87,8 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   if (await p.getByText('Signer mon contrat').isVisible().catch(() => false)) throw new Error('mission : « Signer mon contrat » encore affiché après la signature');
   await etape('mission : à jour après la signature');
   await p.getByLabel('Retour').last().click();
-  await p.getByText('Contrat signé').waitFor(); await etape('liste : contrat signé sur la mission confirmée');
+  await p.getByText('Missions', { exact: true }).filter({ visible: true }).first().waitFor();
+  await p.getByText('Contrat signé', { exact: true }).filter({ visible: true }).first().waitFor(); await etape('liste : contrat signé sur la mission confirmée');
 
   // Dispos
   await p.getByText('Dispos', { exact: true }).click();
