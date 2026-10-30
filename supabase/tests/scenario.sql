@@ -203,3 +203,28 @@ set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 select supprimer_photo();
 select photo_extra(auth.uid()) is null as photo_retiree;
 reset role;
+\echo '--- Inscription d''un restaurateur depuis le site'
+insert into auth.users (id, phone) values ('00000000-0000-0000-0000-0000000000a2', '262692000077'),
+  ('00000000-0000-0000-0000-0000000000a3', '262692000078');
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a2';
+\set ON_ERROR_STOP 0
+insert into restaurants (proprietaire, nom) values (auth.uid(), 'Sans SIRET');
+select creer_restaurant('Chez Lucette', '73282932000075', '12 rue du Port', '97420', 'Le Port', -20.93, 55.29);
+\set ON_ERROR_STOP 1
+select creer_restaurant('  Chez Lucette ', '732 829 320 00074', '12 rue du Port', '97420', 'Le Port', -20.93, 55.29) is not null as restaurant_cree;
+select nom, telephone, siret, commune from restaurants;
+\set ON_ERROR_STOP 0
+select creer_restaurant('Deuxième', '44306184100047', '1 rue', '97420', 'Le Port', -20.93, 55.29);
+insert into extras (id, prenom, nom, telephone, commune, lat, lng) values
+  ('00000000-0000-0000-0000-0000000000a2', 'Lucette', 'Hoarau', '+262692000077', 'Le Port', -20.93, 55.29);
+\set ON_ERROR_STOP 1
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+\set ON_ERROR_STOP 0
+select creer_restaurant('Copie', '73282932000074', '12 rue du Port', '97420', 'Le Port', -20.93, 55.29);
+\set ON_ERROR_STOP 1
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+\set ON_ERROR_STOP 0
+select creer_restaurant('Kévin bar', '44306184100047', '1 rue', '97460', 'Saint-Paul', -21.0, 55.27);
+\set ON_ERROR_STOP 1
+reset role;

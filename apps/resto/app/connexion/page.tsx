@@ -6,7 +6,8 @@ import { textesEcrans } from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
-import { connecter } from '@/lib/auth';
+import Link from 'next/link';
+import { aUnEtablissement, connecter } from '@/lib/auth';
 import s from './connexion.module.css';
 
 const tc = textesEcrans.connexion;
@@ -28,7 +29,8 @@ export default function Connexion() {
     try {
       const r = await connecter(telephone, motDePasse);
       if (r === 'ok') {
-        router.replace('/espace');
+        // Compte sans établissement (inscription interrompue) : l'inscription reprend à l'établissement.
+        router.replace((await aUnEtablissement()) ? '/espace' : '/inscription/restaurant');
         return;
       }
       setErreur(
@@ -97,6 +99,9 @@ export default function Connexion() {
           {tc.seConnecter}
         </button>
       </form>
+      <Link href="/inscription" className={ui.lienDiscret}>
+        {textesEcrans.resto.inscription.pasEncoreCompte}
+      </Link>
     </main>
   );
 }

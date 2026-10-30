@@ -19,6 +19,7 @@ export const textesVitrine = {
     garanties: 'Garanties',
     tarif: 'Tarif',
     seConnecter: 'Se connecter',
+    creerCompte: 'Créer un compte',
   },
   promesse: {
     surtitre: 'Restaurants, hôtels et bars de La Réunion',

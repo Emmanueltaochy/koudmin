@@ -55,9 +55,14 @@ export default async function Accueil() {
               <a href="#garanties">{t.nav.garanties}</a>
               <a href="#tarif">{t.nav.tarif}</a>
             </nav>
-            <a href={LIENS_VITRINE.seConnecter} className={s.connexion}>
-              {t.nav.seConnecter}
-            </a>
+            <div className={s.compte}>
+              <a href={LIENS_VITRINE.seConnecter} className={s.lienConnexion}>
+                {t.nav.seConnecter}
+              </a>
+              <a href={LIENS_VITRINE.creerCompte} className={s.connexion}>
+                {t.nav.creerCompte}
+              </a>
+            </div>
           </header>
           <div className={s.heros}>
             <div className={s.gap32}>

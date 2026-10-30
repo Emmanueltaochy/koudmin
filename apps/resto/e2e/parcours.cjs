@@ -41,6 +41,33 @@ const CAPTURES = process.env.CAPTURES;
   await p.getByRole('link', { name: 'Se connecter' }).first().click();
   await p.waitForURL(URL_SITE + '/connexion'); ok('accueil public : lien Se connecter');
 
+  // Création de compte restaurateur : SIRET obligatoire, compte actif tout de suite.
+  await p.goto(URL_SITE + '/');
+  await p.getByRole('link', { name: 'Créer un compte' }).first().click();
+  await p.waitForURL(URL_SITE + '/inscription'); ok('accueil public : bouton Créer un compte');
+  await p.getByRole('link', { name: /Je cherche des missions/ }).waitFor();
+  await p.getByRole('link', { name: /Je cherche des extras/ }).click();
+  await p.waitForURL(URL_SITE + '/inscription/restaurant');
+  await p.getByRole('button', { name: 'Créer mon compte' }).click();
+  await p.getByText("Indiquez le nom de l'établissement.").waitFor();
+  await p.getByText("Choisissez l'adresse dans la liste.").waitFor();
+  await p.getByText('Vérifiez le numéro SIRET : 14 chiffres.').waitFor();
+  await p.getByText('Choisissez un mot de passe de 8 caractères minimum.').waitFor(); ok('inscription : champs obligatoires');
+  await p.locator('#etablissement').fill('Le Cari Péi');
+  await p.locator('#adresse').fill('22 rue Labourdonnais Saint-Paul');
+  await p.getByRole('option').first().click();
+  await p.locator('#siret').fill('73282932000075');
+  await p.locator('#telephone').fill('0692 11 22 33');
+  await p.locator('#mot-de-passe').fill('kivien974');
+  await p.getByRole('button', { name: 'Créer mon compte' }).click();
+  await p.getByText('Vérifiez le numéro SIRET : 14 chiffres.').waitFor(); ok('inscription : SIRET invalide refusé (clé de Luhn)');
+  await p.locator('#siret').fill('73282932000074');
+  await p.locator('#siret').blur();
+  if ((await p.locator('#siret').inputValue()) !== '732 829 320 00074') throw new Error('SIRET non mis en forme');
+  await capture('inscription');
+  await p.getByRole('button', { name: 'Créer mon compte' }).click();
+  await p.waitForURL(URL_SITE + '/espace'); ok('inscription : compte créé, espace ouvert');
+
   await p.goto(URL_SITE + '/espace');
   await p.getByRole('heading', { name: 'Le Boucan Grillé' }).waitFor();
   await p.getByText('Contrat à signer · Kévin').waitFor(); ok('accueil : demande de ce soir, contrat à signer');
@@ -160,7 +187,7 @@ const CAPTURES = process.env.CAPTURES;
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/inscription', '/inscription/restaurant', '/connexion', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

@@ -18,3 +18,5 @@ export * from './communes';
 export * from './inscription';
 export * from './textesVitrine';
 export * from './profilExtra';
+export * from './siret';
+export * from './inscriptionResto';
