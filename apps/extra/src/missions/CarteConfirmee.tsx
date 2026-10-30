@@ -6,6 +6,7 @@ import Pencil from 'lucide-react-native/icons/pencil';
 import {
   etiquetteJour,
   formatPlage,
+  jourMoisCourt,
   LIBELLES_POSTE,
   textesEcrans,
   type JourISO,
@@ -59,6 +60,38 @@ export const CarteConfirmee = memo(function CarteConfirmee({
           </View>
         </View>
       </View>
+    );
+  }
+  // Terminée : grisée, toujours ouvrable pour revoir le contrat.
+  if (m.passee) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${formatPlage(m.debut, m.fin)}, ${m.restaurant}. ${te.missionPassee}`}
+        onPress={() => onPress(m.id)}
+        style={({ pressed }) => [commun.carte, styles.annulee, pressed && { opacity: 0.5 }]}
+      >
+        <View style={styles.entete}>
+          <View style={styles.titre}>
+            <VignettePoste poste={m.poste} taille={40} />
+            <Texte variante="horaire" couleur="galet">
+              {formatPlage(m.debut, m.fin)}
+            </Texte>
+          </View>
+          <Texte variante="legendeForte" couleur="galet">
+            {jourMoisCourt(m.jour)}
+          </Texte>
+        </View>
+        <Texte couleur="galet">
+          {LIBELLES_POSTE[m.poste].mission} · {m.restaurant}
+        </Texte>
+        <View style={styles.pied}>
+          <Check size={16} color={couleurs.galet} strokeWidth={2.5} />
+          <Texte variante="legendeForte" couleur="galet">
+            {te.missionPassee}
+          </Texte>
+        </View>
+      </Pressable>
     );
   }
   return (

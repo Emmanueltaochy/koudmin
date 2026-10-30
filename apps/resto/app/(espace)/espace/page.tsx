@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { CalendarCheck, ClipboardList, Star, Users, type LucideIcon } from 'lucide-react';
-import { aujourdhuiReunion, dateLongue, formatPlage, minuteReunion, textes as t, textesEcrans } from '@kivien/core';
+import { CalendarCheck, Check, ClipboardList, PenLine, Star, Users, type LucideIcon } from 'lucide-react';
+import { aujourdhuiReunion, dateLongue, etiquetteJour, formatPlage, LIBELLES_POSTE, minuteReunion, textes as t, textesEcrans } from '@kivien/core';
 import { AvatarExtra } from '@/components/AvatarExtra';
 import { CarteDemande } from '@/components/CarteDemande';
 import p from '@/components/pages.module.css';
@@ -64,6 +64,11 @@ export default function Accueil() {
     .flatMap((d) => extrasActifs(d).filter((e) => e.statut === 'terminee' || e.statut === 'confirmee')).length;
   const aNoterNombre = aNoter.flatMap((d) => extrasActifs(d).filter((e) => !e.notation)).length;
   const photo = PHOTO_SECTEUR[restaurant.secteur];
+  // Extras qui ont dit « mi lé la » sur une mission à venir et dont le contrat attend la signature de l'établissement.
+  const trouves = demandes
+    .filter((d) => ['recherche', 'pourvue'].includes(phaseDemande(d)))
+    .flatMap((d) => extrasActifs(d).filter((e) => !e.contratSigneRestaurant).map((e) => ({ e, d })))
+    .sort((a, b) => b.e.confirmeLe.localeCompare(a.e.confirmeLe));
 
   return (
     <div className={p.page}>
@@ -90,6 +95,34 @@ export default function Accueil() {
           </Link>
         </div>
       </section>
+
+      {trouves.length > 0 && (
+        <section className={s.trouves} aria-labelledby="extras-trouves">
+          <h2 id="extras-trouves" className={s.trouvesTitre}>
+            <span className={s.coche} aria-hidden>
+              <Check size={20} strokeWidth={3} />
+            </span>
+            {ta.trouves(trouves.length)}
+          </h2>
+          <ul className={s.trouvesListe}>
+            {trouves.map(({ e, d }) => (
+              <li key={e.affectationId} className={s.trouve}>
+                <AvatarExtra extraId={e.extraId} prenom={e.prenom} nom={e.nom} alt={e.prenom} taille={56} />
+                <div className={s.trouveTexte}>
+                  <span className={s.trouveNom}>{ta.aDitMiLeLa(e.prenom)}</span>
+                  <span className={ui.legende}>
+                    {LIBELLES_POSTE[d.poste].court} · {etiquetteJour(d.jour, d.debut, aujourdhui).texte} · {formatPlage(d.debut, d.fin)}
+                  </span>
+                </div>
+                <Link href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`} className={s.signer}>
+                  <PenLine size={18} strokeWidth={2} aria-hidden />
+                  {ta.signerContrat}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className={s.chiffres}>
         <Chiffre icone={Users} valeur={attendusAujourdhui.length} libelle={ta.aujourdhui} teinte="vacoa" />

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Check from 'lucide-react-native/icons/check';
 import ChevronLeft from 'lucide-react-native/icons/chevron-left';
+import Download from 'lucide-react-native/icons/download';
 import Pencil from 'lucide-react-native/icons/pencil';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { redigerContrat, textesEcrans } from '@kivien/core';
+import { telechargerContratPdf } from '../../contrat/contratPdf';
 import { FormInfosContrat } from '../../contrat/FormInfosContrat';
 import { source, type ContratExtra, type InfosContrat, type MissionDetail, type Profil } from '../../donnees';
-import { BoutonPrincipal, Lien } from '../../ui/Bouton';
+import { BoutonPrincipal, BoutonSecondaire, Lien } from '../../ui/Bouton';
 import { CaseACocher } from '../../ui/CaseACocher';
 import { PaveSignature, type PaveSignatureRef } from '../../ui/PaveSignature';
 import { CarteSquelette } from '../../missions/CarteSquelette';
@@ -56,6 +58,27 @@ export default function Contrat() {
       setErreurs({ envoi: textesEcrans.connexion.pasDeReseauExtra });
     }
     setEnvoi(false);
+  }
+
+  async function telecharger(texte: ReturnType<typeof redigerContrat>) {
+    if (!d || d === 'introuvable') return;
+    const { contrat, profil } = d;
+    try {
+      await telechargerContratPdf({
+        titre: texte.titre,
+        articles: texte.articles,
+        employeur: contrat.employeur,
+        salarie: `${profil.prenom} ${profil.nom}`,
+        signatures: await source.signatures(contrat.affectationId),
+        nomFichier: `contrat-${contrat.employeur}-${d.mission.jour}.pdf`
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^A-Za-z0-9.-]+/g, '-')
+          .toLowerCase(),
+      });
+    } catch {
+      setErreurs({ envoi: textesEcrans.connexion.pasDeReseauExtra });
+    }
   }
 
   const entete = (
@@ -113,6 +136,13 @@ export default function Contrat() {
             )}
             {contrat.signeExtra && (
               <BoutonPrincipal libelle={tc.retourMission} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+            )}
+            {contrat.signeExtra && Platform.OS === 'web' && (
+              <BoutonSecondaire
+                libelle={tc.telechargerPdf}
+                icone={<Download size={18} color={couleurs.basalte} strokeWidth={2} />}
+                onPress={() => void telecharger(texte)}
+              />
             )}
             <View style={styles.carte}>
               <Texte variante="corpsFort">{texte.titre}</Texte>

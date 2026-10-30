@@ -160,3 +160,16 @@
   flex-direction: column;
   gap: 4px;
 }
+
+/* Demande pourvue, contrat à signer : carte teintée vacoa pour que « Extra trouvé » saute aux yeux. */
+.carteLien[data-trouve='true'] {
+  background: color-mix(in srgb, var(--k-vacoa) 9%, var(--k-blanc));
+}
+.trouve {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  width: 100%;
+}

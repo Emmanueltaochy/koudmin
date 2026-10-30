@@ -29,7 +29,7 @@ export default function ProfilEcran() {
     void Promise.all([source.profil(), source.mesMissions(), source.infosContrat()])
       .then(([p, m, i]) => {
         setProfil(p);
-        setMissions(m);
+        setMissions(m.filter((x) => !x.passee && !x.annulee));
         setInfos(i);
       })
       .catch(() => setMessage(textesEcrans.connexion.pasDeReseauExtra));

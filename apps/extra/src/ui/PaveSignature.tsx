@@ -39,6 +39,14 @@ export const PaveSignature = forwardRef<PaveSignatureRef, { erreur?: boolean; li
       };
     }, []);
 
+    // Le trait est copié avant de vider `courant` : la fonction passée à setTraits s'exécute plus tard.
+    const finirTrait = () => {
+      const trait = courant.current;
+      courant.current = '';
+      if (trait.includes('L')) setTraits((t) => [...t, trait]);
+      traceRef.current?.(false);
+    };
+
     const pan = useMemo(
       () =>
         PanResponder.create({
@@ -57,27 +65,20 @@ export const PaveSignature = forwardRef<PaveSignatureRef, { erreur?: boolean; li
             courant.current += ` L${x.toFixed(1)} ${y.toFixed(1)}`;
             rafraichir((n) => n + 1);
           },
-          onPanResponderRelease: () => {
-            if (courant.current.includes('L')) setTraits((t) => [...t, courant.current]);
-            courant.current = '';
-            traceRef.current?.(false);
-          },
-          onPanResponderTerminate: () => {
-            if (courant.current.includes('L')) setTraits((t) => [...t, courant.current]);
-            courant.current = '';
-            traceRef.current?.(false);
-          },
+          onPanResponderRelease: () => finirTrait(),
+          onPanResponderTerminate: () => finirTrait(),
         }),
       [],
     );
 
     useImperativeHandle(ref, () => ({
       image: () => {
-        if (!traits.length) return null;
+        const valides = traits.filter((d) => d.includes('L'));
+        if (!valides.length) return null;
         const { l, h } = taille.current;
         const svg =
           `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.round(l)} ${Math.round(h)}">` +
-          traits.map((d) => `<path d="${d}" fill="none" stroke="#211C18" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('') +
+          valides.map((d) => `<path d="${d}" fill="none" stroke="#211C18" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('') +
           '</svg>';
         return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
       },

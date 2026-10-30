@@ -43,6 +43,7 @@ export function sourceFictive(): SourceDonnees {
   // État de la démo, gardé en mémoire le temps de la session.
   const confirmees = new Set<string>();
   const signes = new Set<string>();
+  const imagesSignees = new Map<string, { image: string; le: string }>();
   const dispos = new Set<CleDispo>([`${ajouterJours(aujourdhuiReunion(), 1)}:soir` as CleDispo]);
   let infos: InfosContrat | null = null;
   let profil: Profil = {
@@ -74,7 +75,7 @@ export function sourceFictive(): SourceDonnees {
       const c = COMPLEMENTS[id];
       if (!m || !c) return null;
       const confirmee = confirmees.has(id);
-      return { ...m, tenue: c.tenue, confirmee, disponible: !confirmee, lieu: confirmee ? c.lieu : null };
+      return { ...m, tenue: c.tenue, confirmee, disponible: !confirmee, lieu: confirmee ? c.lieu : null, position: { lat: c.lieu.lat, lng: c.lieu.lng } };
     },
     async accepter(id) {
       // Délai de la maquette : le temps de voir « On prévient le restaurant ».
@@ -98,7 +99,7 @@ export function sourceFictive(): SourceDonnees {
     async mesMissions(): Promise<MissionConfirmee[]> {
       return missionsFictives()
         .filter((m) => confirmees.has(m.id))
-        .map((m) => ({ ...m, contratSigne: signes.has(m.id), annulee: false }));
+        .map((m) => ({ ...m, contratSigne: signes.has(m.id), annulee: false, passee: false }));
     },
     async emailDuCompte() {
       return emailDemo;
@@ -143,10 +144,14 @@ export function sourceFictive(): SourceDonnees {
       await attendre(400);
       infos = i;
     },
-    async signerContrat(affectationId) {
+    async signerContrat(affectationId, image) {
       await attendre(900);
       signes.add(affectationId.replace(/^a-/, ''));
+      imagesSignees.set(affectationId, { image, le: new Date().toISOString() });
       prevenir();
+    },
+    async signatures(affectationId) {
+      return { restaurant: null, extra: imagesSignees.get(affectationId) ?? null };
     },
     async dispos() {
       return [...dispos];

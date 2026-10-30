@@ -24,7 +24,11 @@ export function CarteDemande({ demande: d }: { demande: DemandeSuivi }) {
   const prenoms = actifs.map((e) => e.prenom).join(', ');
 
   return (
-    <Link href={`/demandes/${d.id}`} className={p.carteLien} aria-label={`${ta.voir} : ${formatPlage(d.debut, d.fin)}, ${jour.texte}`}>
+    <Link
+      href={`/demandes/${d.id}`}
+      className={p.carteLien}
+      data-trouve={phase !== 'recherche' && aSigner.length > 0 ? 'true' : undefined}
+      aria-label={`${ta.voir} : ${formatPlage(d.debut, d.fin)}, ${jour.texte}`}>
       <div className={p.teteCarte}>
         <VignettePoste poste={d.poste} />
         <div className={p.teteTexte}>
@@ -52,12 +56,16 @@ export function CarteDemande({ demande: d }: { demande: DemandeSuivi }) {
           </>
         )}
         {phase !== 'recherche' && aSigner.length > 0 && (
-          <>
-            <Pencil size={16} strokeWidth={2} aria-hidden />
-            <span className={ui.legendeForte}>
-              {ta.contratASigner} · {aSigner.map((e) => e.prenom).join(', ')}
+          <span className={p.trouve}>
+            <span className={`${p.ligne} ${ui.legendeForte} ${ui.vacoa}`}>
+              <Check size={16} strokeWidth={2.5} aria-hidden />
+              {ta.trouve} · {aSigner.map((e) => e.prenom).join(', ')}
             </span>
-          </>
+            <span className={`${p.ligne} ${ui.legendeForte}`}>
+              <Pencil size={16} strokeWidth={2} aria-hidden />
+              {ta.contratASigner}
+            </span>
+          </span>
         )}
         {phase !== 'recherche' && aSigner.length === 0 && (
           <>

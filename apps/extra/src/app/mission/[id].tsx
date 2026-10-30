@@ -138,7 +138,7 @@ export default function DetailMission() {
           {LIBELLES_POSTE[m.poste].mission} · {m.restaurant}
         </Texte>
 
-        <CarteInfos mission={m} lieu={d.detail?.lieu ?? null} tenue={d.detail?.tenue ?? null} />
+        <CarteInfos mission={m} lieu={d.detail?.lieu ?? null} position={d.detail?.position ?? null} tenue={d.detail?.tenue ?? null} />
 
         {etat.nom !== 'done' && (
           <View style={styles.contrat}>

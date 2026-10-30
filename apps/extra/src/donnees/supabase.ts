@@ -63,6 +63,7 @@ const versDetail = (l: LigneDetail): MissionDetail => ({
     l.adresse !== null && l.lat !== null && l.lng !== null
       ? { adresse: l.adresse, codePostal: l.code_postal, acces: l.acces, telephone: l.telephone, lat: l.lat, lng: l.lng }
       : null,
+  position: l.lat !== null && l.lng !== null ? { lat: l.lat, lng: l.lng } : null,
 });
 
 function verifier<T>(r: { data: T | null; error: { message: string } | null }): T {
@@ -152,8 +153,8 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       };
     },
     async mesMissions(): Promise<MissionConfirmee[]> {
-      const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean; annulee: boolean })[];
-      return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe, annulee: l.annulee }));
+      const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean; annulee: boolean; passee: boolean })[];
+      return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe, annulee: l.annulee, passee: l.passee }));
     },
     async emailDuCompte() {
       const { data } = await client.auth.getUser();
@@ -199,6 +200,19 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
             signeRestaurant: l.signe_restaurant,
           }
         : null;
+    },
+    async signatures(affectationId) {
+      const l = verifier(
+        await client
+          .from('contrats')
+          .select('signe_restaurant_le, signature_restaurant, signe_extra_le, signature_extra')
+          .eq('affectation_id', affectationId)
+          .maybeSingle(),
+      ) as { signe_restaurant_le: string | null; signature_restaurant: string | null; signe_extra_le: string | null; signature_extra: string | null } | null;
+      return {
+        restaurant: l?.signature_restaurant && l.signe_restaurant_le ? { image: l.signature_restaurant, le: l.signe_restaurant_le } : null,
+        extra: l?.signature_extra && l.signe_extra_le ? { image: l.signature_extra, le: l.signe_extra_le } : null,
+      };
     },
     async infosContrat() {
       const l = verifier(

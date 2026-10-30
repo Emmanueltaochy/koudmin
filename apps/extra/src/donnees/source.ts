@@ -11,6 +11,8 @@ export interface MissionConfirmee extends MissionResume {
   contratSigne: boolean;
   /** Demande annulée par l'entreprise après l'acceptation. */
   annulee: boolean;
+  /** Heure de fin passée : gardée 30 jours en bas de la liste. */
+  passee: boolean;
 }
 
 export interface ContratExtra {
@@ -22,6 +24,12 @@ export interface ContratExtra {
   secteur: Secteur;
   signeExtra: boolean;
   signeRestaurant: boolean;
+}
+
+/** Signatures des deux parties (images), pour le PDF du contrat. */
+export interface SignaturesContrat {
+  restaurant: { image: string; le: string } | null;
+  extra: { image: string; le: string } | null;
 }
 
 /** Infos demandées une seule fois, à la première signature (DPAE). */
@@ -65,6 +73,8 @@ export interface MissionDetail extends MissionResume {
   /** Encore ouverte : ni pourvue, ni commencée. */
   disponible: boolean;
   lieu: LieuMission | null;
+  /** Position de l'établissement, connue avant l'acceptation pour ouvrir l'itinéraire. */
+  position: { lat: number; lng: number } | null;
 }
 
 export type ReponseAcceptation = 'confirmee' | 'deja_prise' | 'expiree';
@@ -82,6 +92,7 @@ export interface SourceDonnees {
   ecouterMissions(rappel: () => void): () => void;
 
   mesMissions(): Promise<MissionConfirmee[]>;
+  signatures(affectationId: string): Promise<SignaturesContrat>;
   /** Missions avec contrat, passées et à venir (« Mes gains »). */
   mesGains(): Promise<MissionGain[]>;
   contrat(demandeId: string): Promise<ContratExtra | null>;

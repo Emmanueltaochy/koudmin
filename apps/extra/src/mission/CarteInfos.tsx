@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Linking, Platform, StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 import ArrowUpRight from 'lucide-react-native/icons/arrow-up-right';
 import Bus from 'lucide-react-native/icons/bus';
 import Check from 'lucide-react-native/icons/check';
@@ -35,26 +35,21 @@ function Ligne({ icone, children, derniere }: { icone: ReactNode; children: Reac
   );
 }
 
-/** Ouvre l'app de cartes du téléphone sur le restaurant. */
-function ouvrirItineraire(lieu: LieuMission, nom: string) {
-  const { lat, lng } = lieu;
-  const url =
-    Platform.OS === 'android'
-      ? `geo:0,0?q=${lat},${lng}(${encodeURIComponent(nom)})`
-      : Platform.OS === 'ios'
-        ? `maps:?daddr=${lat},${lng}`
-        : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-  void Linking.openURL(url);
+/** Ouvre l'itinéraire Google Maps vers l'établissement (l'app si elle est installée, sinon le navigateur). */
+function ouvrirItineraire({ lat, lng }: { lat: number; lng: number }) {
+  void Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
 }
 
 /** Carte blanche du détail : salaire, lieu, retour, tenue. */
 export function CarteInfos({
   mission: m,
   lieu,
+  position,
   tenue,
 }: {
   mission: MissionResume;
   lieu: LieuMission | null;
+  position: { lat: number; lng: number } | null;
   tenue: string | null;
 }) {
   const minutes = dureeMinutes(m.debut, m.fin) ?? 0;
@@ -94,7 +89,7 @@ export function CarteInfos({
             <View style={styles.actionsLieu}>
               <Lien
                 libelle={td.itineraire}
-                onPress={() => ouvrirItineraire(lieu, m.restaurant)}
+                onPress={() => ouvrirItineraire(lieu)}
                 icone={<ArrowUpRight size={16} color={couleurs.pimentFonce} strokeWidth={2} />}
               />
               {lieu.telephone && (
@@ -114,6 +109,15 @@ export function CarteInfos({
             <Texte variante="legende" couleur="galet">
               {td.adresseApres}
             </Texte>
+            {position && (
+              <View style={styles.itineraireAvant}>
+                <Lien
+                  libelle={td.itineraire}
+                  onPress={() => ouvrirItineraire(position)}
+                  icone={<ArrowUpRight size={16} color={couleurs.pimentFonce} strokeWidth={2} />}
+                />
+              </View>
+            )}
           </>
         )}
       </Ligne>
@@ -151,4 +155,5 @@ const styles = StyleSheet.create({
   contenu: { flex: 1 },
   lieu: { gap: 8 },
   actionsLieu: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  itineraireAvant: { flexDirection: 'row', marginTop: 8 },
 });

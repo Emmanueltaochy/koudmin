@@ -105,7 +105,9 @@ let pageCourante = null;
 
   await p.goto(URL_SITE + '/espace');
   await p.getByRole('heading', { name: 'Le Boucan Grillé' }).waitFor();
-  await p.getByText('Contrat à signer · Kévin').waitFor(); ok('accueil : demande de ce soir, contrat à signer');
+  await p.getByRole('heading', { name: /extras? trouvés?/i }).waitFor();
+  await p.getByText('Kévin a dit mi lé la').waitFor(); ok('accueil : encart « Extra trouvé » avec Kévin');
+  await p.getByText('Extra trouvé · Kévin').waitFor(); ok('accueil : demande de ce soir, extra trouvé, contrat à signer');
   await p.getByText('Missions à noter').waitFor(); ok('accueil : mission à noter');
   await capture('accueil');
 

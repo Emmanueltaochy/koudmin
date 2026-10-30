@@ -44,6 +44,13 @@ export default function Missions() {
     [etat, profil, filtre, aujourdhui],
   );
 
+  // En haut ce qui reste à faire ; en bas les missions terminées ou annulées par l'entreprise.
+  const actives = useMemo(() => confirmees.filter((m) => !m.annulee && !m.passee), [confirmees]);
+  const anciennes = useMemo(
+    () => confirmees.filter((m) => m.annulee || m.passee).sort((a, b) => b.jour.localeCompare(a.jour) || b.debut - a.debut),
+    [confirmees],
+  );
+
   const ouvrir = useCallback((id: string) => router.push(`/mission/${id}`), []);
   const rendreCarte = useCallback(
     ({ item }: { item: MissionResume }) =>
@@ -120,10 +127,10 @@ export default function Missions() {
           ListHeaderComponent={
             <>
               <Bandeau missions={missions} />
-              {confirmees.length > 0 && (
+              {actives.length > 0 && (
                 <View style={styles.confirmees}>
                   <Texte variante="legendeForte">{textesEcrans.extra.missionsConfirmees}</Texte>
-                  {confirmees.map((m) => (
+                  {actives.map((m) => (
                     <CarteConfirmee key={m.id} mission={m} aujourdhui={aujourdhui} onPress={ouvrir} />
                   ))}
                 </View>
@@ -132,6 +139,18 @@ export default function Missions() {
                 {missions.length > 0 ? legendeListe(missions.length, !profil.aVoiture) : tm.videTitre}
               </Texte>
             </>
+          }
+          ListFooterComponent={
+            anciennes.length > 0 ? (
+              <View style={styles.anciennes}>
+                <Texte variante="legendeForte" couleur="galet">
+                  {textesEcrans.extra.missionsPassees}
+                </Texte>
+                {anciennes.map((m) => (
+                  <CarteConfirmee key={m.id} mission={m} aujourdhui={aujourdhui} onPress={ouvrir} />
+                ))}
+              </View>
+            ) : undefined
           }
           ItemSeparatorComponent={Separateur}
           contentContainerStyle={styles.liste}
@@ -156,5 +175,6 @@ const styles = StyleSheet.create({
   liste: { paddingHorizontal: 16, paddingBottom: 16 },
   legende: { marginBottom: 16 },
   confirmees: { gap: 16, marginBottom: 24 },
+  anciennes: { gap: 16, marginTop: 32 },
   separateur: { height: 16 },
 });

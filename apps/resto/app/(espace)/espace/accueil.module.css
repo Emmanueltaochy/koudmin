@@ -150,3 +150,112 @@
     padding: 24px;
   }
 }
+
+/* « Extra trouvé » : encart vacoa en haut de l'accueil, tant que le contrat attend la signature. */
+.trouves {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--k-vacoa);
+  color: var(--k-blanc);
+  animation: apparition 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.trouvesTitre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font: var(--k-titre-font);
+  letter-spacing: var(--k-titre-ls);
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.1;
+}
+.coche {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--k-blanc);
+  color: var(--k-vacoa);
+}
+.coche::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  animation: onde 1.8s ease-out 3;
+}
+.trouvesListe {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trouve {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  color: var(--k-basalte);
+}
+.trouveTexte {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.trouveNom {
+  font: var(--k-corps-fort-font);
+  font-size: 18px;
+}
+.signer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--k-rayon-champ);
+  background: var(--k-basalte);
+  color: var(--k-creme);
+  font: var(--k-corps-fort-font);
+  text-decoration: none;
+}
+.signer:hover {
+  background: color-mix(in srgb, var(--k-basalte) 85%, var(--k-blanc));
+}
+@media (max-width: 479px) {
+  .signer {
+    flex: 1 1 100%;
+  }
+}
+@keyframes apparition {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes onde {
+  to {
+    box-shadow: 0 0 0 14px rgba(255, 255, 255, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trouves,
+  .coche::after {
+    animation: none;
+  }
+}
