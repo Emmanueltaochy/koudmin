@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js';
 import {
   aujourdhuiReunion,
   estSecteur,
@@ -160,6 +160,9 @@ const refus = (e: { message: string } | null, motif: RegExp) => !!e && motif.tes
 
 export function sourceSupabase(url: string, cle: string): SourceResto & { client: SupabaseClient } {
   const client = createClient(url, cle);
+  const ecouteurs = new Set<() => void>();
+  let canal: RealtimeChannel | null = null;
+  const prevenir = () => ecouteurs.forEach((f) => f());
 
   /** Favoris d'un établissement ; sans identifiant, ceux de tous (une demande ouverte par lien). */
   async function idsFavoris(restaurantId?: string): Promise<Set<string>> {
@@ -366,14 +369,20 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       }));
     },
     ecouter(rappel) {
-      const canal = client
+      // Un seul canal temps réel pour tous les écrans ouverts (menu et page s'abonnent en même temps).
+      ecouteurs.add(rappel);
+      canal ??= client
         .channel('suivi-restaurant')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'demandes' }, rappel)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'affectations' }, rappel)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'contrats' }, rappel)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'demandes' }, prevenir)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'affectations' }, prevenir)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'contrats' }, prevenir)
         .subscribe();
       return () => {
-        void client.removeChannel(canal);
+        ecouteurs.delete(rappel);
+        if (ecouteurs.size === 0 && canal) {
+          void client.removeChannel(canal);
+          canal = null;
+        }
       };
     },
   };
