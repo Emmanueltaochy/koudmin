@@ -47,6 +47,8 @@ PAR_AMENITY = {"restaurant": "restaurant", "bar": "bar", "pub": "bar", "biergart
 PAR_TOURISM = {"hotel": "hotel", "resort": "hotel", "motel": "hotel", "guest_house": "hebergement",
                "hostel": "hebergement", "camp_site": "hebergement", "chalet": "hebergement", "apartment": "hebergement"}
 SITES_PAR_PASSAGE = 150
+# Lecture des sites limitée dans le temps : les suivants le seront à la recherche d'après.
+DUREE_SITES = float(os.environ.get("KIVIEN_DUREE_SITES") or 15 * 60)
 
 
 def sql(requete, **variables):
@@ -204,10 +206,13 @@ try:
     ajoutes, majs = sql(f"select ajoutes || '|' || mis_a_jour from importer_prospects({balise}{donnees}{balise}::jsonb);").split("|")
 
     trouves = 0
+    fin_sites = time.monotonic() + DUREE_SITES
     a_lire = sql(f"""select coalesce(json_agg(x), '[]') from (select id, site from prospects
                     where email is null and site is not null and site_lu_le is null
                     order by importe_le limit {SITES_PAR_PASSAGE}) x;""")
     for p in json.loads(a_lire):
+        if time.monotonic() > fin_sites:
+            break
         courriel = courriel_du_site(p["site"])
         if courriel and re.fullmatch(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", courriel):
             sql("""update prospects set email = :'email', source_email = 'site', site_lu_le = now(), maj_le = now()
