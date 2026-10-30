@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Suspense, useRef, useState } from 'react';
-import { ArrowUpRight, Check, ChevronLeft } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronLeft, Download } from 'lucide-react';
 import { formatHeure, formatSiret, redigerContrat, textesEcrans } from '@kivien/core';
 import { PaveSignature, type PaveSignatureRef } from '@/components/PaveSignature';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
+import { telechargerContratPdf } from '@/lib/contratPdf';
 import { source } from '@/lib/donnees';
 import { useDonnees } from '@/lib/useDonnees';
 import s from './contrat.module.css';
@@ -30,6 +31,7 @@ function Contrat() {
   const [lu, setLu] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [erreurs, setErreurs] = useState<{ signature?: string; lecture?: string; envoi?: string }>({});
+  const [pdf, setPdf] = useState(false);
 
   if (etat.statut !== 'pret') return <div className={p.etroite} aria-busy><div className={p.squelette} /></div>;
   const { demande: d, restaurant } = etat.donnees;
@@ -61,6 +63,26 @@ function Contrat() {
     tauxHoraireBrutCentimes: d.tauxHoraireBrutCentimes,
     adresseService: `${d.adresse}, ${[d.codePostal, d.commune].filter(Boolean).join(' ')}`,
   });
+
+  async function telecharger() {
+    setPdf(true);
+    try {
+      await telechargerContratPdf({
+        titre: contrat.titre,
+        articles: contrat.articles,
+        employeur: restaurant.nom,
+        salarie: `${extra!.prenom} ${extra!.nom}`,
+        signatures: await source().signatures(extra!.affectationId),
+        nomFichier: `contrat-${extra!.prenom}-${extra!.nom}-${d!.jour}.pdf`
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^A-Za-z0-9.-]+/g, '-')
+          .toLowerCase(),
+      });
+    } finally {
+      setPdf(false);
+    }
+  }
 
   async function signer() {
     const image = pave.current?.image() ?? null;
@@ -99,6 +121,10 @@ function Contrat() {
           </section>
         ))}
       </article>
+      <button type="button" className={`${ui.boutonSecondaire} ${s.pdf}`} onClick={() => void telecharger()} aria-busy={pdf} disabled={pdf}>
+        {pdf ? <Spinner /> : <Download size={18} strokeWidth={2} aria-hidden />}
+        {pdf ? tc.preparationPdf : tc.telechargerPdf}
+      </button>
 
       {extra.contratSigneRestaurant ? (
         <>

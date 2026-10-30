@@ -349,6 +349,19 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
     async signerContrat(affectationId, signature) {
       verifier(await client.rpc('signer_contrat', { p_affectation: affectationId, p_signature: signature }));
     },
+    async signatures(affectationId) {
+      const l = verifier(
+        await client
+          .from('contrats')
+          .select('signe_restaurant_le, signature_restaurant, signe_extra_le, signature_extra')
+          .eq('affectation_id', affectationId)
+          .maybeSingle(),
+      ) as { signe_restaurant_le: string | null; signature_restaurant: string | null; signe_extra_le: string | null; signature_extra: string | null } | null;
+      return {
+        restaurant: l?.signature_restaurant && l.signe_restaurant_le ? { image: l.signature_restaurant, le: l.signe_restaurant_le } : null,
+        extra: l?.signature_extra && l.signe_extra_le ? { image: l.signature_extra, le: l.signe_extra_le } : null,
+      };
+    },
     async infosDPAE(affectationId) {
       const lignes = verifier(await client.rpc('infos_dpae', { p_affectation: affectationId })) as {
         prenom: string;

@@ -198,6 +198,10 @@ export const textesEcrans = {
       dpaeTexte:
         "Déclarez l'embauche à l'URSSAF avant le début du service. C'est gratuit et en ligne, sur net-entreprises.fr.",
       dpaeLien: 'Faire la DPAE',
+      telechargerPdf: 'Télécharger le contrat en PDF',
+      preparationPdf: 'Préparation du PDF',
+      signePar: (qui: string, le: string) => `Signé par ${qui} le ${le}`,
+      enAttenteSignature: (qui: string) => `En attente de la signature de ${qui}`,
       dpaeInfos: 'Informations à reporter',
       erreurSignature: 'Signez dans le cadre avant de valider.',
       erreurLecture: 'Cochez la case pour confirmer la lecture.',
@@ -350,7 +354,7 @@ export const textesEcrans = {
     },
     missionsConfirmees: 'Tes missions confirmées',
     attente: {
-      titre: (dansZone: string | null) => `Les premières missions arrivent bientôt ${dansZone ?? 'près de chez toi'}.`,
+      titre: 'Les premières missions arrivent bientôt près de chez toi.',
       texte: "Coche tes soirées libres : on te prévient en priorité dès qu'une mission arrive près de chez toi.",
       action: 'Cocher mes soirées libres',
     },

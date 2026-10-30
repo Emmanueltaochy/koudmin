@@ -166,6 +166,7 @@ const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export function sourceFictive(): SourceResto {
   const ecouteurs = new Set<() => void>();
   let memoire: EtatDemo | null = null;
+  const signaturesDemo = new Map<string, { image: string; le: string }>();
 
   function etat(): EtatDemo {
     if (memoire) return memoire;
@@ -344,8 +345,23 @@ export function sourceFictive(): SourceResto {
       await attendre(600);
       ecrire(lire().map((d) => (d.id === id ? { ...d, statut: 'annulee' } : d)));
     },
-    async signerContrat(affectationId) {
+    async signatures(affectationId) {
+      const r = signaturesDemo.get(affectationId);
+      const e = lire().flatMap((d) => d.extras).find((x) => x.affectationId === affectationId);
+      return {
+        restaurant: r ?? null,
+        // Démonstration : signature de l'extra dessinée (en production, celle tracée dans l'app).
+        extra: e?.contratSigneExtra
+          ? {
+              image: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120"><path d="M20 80 C60 20 90 110 130 60 S200 30 240 70 L280 50" fill="none" stroke="#211C18" stroke-width="3" stroke-linecap="round"/></svg>')}`,
+              le: e.contratSigneExtraLe ?? e.confirmeLe,
+            }
+          : null,
+      };
+    },
+    async signerContrat(affectationId, signature) {
       await attendre(800);
+      signaturesDemo.set(affectationId, { image: signature, le: new Date().toISOString() });
       modifierExtra(affectationId, (e) => ({ ...e, contratSigneRestaurant: true }));
     },
     async infosDPAE(affectationId) {

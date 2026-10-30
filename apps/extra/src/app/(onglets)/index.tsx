@@ -7,7 +7,6 @@ import WifiOff from 'lucide-react-native/icons/wifi-off';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   aujourdhuiReunion,
-  DANS_ZONE,
   filtrerMissions,
   legendeListe,
   textes as t,
@@ -15,7 +14,6 @@ import {
   trierMissions,
   type FiltreMissions,
   type MissionResume,
-  zoneDeCommune,
 } from '@kivien/core';
 import { Bandeau } from '../../missions/Bandeau';
 import { CarteConfirmee } from '../../missions/CarteConfirmee';
@@ -37,7 +35,6 @@ export default function Missions() {
   const [filtre, setFiltre] = useState<FiltreMissions>('toutes');
   const insets = useSafeAreaInsets();
   const aujourdhui = aujourdhuiReunion();
-  const zone = profil ? zoneDeCommune(profil.commune) : null;
 
   const missions = useMemo(
     () =>
@@ -108,7 +105,7 @@ export default function Missions() {
         // Lancement : pas encore de mission dans la zone, on fait patienter et cocher ses soirées.
         <EtatPlein
           icone={<Calendar size={28} color={couleurs.basalte} strokeWidth={1.75} />}
-          titre={textesEcrans.extra.attente.titre(zone ? DANS_ZONE[zone] : null)}
+          titre={textesEcrans.extra.attente.titre}
           texte={textesEcrans.extra.attente.texte}
           action={textesEcrans.extra.attente.action}
           onAction={() => router.navigate('/dispos')}

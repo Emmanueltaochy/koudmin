@@ -130,7 +130,7 @@ export const textesVitrine = {
     texte: 'Salle, cuisine, plonge, bar, réception, animation, événements, déménagement. Un vrai contrat à chaque mission, pas besoin de SIRET.',
     bouton: "Je m'inscris",
     sousBouton: 'Gratuit. Une minute pour créer ton profil.',
-    lancement: 'Les premiers établissements arrivent dans l’Ouest le mois prochain : inscris-toi, on te prévient en priorité.',
+    lancement: 'Les premiers établissements arrivent bientôt : inscris-toi, on te prévient en priorité.',
     gainTitre: 'Ce que tu gagnes',
     gainTexte: (net: string, brut: string) => h(`Environ ${net} net pour une soirée de 6 h au SMIC (${brut} brut, congés payés compris).`),
     gainNote: "Payé par l'établissement qui t'embauche, avec un bulletin de paie.",

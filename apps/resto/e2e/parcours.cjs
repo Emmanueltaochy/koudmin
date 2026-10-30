@@ -151,6 +151,12 @@ let pageCourante = null;
   const lien = await p.getByRole('link', { name: 'Faire la DPAE' }).getAttribute('href');
   if (lien !== 'https://www.net-entreprises.fr/declaration/dpae/') throw new Error('lien DPAE ' + lien);
   ok('lien DPAE vers net-entreprises.fr');
+  const [telechargement] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Télécharger le contrat en PDF' }).click()]);
+  const cheminPdf = await telechargement.path();
+  const pdf = require('fs').readFileSync(cheminPdf);
+  if (!telechargement.suggestedFilename().endsWith('.pdf') || pdf.subarray(0, 4).toString() !== '%PDF' || pdf.length < 3000) throw new Error('PDF du contrat invalide');
+  if (CAPTURES) require('fs').copyFileSync(cheminPdf, `${CAPTURES}/contrat.pdf`);
+  ok(`contrat téléchargé en PDF (${telechargement.suggestedFilename()}, ${Math.round(pdf.length / 1024)} Ko)`);
   await capture('contrat-signe');
   // Contrat signé : on le retrouve depuis le suivi, avec les infos de la DPAE.
   await p.goto(URL_SITE + new URL(p.url()).pathname.replace(/\/contrat$/, ''));

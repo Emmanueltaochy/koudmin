@@ -13,6 +13,7 @@
     "@kivien/core": "workspace:*",
     "@kivien/ui-tokens": "workspace:*",
     "@supabase/supabase-js": "^2.118.0",
+    "jspdf": "2.5.2",
     "lucide-react": "^1.64.0",
     "next": "16.4.3",
     "react": "19.3.0",

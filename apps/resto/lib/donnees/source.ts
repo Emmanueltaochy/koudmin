@@ -127,6 +127,12 @@ export interface Notation {
   commentaire: string | null;
 }
 
+/** Signature d'une partie : image (PNG ou SVG en data URL) et date ISO. */
+export interface SignaturesContrat {
+  restaurant: { image: string; le: string } | null;
+  extra: { image: string; le: string } | null;
+}
+
 /** Informations de l'extra pour la DPAE, visibles du seul restaurateur de la mission. */
 export interface InfosDPAE {
   prenom: string;
@@ -163,6 +169,8 @@ export interface SourceResto {
   annulerDemande(id: string): Promise<void>;
   /** Signature du restaurateur (image PNG en data URL). */
   signerContrat(affectationId: string, signature: string): Promise<void>;
+  /** Signatures du contrat (images en data URL) et leurs dates, pour le PDF. */
+  signatures(affectationId: string): Promise<SignaturesContrat>;
   infosDPAE(affectationId: string): Promise<InfosDPAE | null>;
   noter(affectationId: string, n: Notation): Promise<void>;
   favoris(): Promise<Favori[]>;
