@@ -1,4 +1,4 @@
-/** Métiers proposés, regroupés par secteur dans secteurs.ts. Même liste que l'enum SQL `poste`. */
+/** Métiers proposés, regroupés par secteur dans secteurs.ts. Même liste que l'enum SQL `poste` (plus `autre`). */
 export const POSTES = [
   'serveur',
   'barman',
@@ -19,7 +19,14 @@ export const POSTES = [
   'travaux_forestiers',
   'formation',
 ] as const;
-export type Poste = (typeof POSTES)[number];
+/**
+ * `autre` : poste écrit par l'établissement (intitulé obligatoire, description facultative).
+ * Ouvert dans tous les secteurs, jamais proposé comme compétence d'un extra.
+ */
+export const POSTE_LIBRE = 'autre';
+export type Poste = (typeof POSTES)[number] | typeof POSTE_LIBRE;
+export const INTITULE_MAX = 60;
+export const DESCRIPTION_POSTE_MAX = 500;
 
 /**
  * Libellés épicènes. `court` : chips du formulaire de demande.
@@ -44,7 +51,13 @@ export const LIBELLES_POSTE: Record<Poste, { court: string; mission: string }> =
   reparation_navale: { court: 'Réparation navale', mission: 'Aide en réparation navale' },
   travaux_forestiers: { court: 'Travaux forestiers', mission: 'Travaux forestiers' },
   formation: { court: 'Formation', mission: 'Intervention de formation' },
+  autre: { court: 'Autre poste', mission: 'Mission' },
 };
+
+/** Nom du poste à afficher : l'intitulé écrit par l'établissement pour un poste libre. */
+export function libellePoste(poste: Poste, intitule?: string | null, forme: 'court' | 'mission' = 'mission'): string {
+  return poste === POSTE_LIBRE && intitule?.trim() ? intitule.trim() : LIBELLES_POSTE[poste][forme];
+}
 
 /** Famille d'un métier, pour sa vignette (couleur et icône) dans les deux apps. */
 export type FamillePoste = 'salle' | 'cuisine' | 'hebergement' | 'animation' | 'technique' | 'manutention' | 'terrain';
@@ -68,4 +81,5 @@ export const FAMILLE_POSTE: Record<Poste, FamillePoste> = {
   travaux_forestiers: 'terrain',
   enquete: 'terrain',
   formation: 'terrain',
+  autre: 'terrain',
 };

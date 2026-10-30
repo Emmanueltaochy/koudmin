@@ -65,6 +65,16 @@ describe('validation de la demande', () => {
     expect(champsACompleter(Object.keys(e).length)).toBe('2 champs à compléter.');
   });
 
+  it('poste libre : intitulé obligatoire, description facultative et bornée', () => {
+    const libre = { ...valide(), poste: 'autre' as const };
+    expect(validerDemande(libre, SMIC, maintenant).intitule).toBe('Indiquez le poste.');
+    expect(validerDemande({ ...libre, intitule: 'Voiturier' }, SMIC, maintenant)).toEqual({});
+    expect(validerDemande({ ...libre, intitule: 'x'.repeat(61) }, SMIC, maintenant).intitule).toBeDefined();
+    expect(validerDemande({ ...libre, intitule: 'Voiturier', descriptionPoste: 'x'.repeat(501) }, SMIC, maintenant).descriptionPoste).toBeDefined();
+    // Poste de la liste : l'intitulé n'est pas demandé.
+    expect(validerDemande({ ...valide(), intitule: '' }, SMIC, maintenant).intitule).toBeUndefined();
+  });
+
   it('borne le nombre d’extras et les consignes', () => {
     expect(validerDemande({ ...valide(), nbExtras: 0 }, SMIC, maintenant).nbExtras).toBeDefined();
     expect(validerDemande({ ...valide(), nbExtras: 11 }, SMIC, maintenant).nbExtras).toBeDefined();

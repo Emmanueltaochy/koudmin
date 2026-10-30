@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { Check, ChevronLeft } from 'lucide-react';
-import { dateLongue, formatPlage, LIBELLES_POSTE, textes as t, textesEcrans } from '@kivien/core';
+import { dateLongue, formatPlage, libellePoste, textes as t, textesEcrans } from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
@@ -62,7 +62,7 @@ function Notation() {
       <div className={p.intro}>
         <h1 className={ui.titre}>{tn.titre}</h1>
         <p className={`${ui.corps} ${ui.galet}`}>
-          {LIBELLES_POSTE[d.poste].court} · {dateLongue(d.jour)} · {formatPlage(d.debut, d.fin)}
+          {libellePoste(d.poste, d.intitule, 'court')} · {dateLongue(d.jour)} · {formatPlage(d.debut, d.fin)}
         </p>
       </div>
 

@@ -12,7 +12,7 @@ import {
   formatEuros,
   formatNet,
   formatPlage,
-  LIBELLES_POSTE,
+  libellePoste,
   netEstimeEuros,
   resumeGains,
   textesEcrans,
@@ -110,7 +110,7 @@ export default function Gains() {
                   <View style={styles.flex}>
                     <Texte variante="corpsFort">{m.restaurant}</Texte>
                     <Texte variante="legende" couleur="galet">
-                      {dateLongue(m.jour)} · {formatPlage(m.debut, m.fin)} · {LIBELLES_POSTE[m.poste].court}
+                      {dateLongue(m.jour)} · {formatPlage(m.debut, m.fin)} · {libellePoste(m.poste, m.intitule, 'court')}
                     </Texte>
                   </View>
                   <View style={styles.montant}>

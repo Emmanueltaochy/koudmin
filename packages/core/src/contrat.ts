@@ -1,6 +1,6 @@
 import { dateLongue, type JourISO } from './dates';
 import { formatEuros } from './montants';
-import { LIBELLES_POSTE, type Poste } from './postes';
+import { libellePoste, type Poste } from './postes';
 import { DEFINITION_SECTEURS, SECTEUR_PAR_DEFAUT, type Secteur } from './secteurs';
 import { brutParExtraCentimes, CONGES_PAYES_POURCENT } from './salaire';
 import { dureeMinutes, formatDuree, formatPlage } from './temps';
@@ -24,6 +24,9 @@ export interface DonneesContrat {
   /** Secteur de l'employeur (hôtellerie-restauration si absent). */
   secteur?: Secteur;
   poste: Poste;
+  /** Poste libre : intitulé et description écrits par l'établissement. */
+  intitule?: string | null;
+  descriptionPoste?: string | null;
   jour: JourISO;
   debut: number;
   fin: number;
@@ -67,7 +70,10 @@ export function redigerContrat(d: DonneesContrat): { titre: string; articles: Ar
       },
       {
         titre: 'Emploi',
-        texte: `${LIBELLES_POSTE[d.poste].mission}. Lieu de travail : ${d.adresseService}.`,
+        texte:
+          `${libellePoste(d.poste, d.intitule)}.` +
+          (d.descriptionPoste?.trim() ? ` ${d.descriptionPoste.trim().replace(/[.\s]+$/, '')}.` : '') +
+          ` Lieu de travail : ${d.adresseService}.`,
       },
       {
         titre: 'Date et horaires',

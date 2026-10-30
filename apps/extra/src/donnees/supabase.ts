@@ -16,6 +16,7 @@ import {
 
 interface LigneMission {
   id: string;
+  intitule: string | null;
   restaurant: string;
   commune: string;
   distance_metres: number;
@@ -32,6 +33,7 @@ interface LigneDetail extends LigneMission {
   tenue: string | null;
   confirmee: boolean;
   disponible: boolean;
+  description_poste: string | null;
   adresse: string | null;
   code_postal: string | null;
   acces: string | null;
@@ -46,6 +48,7 @@ const versMission = (l: LigneMission): MissionResume => ({
   commune: l.commune,
   distanceMetres: l.distance_metres,
   poste: l.poste,
+  intitule: l.intitule,
   jour: l.jour,
   debut: l.debut,
   fin: l.fin,
@@ -59,6 +62,7 @@ const versDetail = (l: LigneDetail): MissionDetail => ({
   tenue: l.tenue,
   confirmee: l.confirmee,
   disponible: l.disponible,
+  descriptionPoste: l.description_poste,
   lieu:
     l.adresse !== null && l.lat !== null && l.lng !== null
       ? { adresse: l.adresse, codePostal: l.code_postal, acces: l.acces, telephone: l.telephone, lat: l.lat, lng: l.lng }
@@ -169,11 +173,11 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
     },
     async mesGains() {
       const lignes = verifier(await client.rpc('mes_gains')) as {
-        demande_id: string; restaurant: string; commune: string; poste: Poste; jour: string; debut: number; fin: number;
+        demande_id: string; restaurant: string; commune: string; poste: Poste; intitule: string | null; jour: string; debut: number; fin: number;
         taux_horaire_brut_centimes: number; effectuee: boolean; contrat_signe_extra: boolean; contrat_signe_restaurant: boolean;
       }[];
       return lignes.map((l) => ({
-        demandeId: l.demande_id, restaurant: l.restaurant, commune: l.commune, poste: l.poste, jour: l.jour, debut: l.debut, fin: l.fin,
+        demandeId: l.demande_id, restaurant: l.restaurant, commune: l.commune, poste: l.poste, intitule: l.intitule, jour: l.jour, debut: l.debut, fin: l.fin,
         tauxHoraireBrutCentimes: l.taux_horaire_brut_centimes, effectuee: l.effectuee,
         contratSigneExtra: l.contrat_signe_extra, contratSigneRestaurant: l.contrat_signe_restaurant,
       }));

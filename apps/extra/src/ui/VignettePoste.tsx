@@ -17,6 +17,7 @@ import Truck from 'lucide-react-native/icons/truck';
 import UtensilsCrossed from 'lucide-react-native/icons/utensils-crossed';
 import Wine from 'lucide-react-native/icons/wine';
 import Wrench from 'lucide-react-native/icons/wrench';
+import Briefcase from 'lucide-react-native/icons/briefcase';
 import { FAMILLE_POSTE, type FamillePoste, type Poste } from '@kivien/core';
 import { couleurs } from './theme';
 
@@ -39,6 +40,7 @@ const ICONE_POSTE: Record<Poste, typeof Wine> = {
   reparation_navale: Ship,
   travaux_forestiers: Trees,
   formation: GraduationCap,
+  autre: Briefcase,
 };
 
 /** Fond teinté par famille (couleurs de la charte éclaircies), même code couleur que le site. */

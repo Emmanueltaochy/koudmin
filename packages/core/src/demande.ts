@@ -1,7 +1,7 @@
 import { NBSP } from './espaces';
 import type { JourISO } from './dates';
 import { formatEuros } from './montants';
-import type { Poste } from './postes';
+import { DESCRIPTION_POSTE_MAX, INTITULE_MAX, POSTE_LIBRE, type Poste } from './postes';
 import { tauxAutorise } from './salaire';
 import { dureeMinutes, lireHeure } from './temps';
 
@@ -27,6 +27,9 @@ export function montantSaisie(centimes: number): string {
 
 export interface SaisieDemande {
   poste: Poste | null;
+  /** Poste libre : intitulé (obligatoire) et description (facultative). */
+  intitule: string;
+  descriptionPoste: string;
   jour: JourISO | null;
   /** « HH:MM » */
   debut: string;
@@ -41,6 +44,8 @@ export interface SaisieDemande {
 
 export type ChampDemande =
   | 'poste'
+  | 'intitule'
+  | 'descriptionPoste'
   | 'jour'
   | 'horaires'
   | 'taux'
@@ -49,7 +54,7 @@ export type ChampDemande =
   | 'consignes';
 
 /** Ordre d'affichage des champs, pour placer le focus sur la première erreur. */
-export const ORDRE_CHAMPS: ChampDemande[] = ['poste', 'jour', 'horaires', 'taux', 'adresse', 'nbExtras', 'consignes'];
+export const ORDRE_CHAMPS: ChampDemande[] = ['poste', 'intitule', 'descriptionPoste', 'jour', 'horaires', 'taux', 'adresse', 'nbExtras', 'consignes'];
 
 export type ErreursDemande = Partial<Record<ChampDemande, string>>;
 
@@ -57,6 +62,8 @@ export type ErreursDemande = Partial<Record<ChampDemande, string>>;
 export function saisieParDefaut(aujourdhui: JourISO, smicCentimes: number): SaisieDemande {
   return {
     poste: 'serveur',
+    intitule: '',
+    descriptionPoste: '',
     jour: aujourdhui,
     debut: '18:00',
     fin: '00:00',
@@ -79,6 +86,12 @@ export function validerDemande(
 ): ErreursDemande {
   const e: ErreursDemande = {};
   if (!s.poste) e.poste = 'Choisissez un poste.';
+  if (s.poste === POSTE_LIBRE) {
+    const intitule = s.intitule.trim();
+    if (!intitule) e.intitule = 'Indiquez le poste.';
+    else if (intitule.length < 2 || intitule.length > INTITULE_MAX) e.intitule = `Entre 2 et ${INTITULE_MAX} caractères.`;
+    if (s.descriptionPoste.length > DESCRIPTION_POSTE_MAX) e.descriptionPoste = `${DESCRIPTION_POSTE_MAX} caractères maximum.`;
+  }
   if (!s.jour) e.jour = 'Choisissez une date.';
   else if (s.jour < maintenant.jour) e.jour = 'Cette date est passée.';
 

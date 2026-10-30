@@ -7,7 +7,7 @@ import {
   etiquetteJour,
   formatPlage,
   jourMoisCourt,
-  LIBELLES_POSTE,
+  libellePoste,
   textesEcrans,
   type JourISO,
 } from '@kivien/core';
@@ -46,7 +46,7 @@ export const CarteConfirmee = memo(function CarteConfirmee({
           </Texte>
         </View>
         <Texte couleur="galet">
-          {LIBELLES_POSTE[m.poste].mission} · {m.restaurant}
+          {libellePoste(m.poste, m.intitule)} · {m.restaurant}
         </Texte>
         <View style={styles.pied}>
           <Ban size={16} color={couleurs.braise} strokeWidth={2} />
@@ -83,7 +83,7 @@ export const CarteConfirmee = memo(function CarteConfirmee({
           </Texte>
         </View>
         <Texte couleur="galet">
-          {LIBELLES_POSTE[m.poste].mission} · {m.restaurant}
+          {libellePoste(m.poste, m.intitule)} · {m.restaurant}
         </Texte>
         <View style={styles.pied}>
           <Check size={16} color={couleurs.galet} strokeWidth={2.5} />
@@ -112,7 +112,7 @@ export const CarteConfirmee = memo(function CarteConfirmee({
         )}
       </View>
       <Texte>
-        {LIBELLES_POSTE[m.poste].mission} · {m.restaurant}
+        {libellePoste(m.poste, m.intitule)} · {m.restaurant}
       </Texte>
       <View style={styles.pied}>
         {m.contratSigne ? (

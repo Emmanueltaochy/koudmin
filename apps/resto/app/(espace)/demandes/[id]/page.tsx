@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronLeft, Clock, FileText, MapPin, Shirt } from 'lucide-react';
+import { Briefcase, Check, ChevronLeft, Clock, FileText, MapPin, Shirt } from 'lucide-react';
 import {
   dateLongue,
   dureeMinutes,
@@ -13,7 +13,7 @@ import {
   formatPlage,
   legendeFrais,
   legendeSalaires,
-  LIBELLES_POSTE,
+  libellePoste,
   minuteReunion,
   notificationConfirmation,
   recapDemande,
@@ -106,7 +106,7 @@ export default function SuiviDemande() {
         <p className={`${ui.corps} ${ui.galet}`}>{dateLongue(d.jour)}</p>
         <p className={p.pilule}>{formatPlage(d.debut, d.fin)}</p>
         <h1 className={`${ui.sousTitre} ${s.titre}`}>
-          {LIBELLES_POSTE[d.poste].court} · {d.nbExtras} extra{d.nbExtras > 1 ? 's' : ''}
+          {libellePoste(d.poste, d.intitule, 'court')} · {d.nbExtras} extra{d.nbExtras > 1 ? 's' : ''}
         </h1>
       </div>
 
@@ -196,6 +196,12 @@ export default function SuiviDemande() {
             {d.retourAssure && <span className={`${ui.legendeForte} ${ui.vacoa}`}>{ts.retourAssure}</span>}
           </div>
         </div>
+        {d.descriptionPoste && (
+          <div className={s.ligne}>
+            <Briefcase size={20} strokeWidth={2} className={ui.galet} aria-hidden />
+            <p className={`${ui.corps} ${s.contenu}`}>{d.descriptionPoste}</p>
+          </div>
+        )}
         {d.consignes && (
           <div className={s.ligne}>
             <Shirt size={20} strokeWidth={2} className={ui.galet} aria-hidden />

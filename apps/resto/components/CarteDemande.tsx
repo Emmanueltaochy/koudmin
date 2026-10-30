@@ -4,7 +4,7 @@ import {
   aujourdhuiReunion,
   etiquetteJour,
   formatPlage,
-  LIBELLES_POSTE,
+  libellePoste,
   textesEcrans,
 } from '@kivien/core';
 import type { DemandeSuivi } from '@/lib/donnees';
@@ -41,7 +41,7 @@ export function CarteDemande({ demande: d }: { demande: DemandeSuivi }) {
             )}
           </div>
           <span className={ui.corps}>
-            {LIBELLES_POSTE[d.poste].court} · {d.nbExtras} extra{d.nbExtras > 1 ? 's' : ''}
+            {libellePoste(d.poste, d.intitule, 'court')} · {d.nbExtras} extra{d.nbExtras > 1 ? 's' : ''}
           </span>
         </div>
       </div>

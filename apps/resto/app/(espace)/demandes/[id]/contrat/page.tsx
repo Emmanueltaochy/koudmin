@@ -57,6 +57,8 @@ function Contrat() {
     secteur: restaurant.secteur,
     salarie: { prenom: extra.prenom, nom: extra.nom, dateNaissance: null, lieuNaissance: null, adresse: null },
     poste: d.poste,
+    intitule: d.intitule,
+    descriptionPoste: d.descriptionPoste,
     jour: d.jour,
     debut: d.debut,
     fin: d.fin,

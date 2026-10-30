@@ -1,5 +1,6 @@
 import {
   BedDouble,
+  Briefcase,
   ChefHat,
   ClipboardList,
   ConciergeBell,
@@ -41,6 +42,7 @@ export const ICONE_POSTE: Record<Poste, LucideIcon> = {
   reparation_navale: Ship,
   travaux_forestiers: Trees,
   formation: GraduationCap,
+  autre: Briefcase,
 };
 
 /** Pastille colorée du métier (couleur de sa famille, icône du poste). */

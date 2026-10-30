@@ -30,6 +30,8 @@ interface LigneDemande {
   id: string;
   restaurant_id: string;
   poste: Poste;
+  intitule: string | null;
+  description_poste: string | null;
   jour: string;
   debut: number;
   fin: number;
@@ -63,7 +65,7 @@ interface LigneDemande {
   }[];
 }
 
-const SELECTION = `id, restaurant_id, poste, jour, debut, fin, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes,
+const SELECTION = `id, restaurant_id, poste, intitule, description_poste, jour, debut, fin, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes,
   adresse, code_postal, commune, retour_assure, nb_extras, consignes, statut, created_at,
   affectations ( id, extra_id, statut, created_at, updated_at,
     extras ( prenom, nom, telephone, competences, experience, langues, presentation ),
@@ -83,6 +85,8 @@ function versDemande(l: LigneDemande, favoris: Set<string>): DemandeSuivi {
     id: l.id,
     restaurantId: l.restaurant_id,
     poste: l.poste,
+    intitule: l.intitule,
+    descriptionPoste: l.description_poste,
     jour: l.jour,
     debut: l.debut,
     fin: l.fin,
@@ -254,11 +258,13 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         const l = verifier(await client.rpc('admin_demandes', { p_limite: limite })) as {
           id: string; etablissement: string; commune: string; poste: Poste; jour: string; debut: number; fin: number; nb_extras: number;
           pourvues: number; statut: StatutDemande; publiee_le: string; delai_minutes: number | null; frais_ht_centimes: number;
+          intitule: string | null;
         }[];
         return l.map((d) => ({
           id: d.id, etablissement: d.etablissement, commune: d.commune, poste: d.poste, jour: d.jour, debut: d.debut, fin: d.fin,
           nbExtras: d.nb_extras, pourvues: d.pourvues, statut: d.statut, publieeLe: d.publiee_le, delaiMinutes: d.delai_minutes,
           fraisHTCentimes: d.frais_ht_centimes,
+          intitule: d.intitule,
         }));
       },
     },
@@ -353,6 +359,8 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           .insert({
             restaurant_id: r.id,
             poste: d.poste,
+            intitule: d.intitule,
+            description_poste: d.descriptionPoste,
             jour: d.jour,
             debut: d.debut,
             fin: d.fin,

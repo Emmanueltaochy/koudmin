@@ -10,7 +10,7 @@ import {
   formatNet,
   formatPlage,
   legendeBrut,
-  LIBELLES_POSTE,
+  libellePoste,
   ligneRetour,
   salaireMission,
   type JourISO,
@@ -38,7 +38,7 @@ export const CarteMission = memo(function CarteMission({ mission: m, profil, auj
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${plage}, ${jour.texte}, ${m.commune}, ${LIBELLES_POSTE[m.poste].mission}, ${formatNet(salaire.netEuros)}`}
+      accessibilityLabel={`${plage}, ${jour.texte}, ${m.commune}, ${libellePoste(m.poste, m.intitule)}, ${formatNet(salaire.netEuros)}`}
       onPress={() => onPress(m.id)}
       style={({ pressed }) => [commun.carte, pressed && styles.appuye]}
     >
@@ -47,7 +47,7 @@ export const CarteMission = memo(function CarteMission({ mission: m, profil, auj
           <VignettePoste poste={m.poste} taille={44} />
           <View style={styles.titreTexte}>
             <Texte variante="horaire">{plage}</Texte>
-            <Texte numberOfLines={1}>{LIBELLES_POSTE[m.poste].mission}</Texte>
+            <Texte numberOfLines={1}>{libellePoste(m.poste, m.intitule)}</Texte>
           </View>
         </View>
         {jour.urgent ? (

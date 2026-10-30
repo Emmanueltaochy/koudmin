@@ -28,6 +28,22 @@ describe('contrat d’extra', () => {
     expect(texte).toContain('L1243-10');
     expect(texte).toContain('IDCC 1979');
   });
+  it('reprend l’intitulé et la description d’un poste libre', () => {
+    const libre = redigerContrat({
+      employeur: { nom: 'Le Boucan Grillé', adresse: '14 rue du Général de Gaulle', siret: null },
+      salarie: { prenom: 'Kévin', nom: 'Hoarau', dateNaissance: null, lieuNaissance: null, adresse: null },
+      poste: 'autre',
+      intitule: 'Voiturier',
+      descriptionPoste: 'Accueil des clients et stationnement des véhicules.',
+      jour: '2026-10-30',
+      debut: 1080,
+      fin: 0,
+      tauxHoraireBrutCentimes: SMIC,
+      adresseService: '14 rue du Général de Gaulle',
+    });
+    const emploi = libre.articles.find((a) => a.titre === 'Emploi')!.texte;
+    expect(emploi).toBe('Voiturier. Accueil des clients et stationnement des véhicules. Lieu de travail : 14 rue du Général de Gaulle.');
+  });
   it('ne contient ni « ! » ni mention d’âge', () => {
     expect(texte).not.toContain('!');
     expect(texte).not.toMatch(/\d+ ans/);

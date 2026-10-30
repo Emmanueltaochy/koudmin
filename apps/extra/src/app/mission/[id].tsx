@@ -10,7 +10,7 @@ import {
   dateLongue,
   etiquetteJour,
   formatPlage,
-  LIBELLES_POSTE,
+  libellePoste,
   quandMission,
   textes as t,
 } from '@kivien/core';
@@ -135,10 +135,10 @@ export default function DetailMission() {
         </View>
 
         <Texte variante="sousTitre" accessibilityRole="header">
-          {LIBELLES_POSTE[m.poste].mission} · {m.restaurant}
+          {libellePoste(m.poste, m.intitule)} · {m.restaurant}
         </Texte>
 
-        <CarteInfos mission={m} lieu={d.detail?.lieu ?? null} position={d.detail?.position ?? null} tenue={d.detail?.tenue ?? null} />
+        <CarteInfos mission={m} lieu={d.detail?.lieu ?? null} position={d.detail?.position ?? null} descriptionPoste={d.detail?.descriptionPoste ?? null} tenue={d.detail?.tenue ?? null} />
 
         {etat.nom !== 'done' && (
           <View style={styles.contrat}>

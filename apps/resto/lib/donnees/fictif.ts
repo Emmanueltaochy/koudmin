@@ -116,6 +116,8 @@ function demandesInitiales(): DemandeDemo[] {
     commune: 'Saint-Gilles-les-Bains',
     retourAssure: true,
     consignes: 'Tenue noire. Chaussures fermées.',
+    intitule: null,
+    descriptionPoste: null,
     creeLe: new Date().toISOString(),
   };
   const kevin = (o: Partial<ExtraAffecte> = {}) => extra('e1', 'Kévin', 'Hoarau', '+262692000001', o);
@@ -278,7 +280,7 @@ export function sourceFictive(): SourceResto {
         return lire().map((d) => ({
           id: d.id, etablissement: etat().etablissements.find((r) => r.id === d.restaurantId)?.nom ?? '', commune: d.commune, poste: d.poste,
           jour: d.jour, debut: d.debut, fin: d.fin, nbExtras: d.nbExtras, pourvues: d.extras.filter((e) => e.statut !== 'desistee').length,
-          statut: d.statut, publieeLe: d.creeLe, delaiMinutes: d.extras.length ? 35 : null, fraisHTCentimes: d.fraisMiseEnRelationHTCentimes,
+          statut: d.statut, publieeLe: d.creeLe, delaiMinutes: d.extras.length ? 35 : null, fraisHTCentimes: d.fraisMiseEnRelationHTCentimes, intitule: d.intitule,
         }));
       },
     },
@@ -354,6 +356,8 @@ export function sourceFictive(): SourceResto {
         restaurantId: courant().id,
         id,
         poste: n.poste,
+        intitule: n.intitule,
+        descriptionPoste: n.descriptionPoste,
         jour: n.jour,
         debut: n.debut,
         fin: n.fin,

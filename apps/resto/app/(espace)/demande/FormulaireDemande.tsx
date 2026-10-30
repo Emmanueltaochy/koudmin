@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { CalendarDays, Check, CircleAlert, FileText, Minus, Plus } from 'lucide-react';
+import { CalendarDays, Check, CircleAlert, FileText, Minus, PenLine, Plus } from 'lucide-react';
 import {
   aujourdhuiReunion,
   ajouterJours,
@@ -16,7 +16,10 @@ import {
   jourMoisCourt,
   legendeFrais,
   legendeSalaires,
+  DESCRIPTION_POSTE_MAX,
+  INTITULE_MAX,
   LIBELLES_POSTE,
+  POSTE_LIBRE,
   lireHeure,
   lireMontant,
   minuteReunion,
@@ -158,6 +161,8 @@ export function FormulaireDemande() {
       }
       const { id } = await source().publier({
         poste: saisie.poste!,
+        intitule: saisie.poste === POSTE_LIBRE ? saisie.intitule.trim() : null,
+        descriptionPoste: saisie.poste === POSTE_LIBRE ? saisie.descriptionPoste.trim() || null : null,
         jour: saisie.jour!,
         debut: lireHeure(saisie.debut)!,
         fin: lireHeure(saisie.fin)!,
@@ -234,9 +239,64 @@ export function FormulaireDemande() {
                   </button>
                 );
               })}
+              {/* Poste qui n'est pas dans la liste : l'établissement l'écrit. */}
+              <button
+                type="button"
+                role="radio"
+                aria-checked={saisie.poste === POSTE_LIBRE}
+                className={s.chip}
+                onClick={() => modifier({ poste: POSTE_LIBRE })}
+              >
+                {saisie.poste === POSTE_LIBRE ? <Check size={16} strokeWidth={2.5} aria-hidden /> : <PenLine size={16} strokeWidth={2} aria-hidden />}
+                {td.posteLibre}
+              </button>
             </div>
             {err('poste') && <p className={ui.messageErreur}>{err('poste')}</p>}
           </div>
+
+          {saisie.poste === POSTE_LIBRE && (
+            <div className={s.posteLibre}>
+              <div className={s.bloc} id="champ-intitule">
+                <label htmlFor="intitule" className={ui.corpsFort}>
+                  {td.intitule}
+                </label>
+                <span className={ui.champ} data-erreur={!!err('intitule')}>
+                  <input
+                    id="intitule"
+                    type="text"
+                    autoComplete="off"
+                    placeholder={td.intitulePlaceholder}
+                    maxLength={INTITULE_MAX}
+                    value={saisie.intitule}
+                    aria-invalid={!!err('intitule')}
+                    onChange={(e) => modifier({ intitule: e.target.value })}
+                  />
+                </span>
+                {err('intitule') ? (
+                  <p className={ui.messageErreur}>{err('intitule')}</p>
+                ) : (
+                  <p className={`${ui.legende} ${ui.galet}`}>{td.posteLibreAide}</p>
+                )}
+              </div>
+              <div className={s.bloc} id="champ-descriptionPoste">
+                <div className={s.ligneLibelle}>
+                  <label htmlFor="description-poste" className={ui.corpsFort}>
+                    {td.descriptionPoste}
+                  </label>
+                  <span className={ui.legende}>{td.facultatif}</span>
+                </div>
+                <textarea
+                  id="description-poste"
+                  className={s.zoneTexte}
+                  placeholder={td.descriptionPostePlaceholder}
+                  value={saisie.descriptionPoste}
+                  maxLength={DESCRIPTION_POSTE_MAX}
+                  onChange={(e) => modifier({ descriptionPoste: e.target.value })}
+                />
+                {err('descriptionPoste') && <p className={ui.messageErreur}>{err('descriptionPoste')}</p>}
+              </div>
+            </div>
+          )}
 
           {/* Date */}
           <div className={s.bloc} id="champ-jour">

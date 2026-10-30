@@ -338,3 +338,14 @@
     box-shadow: var(--k-ombre-carte);
   }
 }
+
+/* Poste libre : intitulé et description, sous les métiers proposés. */
+.posteLibre {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+}

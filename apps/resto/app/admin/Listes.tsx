@@ -10,6 +10,7 @@ import {
   jourCourt,
   LIBELLES_EXPERIENCE,
   LIBELLES_POSTE,
+  libellePoste,
   textes as t,
   textesEcrans,
   type Experience,
@@ -56,7 +57,7 @@ function Etat({ lignes }: { lignes: unknown[] | 'chargement' | 'erreur' }) {
 export function ListeDemandes() {
   const { lignes, filtrees, champ } = useListe(
     () => source().admin.demandes(300),
-    (d: DemandeAdmin) => `${d.etablissement} ${d.commune} ${LIBELLES_POSTE[d.poste].court} ${ta.statuts[d.statut]}`,
+    (d: DemandeAdmin) => `${d.etablissement} ${d.commune} ${libellePoste(d.poste, d.intitule, 'court')} ${ta.statuts[d.statut]}`,
   );
   if (!Array.isArray(lignes)) return <Etat lignes={lignes} />;
   return (
@@ -83,7 +84,7 @@ export function ListeDemandes() {
                   {d.etablissement}
                   <span className={s.sousLigne}>{d.commune}</span>
                 </th>
-                <td>{LIBELLES_POSTE[d.poste].court}</td>
+                <td>{libellePoste(d.poste, d.intitule, 'court')}</td>
                 <td>{jourCourt(d.jour)}</td>
                 <td>{formatPlage(d.debut, d.fin)}</td>
                 <td>

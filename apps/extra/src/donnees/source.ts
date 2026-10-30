@@ -68,6 +68,8 @@ export interface LieuMission {
 
 export interface MissionDetail extends MissionResume {
   tenue: string | null;
+  /** Poste libre : description écrite par l'établissement. */
+  descriptionPoste: string | null;
   /** Confirmée par l'extra connecté. */
   confirmee: boolean;
   /** Encore ouverte : ni pourvue, ni commencée. */

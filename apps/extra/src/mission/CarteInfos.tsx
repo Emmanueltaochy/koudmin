@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 import ArrowUpRight from 'lucide-react-native/icons/arrow-up-right';
+import Briefcase from 'lucide-react-native/icons/briefcase';
 import Bus from 'lucide-react-native/icons/bus';
 import Check from 'lucide-react-native/icons/check';
 import Euro from 'lucide-react-native/icons/euro';
@@ -46,11 +47,13 @@ export function CarteInfos({
   lieu,
   position,
   tenue,
+  descriptionPoste = null,
 }: {
   mission: MissionResume;
   lieu: LieuMission | null;
   position: { lat: number; lng: number } | null;
   tenue: string | null;
+  descriptionPoste?: string | null;
 }) {
   const minutes = dureeMinutes(m.debut, m.fin) ?? 0;
   const salaire = salaireMission(minutes, m.tauxHoraireBrutCentimes);
@@ -70,6 +73,12 @@ export function CarteInfos({
           {detailCalculExtra(minutes, m.tauxHoraireBrutCentimes)}
         </Texte>
       </Ligne>
+
+      {descriptionPoste ? (
+        <Ligne icone={<Briefcase size={20} color={couleurs.galet} strokeWidth={2} />}>
+          <Texte>{descriptionPoste}</Texte>
+        </Ligne>
+      ) : null}
 
       <Ligne
         icone={<MapPin size={20} color={couleurs.galet} strokeWidth={2} />}

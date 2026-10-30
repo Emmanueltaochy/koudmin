@@ -9,7 +9,7 @@ import {
   formatEuros,
   formatHT,
   formatPlage,
-  LIBELLES_POSTE,
+  libellePoste,
   recapDemande,
   textesEcrans,
   totauxFacture,
@@ -47,7 +47,7 @@ function Missions() {
                 </span>
               </div>
               <span className={ui.corps}>
-                {formatPlage(d.debut, d.fin)} · {LIBELLES_POSTE[d.poste].court}
+                {formatPlage(d.debut, d.fin)} · {libellePoste(d.poste, d.intitule, 'court')}
               </span>
               <span className={ui.legende}>
                 {d.extras.length ? d.extras.map((e) => `${e.prenom}${e.statut === 'absente' ? ` (${textesEcrans.resto.statuts.absente.toLowerCase()})` : ''}`).join(', ') : '—'}

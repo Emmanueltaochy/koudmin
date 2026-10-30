@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { CalendarCheck, Check, ClipboardList, PenLine, Star, Users, type LucideIcon } from 'lucide-react';
-import { aujourdhuiReunion, dateLongue, etiquetteJour, formatPlage, LIBELLES_POSTE, minuteReunion, textes as t, textesEcrans } from '@kivien/core';
+import { aujourdhuiReunion, dateLongue, etiquetteJour, formatPlage, libellePoste, minuteReunion, textes as t, textesEcrans } from '@kivien/core';
 import { AvatarExtra } from '@/components/AvatarExtra';
 import { CarteDemande } from '@/components/CarteDemande';
 import p from '@/components/pages.module.css';
@@ -111,7 +111,7 @@ export default function Accueil() {
                 <div className={s.trouveTexte}>
                   <span className={s.trouveNom}>{ta.aDitMiLeLa(e.prenom)}</span>
                   <span className={ui.legende}>
-                    {LIBELLES_POSTE[d.poste].court} · {etiquetteJour(d.jour, d.debut, aujourdhui).texte} · {formatPlage(d.debut, d.fin)}
+                    {libellePoste(d.poste, d.intitule, 'court')} · {etiquetteJour(d.jour, d.debut, aujourdhui).texte} · {formatPlage(d.debut, d.fin)}
                   </span>
                 </div>
                 <Link href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`} className={s.signer}>

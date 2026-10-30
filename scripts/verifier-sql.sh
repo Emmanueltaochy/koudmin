@@ -45,11 +45,12 @@ Taux horaire sous le minimum légal
 new row for relation "extras" violates check constraint "extras_presentation_check"
 new row for relation "photos_extras" violates check constraint "photos_extras_image_check"
 new row violates row-level security policy for table "extras"
-permission denied for table abonnes_lettre'
+permission denied for table abonnes_lettre
+new row for relation "demandes" violates check constraint "poste_libre_intitule"'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   echo "ÉCHEC : erreurs SQL inattendues" >&2
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (23 refus attendus)."
+echo "Scénario SQL conforme (24 refus attendus)."

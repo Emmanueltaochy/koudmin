@@ -11,7 +11,7 @@ import {
   jourCourt,
   jourMoisCourt,
   joursDeLaSemaine,
-  LIBELLES_POSTE,
+  libellePoste,
   lundiDeLaSemaine,
   resumeProfil,
   textes as t,
@@ -33,7 +33,7 @@ function Bloc({ c }: { c: Creneau }) {
     <Link href={`/demandes/${d.id}`} className={s.bloc} data-recherche={c.restants ? 'true' : undefined}>
       <span className={s.horaire}>{formatPlage(d.debut, d.fin)}</span>
       <span className={ui.legende}>
-        {LIBELLES_POSTE[d.poste].court}
+        {libellePoste(d.poste, d.intitule, 'court')}
         {c.restants ? ` · ${c.restants} ${tp.aTrouver}` : ''}
       </span>
     </Link>

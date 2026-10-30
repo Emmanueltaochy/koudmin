@@ -1,4 +1,4 @@
-import { bornesMission, dateLongue, formatPlage, LIBELLES_POSTE, textesEcrans } from '@kivien/core';
+import { bornesMission, dateLongue, formatPlage, libellePoste, textesEcrans } from '@kivien/core';
 import type { DemandeSuivi } from './donnees';
 import { phaseDemande } from './phase';
 
@@ -23,7 +23,7 @@ export function notificationsDepuis(demandes: DemandeSuivi[], maintenant = Date.
   const liste: Avis[] = [];
   for (const d of demandes) {
     if (d.statut === 'annulee') continue;
-    const detail = `${LIBELLES_POSTE[d.poste].court} · ${dateLongue(d.jour)} · ${formatPlage(d.debut, d.fin)}`;
+    const detail = `${libellePoste(d.poste, d.intitule, 'court')} · ${dateLongue(d.jour)} · ${formatPlage(d.debut, d.fin)}`;
     const lien = `/demandes/${d.id}`;
     for (const e of d.extras) {
       liste.push({ id: `accepte-${e.affectationId}`, le: Date.parse(e.confirmeLe), titre: tn.accepte(e.prenom), detail, lien, type: 'accepte' });

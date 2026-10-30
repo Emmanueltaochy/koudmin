@@ -9,6 +9,7 @@ export interface MissionGain {
   restaurant: string;
   commune: string;
   poste: Poste;
+  intitule?: string | null;
   jour: JourISO;
   debut: number;
   fin: number;

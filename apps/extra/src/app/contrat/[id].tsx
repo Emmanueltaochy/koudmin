@@ -107,6 +107,8 @@ export default function Contrat() {
     secteur: contrat.secteur,
     salarie: { prenom: profil.prenom, nom: profil.nom, dateNaissance: infos?.dateNaissance ?? null, lieuNaissance: infos?.lieuNaissance ?? null, adresse: infos?.adresse ?? null },
     poste: m.poste,
+    intitule: m.intitule,
+    descriptionPoste: m.descriptionPoste,
     jour: m.jour,
     debut: m.debut,
     fin: m.fin,

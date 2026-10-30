@@ -68,6 +68,7 @@ export interface ExtraAdmin {
 export interface DemandeAdmin {
   id: string; etablissement: string; commune: string; poste: Poste; jour: string; debut: number; fin: number; nbExtras: number;
   pourvues: number; statut: StatutDemande; publieeLe: string; delaiMinutes: number | null; fraisHTCentimes: number;
+  intitule: string | null;
 }
 
 /** Accès de l'espace administrateur (null : compte sans droit administrateur). */
@@ -86,6 +87,9 @@ export interface Statistiques {
 
 export interface NouvelleDemande {
   poste: Poste;
+  /** Poste libre : intitulé et description écrits par l'établissement. */
+  intitule: string | null;
+  descriptionPoste: string | null;
   jour: JourISO;
   debut: number;
   fin: number;
@@ -120,6 +124,8 @@ export interface DemandeSuivi {
   /** Établissement employeur (contrat, facture). */
   restaurantId: string;
   poste: Poste;
+  intitule: string | null;
+  descriptionPoste: string | null;
   jour: JourISO;
   debut: number;
   fin: number;

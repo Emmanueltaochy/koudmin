@@ -10,6 +10,8 @@ export interface MissionResume {
   commune: string;
   distanceMetres: number;
   poste: Poste;
+  /** Intitulé écrit par l'établissement quand le poste est `autre`. */
+  intitule?: string | null;
   jour: JourISO;
   debut: MinuteDuJour;
   fin: MinuteDuJour;

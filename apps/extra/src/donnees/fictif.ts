@@ -75,7 +75,7 @@ export function sourceFictive(): SourceDonnees {
       const c = COMPLEMENTS[id];
       if (!m || !c) return null;
       const confirmee = confirmees.has(id);
-      return { ...m, tenue: c.tenue, confirmee, disponible: !confirmee, lieu: confirmee ? c.lieu : null, position: { lat: c.lieu.lat, lng: c.lieu.lng } };
+      return { ...m, tenue: c.tenue, descriptionPoste: null, confirmee, disponible: !confirmee, lieu: confirmee ? c.lieu : null, position: { lat: c.lieu.lat, lng: c.lieu.lng } };
     },
     async accepter(id) {
       // Délai de la maquette : le temps de voir « On prévient le restaurant ».

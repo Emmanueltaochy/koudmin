@@ -260,6 +260,15 @@ insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, 
 select id, 'animation', jour_reunion() + 3, 660, 900, '12 rue du Port', 'Le Port', -20.93, 55.29
 from restaurants where nom = 'Chez Lucette';
 \set ON_ERROR_STOP 1
+\echo '--- Poste libre : intitulé écrit par l''établissement, obligatoire'
+insert into demandes (restaurant_id, poste, intitule, description_poste, jour, debut, fin, adresse, commune, lat, lng)
+select id, 'autre', 'Voiturier', 'Accueil et stationnement des véhicules.', jour_reunion() + 3, 660, 900, '12 rue du Port', 'Le Port', -20.93, 55.29
+from restaurants where nom = 'Chez Lucette' returning poste, intitule;
+\set ON_ERROR_STOP 0
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+select id, 'autre', jour_reunion() + 3, 660, 900, '12 rue du Port', 'Le Port', -20.93, 55.29
+from restaurants where nom = 'Chez Lucette';
+\set ON_ERROR_STOP 1
 \echo '--- Le Boucan ne voit pas l''établissement de Lucette'
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
 select count(*) as visibles from restaurants where nom = 'Chez Lucette';
