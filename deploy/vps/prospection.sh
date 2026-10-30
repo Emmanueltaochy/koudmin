@@ -26,7 +26,7 @@ from email.utils import formataddr, make_msgid
 
 PAR_LOT = 8
 # Éditeur (mention obligatoire en prospection) : même texte que apps/resto/lib/identite.ts.
-EDITEUR = "Kivien · Emmanuel TAOCHY · SIRET 884 270 604 00025 · 124 route des Canots, 97427 L'Étang-Salé"
+EDITEUR = "Kivien · Emmanuel TAOCHY EI · SIRET 884 270 604 00025 · 124 route des Canots, 97427 L'Étang-Salé"
 par_jour = int(os.environ.get("PAR_JOUR") or 40)
 site = os.environ.get("SITE") or "https://kivien.re"
 boite = os.environ["SMTP_USER"]
