@@ -25,6 +25,8 @@ from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 
 PAR_LOT = 8
+# Éditeur (mention obligatoire en prospection) : même texte que apps/resto/lib/identite.ts.
+EDITEUR = "Kivien · Emmanuel TAOCHY · SIRET 884 270 604 00025 · 124 route des Canots, 97427 L'Étang-Salé"
 par_jour = int(os.environ.get("PAR_JOUR") or 40)
 site = os.environ.get("SITE") or "https://kivien.re"
 boite = os.environ["SMTP_USER"]
@@ -92,7 +94,7 @@ def message(e):
     m["Subject"] = personnaliser(e["sujet"], e)
     m["Message-ID"] = make_msgid(domain=boite.split("@")[1])
     m["List-Unsubscribe"] = f"<{desinscription}>, <mailto:{boite}?subject=desinscription>"
-    m.set_content(f"{corps}\n\n--\nKivien · {boite} · {site}\n{pied}\n")
+    m.set_content(f"{corps}\n\n--\n{EDITEUR}\n{boite} · {site}\n{pied}\n")
     m.add_alternative(f"""<!doctype html><html lang="fr"><body style="margin:0;padding:0;background:#FBF6EE;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF6EE;padding:24px 12px;font-family:Helvetica,Arial,sans-serif;color:#211C18;">
 <tr><td align="center"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:16px;padding:28px 24px;">
@@ -100,7 +102,7 @@ def message(e):
 <tr><td style="font-size:16px;line-height:1.55;color:#211C18;">{en_html(corps)}</td></tr>
 <tr><td style="padding-top:8px;"><a href="{site}" style="display:inline-block;background:#C2401E;color:#FFFFFF;text-decoration:none;font-weight:700;font-size:16px;padding:14px 24px;border-radius:12px;">Découvrir Kivien</a></td></tr>
 </table>
-<p style="max-width:560px;font-size:12px;line-height:1.5;color:#7A726B;margin:16px 0 0;">Kivien · <a href="mailto:{boite}" style="color:#7A726B;">{boite}</a> · <a href="{site}" style="color:#7A726B;">kivien.re</a><br>
+<p style="max-width:560px;font-size:12px;line-height:1.5;color:#7A726B;margin:16px 0 0;">{html.escape(EDITEUR)}<br><a href="mailto:{boite}" style="color:#7A726B;">{boite}</a> · <a href="{site}" style="color:#7A726B;">kivien.re</a><br>
 {html.escape(pied.split(' Pour ne plus')[0])} <a href="{desinscription}" style="color:#7A726B;">Se désinscrire</a></p>
 </td></tr></table></body></html>""", subtype="html")
     return m

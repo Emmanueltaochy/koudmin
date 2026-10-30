@@ -370,7 +370,7 @@ export const textesEcrans = {
       signeParLesDeux: 'Contrat signé par les deux parties.',
       dpaeTitre: "Dernière étape : la DPAE",
       dpaeTexte:
-        "Déclarez l'embauche à l'URSSAF avant le début du service. C'est gratuit et en ligne, sur net-entreprises.fr.",
+        "Déclarez l'embauche à l'URSSAF avant le début du service. C'est gratuit et en ligne, sur net-entreprises.fr. L'envoi automatique par Kivien arrive bientôt : nous vous préviendrons.",
       dpaeLien: 'Faire la DPAE',
       telechargerPdf: 'Télécharger le contrat en PDF',
       preparationPdf: 'Préparation du PDF',

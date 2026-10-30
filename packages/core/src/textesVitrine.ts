@@ -80,7 +80,11 @@ export const textesVitrine = {
     liste: [
       { titre: "Contrat d'extra pré-rempli", texte: 'Poste, horaires, taux et adresse sont déjà remplis.' },
       { titre: 'Signature au doigt', texte: "Vous et l'extra signez sur téléphone, en une minute." },
-      { titre: 'Rappel de la DPAE', texte: "Avec le lien direct vers le site de l'URSSAF." },
+      {
+        titre: 'DPAE : bientôt automatique',
+        texte:
+          "La connexion avec l'URSSAF est en cours : la DPAE partira toute seule, nous vous préviendrons. En attendant, vous la faites vous-même, avec le lien direct et les informations à reporter.",
+      },
       { titre: 'Tout est rangé', texte: 'Contrats et factures téléchargeables dans Mes missions.' },
     ],
     carteTitre: "Contrat d'extra",

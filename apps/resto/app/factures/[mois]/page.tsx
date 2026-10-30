@@ -35,7 +35,7 @@ export default function Facture() {
             <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" width={96} style={{ height: "auto", marginBottom: 8 }} />
             <p className={ui.legende}>{IDENTITE_KIVIEN.raisonSociale}</p>
             <p className={ui.legende}>{IDENTITE_KIVIEN.adresse}</p>
-            {IDENTITE_KIVIEN.siren && <p className={ui.legende}>SIREN {IDENTITE_KIVIEN.siren}</p>}
+            <p className={ui.legende}>SIRET {IDENTITE_KIVIEN.siret}</p>
             {IDENTITE_KIVIEN.tvaIntracom && <p className={ui.legende}>TVA {IDENTITE_KIVIEN.tvaIntracom}</p>}
           </div>
           <div className={s.droite}>
