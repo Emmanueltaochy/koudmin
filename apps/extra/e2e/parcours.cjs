@@ -12,7 +12,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   // le parcours donne le même résultat quelle que soit l'heure du lancement.
   const jourReunion = new Date(Date.now() + 4 * 3600e3).toISOString().slice(0, 10);
   await p.clock.setFixedTime(new Date(`${jourReunion}T14:00:00+04:00`));
-  const logs = [];
+  const logs = (globalThis.__logs = []);
   p.on('pageerror', (e) => logs.push('PAGEERROR ' + e.message));
   p.on('console', (m) => { if (m.type() === 'error') logs.push('CONSOLE ' + m.text().slice(0, 200)); });
   // Parcours complet au clic, depuis la liste.
@@ -201,6 +201,15 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await b.close();
 })().catch(async (e) => {
   console.log('ÉCHEC ' + e.message.split('\n')[0]);
-  if (process.env.CAPTURES && globalThis.__page) await globalThis.__page.screenshot({ path: `${process.env.CAPTURES}/echec.png` });
+  // Diagnostic : ce que le test attendait, la page affichée et les erreurs du navigateur.
+  console.log(e.message.split('\n').filter((l) => /waiting for|locator/.test(l)).slice(0, 3).join('\n'));
+  const page = globalThis.__page;
+  if (page) {
+    console.log('Adresse : ' + page.url());
+    const texte = await page.evaluate(() => document.body.innerText).catch(() => '(page illisible)');
+    console.log('Page : ' + texte.replace(/\s+/g, ' ').slice(0, 600));
+    console.log('Erreurs : ' + (globalThis.__logs?.join(' | ') || 'aucune'));
+    if (process.env.CAPTURES) await page.screenshot({ path: `${process.env.CAPTURES}/echec.png` });
+  }
   process.exit(1);
 });
