@@ -231,6 +231,29 @@ export function sourceFictive(): SourceResto {
       });
       return 'ok';
     },
+    async statistiques() {
+      // Démonstration : quelques inscrits répartis sur l'île.
+      const il = (jours: number) => new Date(Date.now() - jours * 86400e3).toISOString();
+      const extra = (commune: string, competences: DemandeSuivi['poste'][], jours: number, dispo: boolean, voiture = false) => ({
+        commune, competences, experience: '1_3_ans', aVoiture: voiture, inscritLe: il(jours), dispoWeekEnd: dispo, dispo7Jours: dispo,
+      });
+      return {
+        extras: [
+          extra('Saint-Paul', ['serveur', 'barman'], 2, true, true),
+          extra('Saint-Paul', ['plonge', 'commis'], 5, true),
+          extra('Le Port', ['cuisine'], 12, false, true),
+          extra('Saint-Leu', ['serveur'], 1, true),
+          extra('Saint-Pierre', ['serveur', 'reception'], 3, true, true),
+          extra('Le Tampon', ['plonge'], 20, false),
+          extra('Saint-Denis', ['animation'], 6, true),
+          extra('Saint-André', ['demenagement'], 9, false, true),
+        ],
+        etablissements: [
+          { commune: 'Saint-Gilles-les-Bains', lat: -21.0394, lng: 55.2375, secteur: 'hotellerie_restauration', inscritLe: il(30), demandes: 4 },
+          { commune: 'Saint-Gilles-les-Bains', lat: -21.0601, lng: 55.2235, secteur: 'loisirs_vacances', inscritLe: il(8), demandes: 1 },
+        ],
+      };
+    },
     async equipe(restaurantId) {
       return etat().equipes[restaurantId] ?? [];
     },

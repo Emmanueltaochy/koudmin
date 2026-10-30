@@ -17,6 +17,10 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   p.on('console', (m) => { if (m.type() === 'error') logs.push('CONSOLE ' + m.text().slice(0, 200)); });
   // Parcours complet au clic, depuis la liste.
   const etape = async (txt) => console.log('OK  ' + txt);
+  // Lancement : aucune mission dans la zone, écran d'attente avec la zone de l'extra.
+  await p.goto(URL_APP + '/?demo=vide');
+  await p.getByText('Les premières missions arrivent bientôt', { exact: false }).waitFor();
+  await p.getByText('Cocher mes soirées libres').waitFor(); await etape("écran d'attente : premières missions bientôt, soirées à cocher");
   await p.goto(URL_APP + '/');
   await p.getByText('Le Boucan Grillé').waitFor();
   await p.getByText('Le Boucan Grillé').click();

@@ -145,3 +145,22 @@ describe('semaine du planning', () => {
     ]);
   });
 });
+
+describe('zones de recrutement', () => {
+  it('rattache chaque commune à une zone (intercommunalités)', async () => {
+    const { COMMUNES_REUNION, zoneDeCommune } = await import('../src');
+    for (const c of COMMUNES_REUNION) expect(zoneDeCommune(c.nom), c.nom).not.toBeNull();
+    expect(zoneDeCommune('Saint-Gilles')).toBeNull();
+    expect(zoneDeCommune('Saint-Paul')).toBe('ouest');
+    expect(zoneDeCommune('Le Tampon')).toBe('sud');
+  });
+});
+
+describe('zone d’un établissement', () => {
+  it('se rabat sur la commune la plus proche pour une localité', async () => {
+    const { zoneDuLieu } = await import('../src');
+    expect(zoneDuLieu('Saint-Gilles-les-Bains', -21.0394, 55.2375)).toBe('ouest');
+    expect(zoneDuLieu('Saint-Denis')).toBe('nord');
+    expect(zoneDuLieu(null)).toBeNull();
+  });
+});

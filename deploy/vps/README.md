@@ -101,6 +101,17 @@ sudo /opt/kivien/source/deploy/vps/ajouter-restaurant.sh "+262692123456" "Le Bou
 L'adresse est géolocalisée (Géoplateforme IGN, codes postaux 974 uniquement). Le mot de passe du restaurateur
 s'affiche une seule fois : le lui transmettre directement.
 
+### Compteur de recrutement (kivien.re/admin)
+
+Inscriptions des extras et des établissements par zone et par métier, sans donnée personnelle.
+Créer d'abord un compte sur kivien.re avec le mobile, puis lui ouvrir l'accès :
+
+```bash
+sudo /opt/kivien/source/deploy/vps/ajouter-admin.sh "+262692123456"
+```
+
+Retirer l'accès : même commande suivie de `--retirer`.
+
 ### Studio (administration)
 
 Studio n'est pas exposé sur Internet. Depuis ton ordinateur :

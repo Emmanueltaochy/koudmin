@@ -218,6 +218,32 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       verifier({ data: null, error });
       return 'ok';
     },
+    async statistiques() {
+      const [ex, et] = await Promise.all([client.rpc('statistiques_extras'), client.rpc('statistiques_etablissements')]);
+      if (refus(ex.error, /administrateurs Kivien/)) return null;
+      const extras = verifier(ex) as {
+        commune: string;
+        competences: Poste[];
+        experience: string | null;
+        a_voiture: boolean;
+        inscrit_le: string;
+        dispo_week_end: boolean;
+        dispo_7_jours: boolean;
+      }[];
+      const etablissements = verifier(et) as { commune: string | null; lat: number | null; lng: number | null; secteur: string; inscrit_le: string; demandes: number }[];
+      return {
+        extras: extras.map((e) => ({
+          commune: e.commune,
+          competences: e.competences ?? [],
+          experience: e.experience,
+          aVoiture: e.a_voiture,
+          inscritLe: e.inscrit_le,
+          dispoWeekEnd: e.dispo_week_end,
+          dispo7Jours: e.dispo_7_jours,
+        })),
+        etablissements: etablissements.map((r) => ({ commune: r.commune, lat: r.lat, lng: r.lng, secteur: r.secteur, inscritLe: r.inscrit_le, demandes: r.demandes })),
+      };
+    },
     async equipe(restaurantId) {
       const lignes = verifier(await client.rpc('equipe_etablissement', { p_restaurant: restaurantId })) as {
         utilisateur_id: string | null;

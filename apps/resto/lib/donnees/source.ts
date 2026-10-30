@@ -44,6 +44,12 @@ export interface Membre {
 
 export type ResultatInvitation = 'ok' | 'dejaMembre' | 'compteExtra' | 'reserve';
 
+/** Compteur de l'équipe Kivien : extras et établissements inscrits, sans donnée personnelle. */
+export interface Statistiques {
+  extras: { commune: string; competences: Poste[]; experience: string | null; aVoiture: boolean; inscritLe: string; dispoWeekEnd: boolean; dispo7Jours: boolean }[];
+  etablissements: { commune: string | null; lat: number | null; lng: number | null; secteur: string; inscritLe: string; demandes: number }[];
+}
+
 export interface NouvelleDemande {
   poste: Poste;
   jour: JourISO;
@@ -145,6 +151,8 @@ export interface SourceResto {
   annulerInvitation(restaurantId: string, telephone: string): Promise<void>;
   changerRole(restaurantId: string, utilisateurId: string, role: Role): Promise<'ok' | 'dernierGerant'>;
   retirerMembre(restaurantId: string, utilisateurId: string): Promise<'ok' | 'dernierGerant'>;
+  /** null : compte sans accès administrateur. */
+  statistiques(): Promise<Statistiques | null>;
   /** Photo de profil d'un extra affecté à une de vos demandes (JPEG base64), null sans photo. */
   photoExtra(extraId: string): Promise<string | null>;
   parametres(): Promise<ParametresTarifaires>;

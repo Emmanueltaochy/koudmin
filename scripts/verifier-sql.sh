@@ -31,6 +31,7 @@ Au moins un gérant requis
 Métier non autorisé pour ce secteur
 Mission annulée
 Numéro de mobile invalide
+Réservé aux administrateurs Kivien
 Réservé au gérant
 Secteur non autorisé
 Numéro SIRET invalide
@@ -50,4 +51,4 @@ if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (21 refus attendus)."
+echo "Scénario SQL conforme (22 refus attendus)."

@@ -45,6 +45,20 @@ let pageCourante = null;
   await p.getByRole('link', { name: 'Se connecter' }).first().click();
   await p.waitForURL(URL_SITE + '/connexion'); ok('accueil public : lien Se connecter');
 
+  // Recrutement des extras : page des annonces, inscription dans l'app.
+  await p.goto(URL_SITE + '/extras');
+  await p.getByRole('heading', { name: 'Des missions près de chez toi. Tu choisis tes soirées.' }).waitFor();
+  if (!(await p.getByRole('link', { name: "Je m'inscris" }).first().getAttribute('href')).endsWith('/bienvenue')) throw new Error('lien inscription extra');
+  await p.getByText('Animation', { exact: true }).waitFor();
+  await p.getByText(/Environ\s63\s€\snet/).waitFor(); ok('page extras : métiers autorisés, gain au SMIC, inscription dans l’app');
+  await capture('page-extras');
+
+  // Compteur de l'équipe Kivien (démo) : extras par zone et par métier.
+  await p.goto(URL_SITE + '/admin');
+  await p.getByRole('heading', { name: 'Recrutement' }).waitFor();
+  await p.getByRole('row', { name: /^Ouest/ }).first().waitFor(); ok('compteur : extras et établissements par zone');
+  await capture('admin');
+
   // Création de compte restaurateur : SIRET obligatoire, compte actif tout de suite.
   await p.goto(URL_SITE + '/');
   await p.getByRole('link', { name: 'Créer un compte' }).first().click();
@@ -258,7 +272,7 @@ let pageCourante = null;
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/extras', '/admin', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

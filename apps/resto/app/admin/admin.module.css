@@ -1,0 +1,62 @@
+.marque {
+  display: inline-flex;
+  margin-top: 16px;
+}
+
+.chiffres {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.chiffre {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+}
+.valeur {
+  font: var(--k-titre-font);
+  letter-spacing: var(--k-titre-ls);
+  line-height: 1;
+}
+
+.defilement {
+  overflow-x: auto;
+  border-radius: var(--k-rayon-carte);
+  background: var(--k-blanc);
+  box-shadow: var(--k-ombre-carte);
+}
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--k-corps-font);
+}
+.tableau th,
+.tableau td {
+  padding: 12px;
+  border-bottom: 1px solid var(--k-trait);
+  text-align: right;
+  white-space: nowrap;
+}
+.tableau th:first-child {
+  text-align: left;
+}
+.tableau thead th {
+  font: var(--k-legende-forte-font);
+  color: var(--k-galet);
+}
+.tableau tbody th {
+  font: var(--k-corps-fort-font);
+}
+.tableau tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .chiffres {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

@@ -15,7 +15,7 @@ export const LIENS_VITRINE = {
     Tarif: '#tarif',
     "Le contrat d'extra": '#contrat',
     'Se connecter': '/connexion',
-    'Devenir extra': `${URL_APP_EXTRA}/bienvenue`,
+    'Devenir extra': '/extras',
     'Missions près de chez moi': `${URL_APP_EXTRA}/bienvenue`,
     'Mes droits': '#',
     'Questions fréquentes': '#',

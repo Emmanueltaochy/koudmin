@@ -285,3 +285,14 @@ select restaurant, annulee from mes_missions() where restaurant = 'Chez Lucette'
 select signer_contrat((select affectation_id from contrat_extra(:'dcuisine')), repeat('k', 200));
 \set ON_ERROR_STOP 1
 reset role;
+\echo '--- Compteur de l''équipe Kivien : refusé à un restaurateur, ouvert à un administrateur'
+insert into admins (utilisateur_id) values ('00000000-0000-0000-0000-0000000000a3');
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+\set ON_ERROR_STOP 0
+select count(*) from statistiques_extras();
+\set ON_ERROR_STOP 1
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select commune, competences, dispo_7_jours from statistiques_extras() order by commune;
+select count(*) as etablissements from statistiques_etablissements();
+reset role;
