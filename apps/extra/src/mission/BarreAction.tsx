@@ -2,8 +2,8 @@ import { StyleSheet, View } from 'react-native';
 import Check from 'lucide-react-native/icons/check';
 import Pencil from 'lucide-react-native/icons/pencil';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { confirmationExtra, textes as t, type EtatMission } from '@kivien/core';
-import { BoutonPrincipal, Lien } from '../ui/Bouton';
+import { confirmationExtra, textes as t, textesEcrans, type EtatMission } from '@kivien/core';
+import { BoutonPrincipal, BoutonSecondaire, Lien } from '../ui/Bouton';
 import { couleurs, dimensions, rayons } from '../ui/theme';
 import { Texte } from '../ui/Texte';
 
@@ -17,6 +17,7 @@ export function BarreAction({
   onMiLeLa,
   onSigner,
   onDesister,
+  contratSigne = false,
 }: {
   etat: EtatMission;
   debut: number;
@@ -24,6 +25,8 @@ export function BarreAction({
   onMiLeLa: () => void;
   onSigner: () => void;
   onDesister: () => void;
+  /** Contrat déjà signé par l'extra : on propose de le relire, plus de le signer. */
+  contratSigne?: boolean;
 }) {
   const insets = useSafeAreaInsets();
   return (
@@ -53,11 +56,23 @@ export function BarreAction({
               {confirmationExtra(debut, quand)}
             </Texte>
           </View>
-          <BoutonPrincipal
-            libelle={td.signer}
-            onPress={onSigner}
-            icone={<Pencil size={18} color={couleurs.blanc} strokeWidth={2} />}
-          />
+          {contratSigne ? (
+            <>
+              <View style={styles.signe}>
+                <Check size={18} color={couleurs.vacoa} strokeWidth={2.5} />
+                <Texte variante="corpsFort" couleur="vacoa">
+                  {textesEcrans.extra.contrat.signeCourt}
+                </Texte>
+              </View>
+              <BoutonSecondaire libelle={textesEcrans.extra.contrat.voirContrat} onPress={onSigner} />
+            </>
+          ) : (
+            <BoutonPrincipal
+              libelle={td.signer}
+              onPress={onSigner}
+              icone={<Pencil size={18} color={couleurs.blanc} strokeWidth={2} />}
+            />
+          )}
         </>
       )}
 
@@ -73,6 +88,7 @@ export function BarreAction({
 }
 
 const styles = StyleSheet.create({
+  signe: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   barre: {
     backgroundColor: couleurs.blanc,
     borderTopWidth: 1,

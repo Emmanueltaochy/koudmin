@@ -63,18 +63,29 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Kévin Hoarau, né·e le 12 mai 2001', { exact: false }).waitFor(); await etape('contrat prérempli (identité, date de naissance)');
   await p.getByText('Signer mon contrat').last().click();
   await p.getByText('Signe dans le cadre.').waitFor(); await etape('contrat : signature obligatoire');
+  // Signature au doigt (écran tactile) : le tracé ne doit pas faire défiler l'écran.
   const pave = await p.getByLabel('Signe avec le doigt.').boundingBox();
-  await p.mouse.move(pave.x + 30, pave.y + 100);
-  await p.mouse.down();
-  for (let i = 0; i < 12; i++) await p.mouse.move(pave.x + 40 + i * 20, pave.y + 60 + (i % 2) * 50, { steps: 3 });
-  await p.mouse.up();
+  const cdp = await p.context().newCDPSession(p);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+  const doigt = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  await doigt('touchStart', pave.x + 30, pave.y + 100);
+  for (let i = 0; i < 12; i++) await doigt('touchMove', pave.x + 40 + i * 20, pave.y + 20 + (i % 2) * 110);
+  await doigt('touchEnd');
+  const apres = await p.getByLabel('Signe avec le doigt.').boundingBox();
+  if (Math.abs(apres.y - pave.y) > 2) throw new Error(`la signature fait défiler l'écran (${pave.y} → ${apres.y})`);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+  await etape('contrat : signature au doigt sans défilement');
   await p.getByText("J'ai lu le contrat et je le signe.").click();
   await p.getByText('Signer mon contrat').last().click();
-  await p.getByText('Contrat signé. Le restaurant reçoit', { exact: false }).waitFor({ timeout: 5000 }); await etape('contrat signé');
+  await p.getByText("Contrat signé. L'entreprise reçoit", { exact: false }).waitFor({ timeout: 5000 }); await etape('contrat signé');
+  await p.getByText('Retour à la mission').waitFor(); await etape('contrat signé : bouton de retour à la mission');
   if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/contrat-signe.png`, fullPage: true });
 
   // Retour à la liste par la navigation (un rechargement effacerait l'état de démo, gardé en mémoire).
   await p.getByLabel('Retour').last().click();
+  await p.waitForTimeout(800);
+  if (await p.getByText('Signer mon contrat').isVisible().catch(() => false)) throw new Error('mission : « Signer mon contrat » encore affiché après la signature');
+  await etape('mission : à jour après la signature');
   await p.getByLabel('Retour').last().click();
   await p.getByText('Contrat signé').waitFor(); await etape('liste : contrat signé sur la mission confirmée');
 

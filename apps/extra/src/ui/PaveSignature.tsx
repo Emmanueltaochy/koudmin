@@ -1,5 +1,5 @@
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { PanResponder, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { PanResponder, Platform, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { couleurs, rayons } from './theme';
 
@@ -10,19 +10,45 @@ export interface PaveSignatureRef {
 }
 
 /** Signature au doigt : tracé basalte vectoriel, léger (pas d'image bitmap). */
-export const PaveSignature = forwardRef<PaveSignatureRef, { erreur?: boolean; libelle: string }>(
-  function PaveSignature({ erreur, libelle }, ref) {
+/**
+ * `onTrace(true)` au début du tracé, `onTrace(false)` à la fin : l'écran bloque son défilement
+ * pendant la signature (sinon, sur téléphone, le doigt fait défiler la page au lieu de signer).
+ */
+export const PaveSignature = forwardRef<PaveSignatureRef, { erreur?: boolean; libelle: string; onTrace?: (enCours: boolean) => void }>(
+  function PaveSignature({ erreur, libelle, onTrace }, ref) {
     const [traits, setTraits] = useState<string[]>([]);
     const courant = useRef('');
     const [, rafraichir] = useState(0);
     const taille = useRef({ l: 300, h: 160 });
+    const zone = useRef<unknown>(null);
+    const traceRef = useRef(onTrace);
+    traceRef.current = onTrace;
+
+    // Navigateur (app.kivien.re sur téléphone) : le glisser du doigt ne fait pas défiler la page.
+    useEffect(() => {
+      if (Platform.OS !== 'web') return;
+      const el = zone.current as unknown as HTMLElement | null;
+      if (!el?.addEventListener) return;
+      el.style.touchAction = 'none';
+      const bloquer = (e: TouchEvent) => e.preventDefault();
+      el.addEventListener('touchstart', bloquer, { passive: false });
+      el.addEventListener('touchmove', bloquer, { passive: false });
+      return () => {
+        el.removeEventListener('touchstart', bloquer);
+        el.removeEventListener('touchmove', bloquer);
+      };
+    }, []);
 
     const pan = useMemo(
       () =>
         PanResponder.create({
           onStartShouldSetPanResponder: () => true,
           onMoveShouldSetPanResponder: () => true,
+          // Le défilement de l'écran ne reprend pas la main pendant le tracé.
+          onPanResponderTerminationRequest: () => false,
+          onShouldBlockNativeResponder: () => true,
           onPanResponderGrant: (e) => {
+            traceRef.current?.(true);
             const { locationX: x, locationY: y } = e.nativeEvent;
             courant.current = `M${x.toFixed(1)} ${y.toFixed(1)}`;
           },
@@ -34,6 +60,12 @@ export const PaveSignature = forwardRef<PaveSignatureRef, { erreur?: boolean; li
           onPanResponderRelease: () => {
             if (courant.current.includes('L')) setTraits((t) => [...t, courant.current]);
             courant.current = '';
+            traceRef.current?.(false);
+          },
+          onPanResponderTerminate: () => {
+            if (courant.current.includes('L')) setTraits((t) => [...t, courant.current]);
+            courant.current = '';
+            traceRef.current?.(false);
           },
         }),
       [],
@@ -54,6 +86,7 @@ export const PaveSignature = forwardRef<PaveSignatureRef, { erreur?: boolean; li
 
     return (
       <View
+        ref={zone as never}
         accessible
         accessibilityLabel={libelle}
         style={[styles.pave, erreur && styles.erreur]}

@@ -29,6 +29,14 @@ export const PaveSignature = forwardRef<PaveSignatureRef, { libelle: string; err
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.strokeStyle = '#211C18';
+      // Safari sur iPhone : sans ce blocage, le doigt fait défiler la page au lieu de signer.
+      const bloquer = (e: TouchEvent) => e.preventDefault();
+      c.addEventListener('touchstart', bloquer, { passive: false });
+      c.addEventListener('touchmove', bloquer, { passive: false });
+      return () => {
+        c.removeEventListener('touchstart', bloquer);
+        c.removeEventListener('touchmove', bloquer);
+      };
     }, []);
 
     useImperativeHandle(ref, () => ({

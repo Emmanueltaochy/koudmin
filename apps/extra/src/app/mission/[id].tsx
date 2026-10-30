@@ -1,6 +1,6 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BackHandler, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import ChevronLeft from 'lucide-react-native/icons/chevron-left';
 import FileText from 'lucide-react-native/icons/file-text';
 import WifiOff from 'lucide-react-native/icons/wifi-off';
@@ -14,7 +14,7 @@ import {
   quandMission,
   textes as t,
 } from '@kivien/core';
-import { demoAutorisee } from '../../donnees';
+import { demoAutorisee, source } from '../../donnees';
 import { BarreAction } from '../../mission/BarreAction';
 import { CarteInfos } from '../../mission/CarteInfos';
 import { EcranDesistement } from '../../mission/EcranDesistement';
@@ -64,6 +64,22 @@ export default function DetailMission() {
   }, [etat.nom, annulerDesistement]);
 
   const signer = useCallback(() => router.push(`/contrat/${id}`), [id]);
+
+  // État du contrat, relu à chaque retour sur l'écran (après la signature notamment).
+  const [contratSigne, setContratSigne] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (etat.nom !== 'done') return;
+      let actif = true;
+      source
+        .contrat(id)
+        .then((c) => actif && setContratSigne(!!c?.signeExtra))
+        .catch(() => undefined);
+      return () => {
+        actif = false;
+      };
+    }, [id, etat.nom]),
+  );
 
   if (!d.mission) {
     return (
@@ -143,6 +159,7 @@ export default function DetailMission() {
         onMiLeLa={() => void d.accepter()}
         onSigner={signer}
         onDesister={d.desister}
+        contratSigne={contratSigne}
       />
 
       {etat.nom === 'taken' && (

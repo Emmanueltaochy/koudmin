@@ -28,6 +28,9 @@ export default function Contrat() {
   const [envoi, setEnvoi] = useState(false);
   const [erreurs, setErreurs] = useState<{ signature?: boolean; lecture?: boolean; envoi?: string }>({});
   const pave = useRef<PaveSignatureRef>(null);
+  const defilement = useRef<{ scrollTo(o: { y: number; animated?: boolean }): void } | null>(null);
+  // Défilement bloqué pendant que le doigt signe.
+  const [signatureEnCours, setSignatureEnCours] = useState(false);
 
   const charger = useCallback(async () => {
     const [contrat, mission, infos, profil] = await Promise.all([source.contrat(id), source.detail(id), source.infosContrat(), source.profil()]);
@@ -47,6 +50,8 @@ export default function Contrat() {
     try {
       await source.signerContrat(d.contrat.affectationId, image!);
       await charger();
+      // Le bandeau « Contrat signé » est en haut : on y remonte.
+      defilement.current?.scrollTo({ y: 0, animated: true });
     } catch {
       setErreurs({ envoi: textesEcrans.connexion.pasDeReseauExtra });
     }
@@ -89,7 +94,7 @@ export default function Contrat() {
   return (
     <View style={styles.ecran}>
       {entete}
-      <ScrollView contentContainerStyle={[styles.contenu, { paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
+      <ScrollView ref={defilement as never} scrollEnabled={!signatureEnCours} contentContainerStyle={[styles.contenu, { paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
         <Texte variante="titre" accessibilityRole="header">
           {tc.titre}
         </Texte>
@@ -105,6 +110,9 @@ export default function Contrat() {
                   {tc.signe}
                 </Texte>
               </View>
+            )}
+            {contrat.signeExtra && (
+              <BoutonPrincipal libelle={tc.retourMission} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
             )}
             <View style={styles.carte}>
               <Texte variante="corpsFort">{texte.titre}</Texte>
@@ -123,7 +131,7 @@ export default function Contrat() {
                   <Texte variante="corpsFort">{tc.signature}</Texte>
                   <Lien libelle={tc.effacer} onPress={() => pave.current?.effacer()} />
                 </View>
-                <PaveSignature ref={pave} libelle={tc.signatureAide} erreur={erreurs.signature} />
+                <PaveSignature ref={pave} libelle={tc.signatureAide} erreur={erreurs.signature} onTrace={setSignatureEnCours} />
                 <Texte variante={erreurs.signature ? 'legendeForte' : 'legende'} couleur={erreurs.signature ? 'braise' : 'galet'}>
                   {erreurs.signature ? tc.erreurSignature : tc.signatureAide}
                 </Texte>

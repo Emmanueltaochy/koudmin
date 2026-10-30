@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
 import {
   etatDepuisServeur,
@@ -72,13 +73,16 @@ export function useDetailMission(id: string, demo?: DemoDetail) {
   }, [id]);
 
   useEffect(() => {
-    if (demo) {
-      void jouerDemo(demo);
-      return;
-    }
-    void chargerDetail();
+    if (demo) void jouerDemo(demo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demo, id]);
+
+  // Rechargé à chaque retour sur l'écran (ex. après la signature du contrat).
+  useFocusEffect(
+    useCallback(() => {
+      if (!demo) void chargerDetail();
+    }, [demo, chargerDetail]),
+  );
 
   /** Démo (données fictives uniquement) : amène l'écran dans l'état demandé. */
   async function jouerDemo(d: DemoDetail) {
