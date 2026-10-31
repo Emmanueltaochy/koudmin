@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { DEFINITION_SECTEURS, LIBELLES_POSTE, LIBELLES_ZONE, montantsVitrine, SECTEURS, textesVitrine, ZONES, type Poste } from '@kivien/core';
+import { DEFINITION_SECTEURS, LIBELLES_POSTE, LIBELLES_ZONE, SECTEURS, textesVitrine, ZONES, type Poste } from '@kivien/core';
 import { LogoKivien } from '@/components/vitrine/LogoKivien';
 import { VignettePoste } from '@/components/VignettePoste';
 import { LIENS_VITRINE } from '@/lib/vitrine/liens';
-import { parametresPublics } from '@/lib/vitrine/parametres';
 import v from '../vitrine.module.css';
 import s from './extras.module.css';
 
@@ -22,8 +21,6 @@ const METIERS: Poste[] = [...new Set(SECTEURS.flatMap((x) => DEFINITION_SECTEURS
 
 /** Page de recrutement des extras (lien des annonces) : inscription dans l'app. */
 export default async function DevenirExtra() {
-  const p = await parametresPublics();
-  const m = montantsVitrine(p.tauxHoraireBrutCentimes, p.fraisMiseEnRelationHTCentimes);
   const inscription = LIENS_VITRINE.telechargerApp;
 
   return (
@@ -57,7 +54,7 @@ export default async function DevenirExtra() {
           <h2 id="gain" className={s.sousTitre}>
             {t.gainTitre}
           </h2>
-          <p className={s.gain}>{t.gainTexte(m.net, m.brut)}</p>
+          <p className={s.gain}>{t.gainTexte}</p>
           <p className={s.note}>{t.gainNote}</p>
         </div>
       </section>

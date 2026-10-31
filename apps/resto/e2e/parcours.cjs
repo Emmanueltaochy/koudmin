@@ -50,7 +50,9 @@ let pageCourante = null;
   await p.getByRole('heading', { name: 'Des missions près de chez toi. Tu choisis tes soirées.' }).waitFor();
   if (!(await p.getByRole('link', { name: "Je m'inscris" }).first().getAttribute('href')).endsWith('/bienvenue')) throw new Error('lien inscription extra');
   await p.getByText('Animation', { exact: true }).waitFor();
-  await p.getByText(/Environ\s63\s€\snet/).waitFor(); ok('page extras : métiers autorisés, gain au SMIC, inscription dans l’app');
+  await p.getByText('Un vrai contrat, une fiche de paie et tes congés payés en plus, à chaque mission.').waitFor();
+  if (await p.getByText(/€\snet/).count()) throw new Error('montant affiché sur la page extras');
+  ok('page extras : métiers autorisés, contrat et fiche de paie (sans montant), inscription dans l’app');
   await capture('page-extras');
 
   // Compteur de l'équipe Kivien (démo) : extras par zone et par métier.
