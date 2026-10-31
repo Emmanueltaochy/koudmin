@@ -16,8 +16,8 @@ export const textesVitrine = {
   lancement: 'Lancement officiel très bientôt',
   lancementTexte: 'Inscriptions ouvertes dès maintenant, pour les établissements comme pour les extras.',
   nav: {
-    etablissements: 'Établissements',
-    extras: 'Extras',
+    etablissements: 'Trouver du renfort',
+    extras: 'Trouver du travail',
     trouver: 'Trouver un extra',
     devenir: 'Devenir extra',
     garanties: 'Garanties',
