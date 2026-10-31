@@ -42,7 +42,7 @@ export function modeleCampagne(fraisHT: string): { sujet: string; message: strin
     sujet: "Kivien : vos extras à La Réunion, sans passer par l'intérim",
     message: [
       'Bonjour,',
-      "Kivien, la nouvelle plateforme réunionnaise pour trouver des extras, ouvre dans quelques jours.",
+      "Kivien, la nouvelle plateforme réunionnaise pour trouver des extras, ouvre très bientôt.",
       "Un service chargé, une absence de dernière minute : vous publiez votre besoin et les extras disponibles près de {commune} sont prévenus tout de suite. Notre objectif : un extra trouvé en 2 heures.",
       [
         "- Contrat d'extra (CDD d'usage) rédigé pour vous, signé en ligne",

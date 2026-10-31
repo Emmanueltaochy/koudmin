@@ -13,7 +13,7 @@ import { brutParExtraCentimes, CONGES_PAYES_POURCENT, netEstimeEuros } from './s
 const h = (s: string) => s.replace(/ (h|€|HT)(?=\s|$|[.,:])/g, `${NBSP}$1`).replace(/(\d\u00a0h) (\d)/g, `$1${NBSP}$2`);
 
 export const textesVitrine = {
-  lancement: 'Lancement officiel dans quelques jours',
+  lancement: 'Lancement officiel très bientôt',
   lancementTexte: 'Inscriptions ouvertes dès maintenant, pour les établissements comme pour les extras.',
   nav: {
     trouver: 'Trouver un extra',
