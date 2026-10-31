@@ -237,6 +237,12 @@ export const textesVitrine = {
     ],
     copyright: '© Kivien 2026 · Saint-Denis · Saint-Paul · Saint-Pierre · Le Tampon',
     legal: ['Mentions légales', 'CGV', 'Confidentialité', 'Cookies'],
+    realisation: {
+      avant: 'Site, plateforme et application mobile réalisés par ',
+      lien: 'Taochy Agency',
+      url: 'https://taochyagency.com/',
+      apres: ', agence web et marketing à La Réunion',
+    },
   },
 } as const;
 

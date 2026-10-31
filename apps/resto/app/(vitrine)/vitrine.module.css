@@ -1009,6 +1009,15 @@
 .piedLegal a {
   color: #fbf6ee;
 }
+.piedRealisation {
+  margin: -16px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: rgba(251, 246, 238, 0.75);
+}
+.piedRealisation a {
+  color: #fbf6ee;
+}
 
 /* Liens au clavier : anneau visible sur fond clair comme sur fond sombre. */
 .page a:focus-visible,

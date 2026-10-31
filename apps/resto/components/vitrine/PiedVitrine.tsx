@@ -33,6 +33,11 @@ export function PiedVitrine() {
           ))}
         </div>
       </div>
+      <p className={s.piedRealisation}>
+        {t.pied.realisation.avant}
+        <a href={t.pied.realisation.url}>{t.pied.realisation.lien}</a>
+        {t.pied.realisation.apres}
+      </p>
     </footer>
   );
 }

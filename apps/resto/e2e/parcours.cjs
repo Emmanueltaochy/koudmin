@@ -73,6 +73,8 @@ let pageCourante = null;
   await p.goto(URL_SITE + '/mentions-legales');
   await p.getByText('884 270 604 00025', { exact: false }).first().waitFor();
   ok('pages légales, questions fréquentes, qui sommes-nous : en ligne et reliées au pied de page');
+  if ((await p.locator('footer a', { hasText: 'Taochy Agency' }).getAttribute('href')) !== 'https://taochyagency.com/') throw new Error('crédit Taochy Agency');
+  await p.locator('footer').getByText('agence web et marketing à La Réunion', { exact: false }).waitFor(); ok('pied : réalisation par Taochy Agency');
 
   // Recrutement des extras : page des annonces, inscription dans l'app.
   await p.goto(URL_SITE + '/extras');
