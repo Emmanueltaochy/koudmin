@@ -1,7 +1,11 @@
 .haut {
   background: var(--k-basalte);
   color: var(--k-creme);
-  padding: 16px 16px 40px;
+  padding: 0 16px 40px;
+}
+/* L'en-tête commun a ses propres marges : il occupe toute la largeur. */
+.haut > header {
+  margin: 0 -16px 24px;
 }
 .entete {
   display: flex;

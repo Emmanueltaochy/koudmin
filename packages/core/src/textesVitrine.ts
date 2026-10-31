@@ -16,12 +16,68 @@ export const textesVitrine = {
   lancement: 'Lancement officiel très bientôt',
   lancementTexte: 'Inscriptions ouvertes dès maintenant, pour les établissements comme pour les extras.',
   nav: {
+    etablissements: 'Établissements',
+    extras: 'Extras',
     trouver: 'Trouver un extra',
     devenir: 'Devenir extra',
     garanties: 'Garanties',
     tarif: 'Tarif',
     seConnecter: 'Se connecter',
     creerCompte: 'Créer un compte',
+  },
+  /** Page d'accueil : le concept, pour les établissements comme pour les extras. */
+  accueil: {
+    surtitre: 'La Réunion · restauration, hôtellerie, événementiel, loisirs',
+    titre: 'Les extras péi, près de chez vous.',
+    texte:
+      "Kivien met en relation les établissements qui ont besoin de renfort et les extras disponibles près de chez eux. Le contrat d'extra est rédigé et signé en ligne.",
+    pro: {
+      titre: 'Je recrute des extras',
+      texte: "Restaurant, hôtel, bar, traiteur, événementiel : un renfort pour aujourd'hui, environ 20 % moins cher que l'intérim.",
+      bouton: 'Trouver un extra',
+    },
+    extra: {
+      titre: 'Je cherche des missions',
+      texte: "Des missions près de chez toi, aux horaires qui t'arrangent, avec un vrai contrat et une fiche de paie.",
+      bouton: 'Devenir extra',
+    },
+    commentSurtitre: 'COMMENT ÇA MARCHE',
+    commentTitre: 'Deux côtés, trois étapes.',
+    cotePro: {
+      titre: 'Côté établissement',
+      etapes: [
+        'Vous publiez votre besoin : poste, horaires, adresse.',
+        "Les extras proches reçoivent l'alerte, l'un d'eux accepte.",
+        "Le contrat d'extra est rédigé : vous signez en ligne, l'extra aussi.",
+      ],
+      lien: 'Tout savoir pour les établissements',
+    },
+    coteExtra: {
+      titre: 'Côté extra',
+      etapes: [
+        'Tu crées ton profil et tu coches tes soirées libres.',
+        'Une mission près de chez toi te plaît : tu dis mi lé la.',
+        'Tu signes ton contrat sur ton téléphone, et le jour J tu y vas.',
+      ],
+      lien: 'Tout savoir pour les extras',
+    },
+    valeursSurtitre: 'POURQUOI KIVIEN',
+    valeursTitre: 'Simple, local et dans les règles.',
+    valeurs: [
+      {
+        titre: 'Un vrai contrat',
+        texte: "CDD d'usage rédigé automatiquement et signé par les deux parties. Fiche de paie et congés payés pour l'extra.",
+      },
+      {
+        titre: 'Tout près',
+        texte: "Nord, Ouest, Sud, Est : les missions et les extras les plus proches d'abord. Le retour assuré passe en tête pour qui n'a pas de voiture.",
+      },
+      {
+        titre: 'Juste pour tout le monde',
+        texte: "L'établissement ne paie que la mise en relation, et rien en cas d'absence. L'extra ne paie jamais rien.",
+      },
+    ],
+    finTitre: 'Par où commencer ?',
   },
   promesse: {
     surtitre: 'Restaurants, hôtels et bars de La Réunion',
@@ -174,7 +230,7 @@ export const textesVitrine = {
   pied: {
     signature: 'Les extras péi, près de chez vous.',
     colonnes: [
-      { titre: 'Restaurateurs', liens: ['Trouver un extra', 'Tarif', "Le contrat d'extra", 'Se connecter'] },
+      { titre: 'Établissements', liens: ['Trouver un extra', 'Tarif', "Le contrat d'extra", 'Se connecter'] },
       { titre: 'Extras', liens: ['Devenir extra', 'Missions près de chez moi', 'Mes droits'] },
       { titre: 'Aide', liens: ['Questions fréquentes', 'Nous écrire', 'bonjour@kivien.re'] },
       { titre: "Télécharger l'app", liens: ['Android', 'iPhone'] },

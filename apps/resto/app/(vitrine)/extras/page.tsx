@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { DEFINITION_SECTEURS, LIBELLES_POSTE, LIBELLES_ZONE, SECTEURS, textesVitrine, ZONES, type Poste } from '@kivien/core';
-import { LogoKivien } from '@/components/vitrine/LogoKivien';
+import { BandeauLancement, EnteteVitrine } from '@/components/vitrine/EnteteVitrine';
+import { PiedVitrine } from '@/components/vitrine/PiedVitrine';
 import { VignettePoste } from '@/components/VignettePoste';
 import { LIENS_VITRINE } from '@/lib/vitrine/liens';
 import v from '../vitrine.module.css';
@@ -25,15 +26,9 @@ export default async function DevenirExtra() {
 
   return (
     <div className={v.page}>
+      <BandeauLancement />
       <section className={s.haut}>
-        <header className={s.entete}>
-          <a href="/" aria-label="Kivien, accueil">
-            <LogoKivien largeur={88} encre="#FBF6EE" pilule="#C2401E" />
-          </a>
-          <a href={LIENS_VITRINE.seConnecter} className={s.lienPro}>
-            {textesVitrine.nav.trouver}
-          </a>
-        </header>
+        <EnteteVitrine />
         <div className={s.heros}>
           <div className={s.texteHaut}>
             <span className={s.surtitre}>{t.surtitre}</span>
@@ -110,6 +105,7 @@ export default async function DevenirExtra() {
         </a>
         <span className={s.legende}>{t.sousBouton}</span>
       </section>
+      <PiedVitrine />
     </div>
   );
 }

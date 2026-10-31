@@ -12,8 +12,8 @@ export const LIENS_VITRINE = {
   telechargerApp: `${URL_APP_EXTRA}/bienvenue`,
   pied: {
     'Trouver un extra': '/inscription/restaurant',
-    Tarif: '#tarif',
-    "Le contrat d'extra": '#contrat',
+    Tarif: '/pro#tarif',
+    "Le contrat d'extra": '/pro#contrat',
     'Se connecter': '/connexion',
     'Devenir extra': '/extras',
     'Missions près de chez moi': `${URL_APP_EXTRA}/bienvenue`,
@@ -33,19 +33,20 @@ export const LIENS_VITRINE = {
 /** Logos des établissements partenaires. Vide : emplacements « Logo partenaire » de la maquette. */
 export const PARTENAIRES: { nom: string; src: string }[] = [];
 
-/** Photos du haut de page (visuels de travail de la maquette, à remplacer par des photos sous licence). */
+/**
+ * Photos du haut de page (visuels de travail, à remplacer par des photos sous licence).
+ * Seulement des métiers où le contrat d'extra est permis : cuisine et salle pour l'instant.
+ */
 export const PHOTOS_HAUT = {
   monte: [
     { src: '/vitrine/cuisine.jpg', alt: 'Cuisine', hauteur: 340 },
-    { src: '/vitrine/aide-a-domicile.jpg', alt: 'Aide à domicile', hauteur: 260 },
-    { src: '/vitrine/menage.jpg', alt: 'Ménage', hauteur: 280 },
+    { src: '/vitrine/salle.jpg', alt: 'Service en salle', hauteur: 280 },
   ],
   descend: [
-    { src: '/vitrine/salle.jpg', alt: 'Service en salle', hauteur: 340 },
-    { src: '/vitrine/batiment.jpg', alt: 'Bâtiment', hauteur: 280 },
-    { src: '/vitrine/nettoyage-auto.jpg', alt: 'Nettoyage auto', hauteur: 260 },
+    { src: '/vitrine/salle.jpg', alt: 'Service en salle', hauteur: 300 },
+    { src: '/vitrine/cuisine.jpg', alt: 'Cuisine', hauteur: 320 },
   ],
 };
 
 /** Photo associée à chaque témoignage, dans l'ordre de textesVitrine.temoignages.liste. */
-export const PHOTOS_TEMOIGNAGES = ['/vitrine/cuisine.jpg', '/vitrine/salle.jpg', '/vitrine/aide-a-domicile.jpg', '/vitrine/batiment.jpg'];
+export const PHOTOS_TEMOIGNAGES = ['/vitrine/cuisine.jpg', '/vitrine/salle.jpg', '/vitrine/cuisine.jpg', '/vitrine/salle.jpg'];

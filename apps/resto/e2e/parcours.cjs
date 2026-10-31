@@ -23,18 +23,29 @@ let pageCourante = null;
   const ok = (t) => console.log('OK  ' + t);
   const capture = async (nom) => CAPTURES && p.screenshot({ path: `${CAPTURES}/${nom}.png`, fullPage: true });
 
-  // Page d'accueil publique : montants tirés des paramètres, témoignages, lettre, accès à l'espace.
+  // Accueil : le concept, deux entrées (établissement, extra).
   await p.goto(URL_SITE + '/');
-  await p.getByRole('heading', { name: /Un extra pour aujourd'hui, environ 20\s%\smoins cher que l'intérim\./ }).waitFor(); ok('accueil public : promesse');
-  await p.getByText(/81,25\s€\sbrut, congés payés compris/).waitFor();
-  await p.getByText(/≈\s63\s€\snet/).waitFor();
-  await p.getByText(/^19,00\s€\sHT$/).waitFor(); ok('accueil public : 6 h au SMIC = 81,25 € brut, ≈ 63 € net, frais 19 € HT');
-  await p.getByText('Environ 20 % moins cher que l’intérim', { exact: false }).first().waitFor(); ok('accueil public : comparaison avec l’intérim');
-  if (await p.getByText(/Serveur|Barman|s'il ne vient pas|embauché/).count()) throw new Error('texte genré sur la page d’accueil');
+  await p.getByRole('heading', { name: 'Les extras péi, près de chez vous.' }).waitFor();
+  await p.getByRole('link', { name: /Je recrute des extras/ }).first().waitFor();
+  await p.getByRole('link', { name: /Je cherche des missions/ }).first().waitFor();
+  await p.getByText('Côté établissement').waitFor();
+  await p.getByText('Côté extra').waitFor(); ok('accueil : concept, deux entrées, comment ça marche des deux côtés');
+  if (await p.locator('img[src*="aide-a-domicile"], img[src*="batiment"], img[src*="menage"], img[src*="nettoyage"]').count()) throw new Error('photo de métier non autorisé');
+  ok('accueil : photos limitées aux métiers autorisés');
+  await capture('accueil-concept');
+  await p.getByRole('link', { name: /Je recrute des extras/ }).first().click();
+  await p.waitForURL(URL_SITE + '/pro');
+
+  // Page des établissements : montants tirés des paramètres, témoignages, lettre, accès à l'espace.
+  await p.getByRole('heading', { name: /Un extra pour aujourd'hui, environ 20\s%\smoins cher que l'intérim\./ }).waitFor(); ok('page pro : promesse, depuis l’accueil');
+  await p.getByText(/81,25\s€\sbrut/).first().waitFor();
+  await p.getByText(/^19,00\s€\sHT$/).waitFor(); ok('page pro : 6 h au SMIC = 81,25 € brut, frais 19 € HT');
+  await p.getByText('Environ 20 % moins cher que l’intérim', { exact: false }).first().waitFor(); ok('page pro : comparaison avec l’intérim');
+  if (await p.getByText(/Serveur|Barman|s'il ne vient pas|embauché/).count()) throw new Error('texte genré sur la page pro');
   await p.getByRole('button', { name: 'Témoignage suivant' }).click();
-  await p.locator('[aria-hidden="false"]', { hasText: 'Je coche mes soirées libres' }).waitFor(); ok('accueil public : témoignage suivant');
+  await p.locator('[aria-hidden="false"]', { hasText: 'Je coche mes soirées libres' }).waitFor(); ok('page pro : témoignage suivant');
   await p.getByRole('button', { name: 'Témoignage précédent' }).click();
-  await p.locator('[aria-hidden="false"]', { hasText: 'il me manquait un commis' }).waitFor(); ok('accueil public : témoignage précédent');
+  await p.locator('[aria-hidden="false"]', { hasText: 'il me manquait un commis' }).waitFor(); ok('page pro : témoignage précédent');
   await p.getByLabel('Votre e-mail').fill('pas-une-adresse');
   await p.getByRole('button', { name: "S'inscrire" }).click();
   await p.getByText('Indiquez une adresse e-mail valide.').waitFor(); ok('lettre : adresse invalide refusée');
@@ -43,7 +54,7 @@ let pageCourante = null;
   await p.getByText('Inscription enregistrée.', { exact: false }).waitFor(); ok('lettre : inscription enregistrée');
   await capture('vitrine');
   await p.getByRole('link', { name: 'Se connecter' }).first().click();
-  await p.waitForURL(URL_SITE + '/connexion'); ok('accueil public : lien Se connecter');
+  await p.waitForURL(URL_SITE + '/connexion'); ok('page pro : lien Se connecter');
 
   // Recrutement des extras : page des annonces, inscription dans l'app.
   await p.goto(URL_SITE + '/extras');
@@ -392,7 +403,7 @@ let pageCourante = null;
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/paiement', '/desinscription?j=demo', '/decouvrir/00000000-0000-0000-0000-000000000001', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/pro', '/paiement', '/desinscription?j=demo', '/decouvrir/00000000-0000-0000-0000-000000000001', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

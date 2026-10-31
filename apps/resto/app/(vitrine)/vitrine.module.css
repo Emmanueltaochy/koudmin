@@ -1067,3 +1067,132 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+/* Accueil : deux entrées (établissement, extra). */
+.choix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+  max-width: 640px;
+}
+.carteChoix {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 12px 12px 40px 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease;
+}
+.carteChoix:hover {
+  transform: translateY(-2px);
+}
+.choix[data-variante='sombre'] .carteChoix {
+  background: rgba(251, 246, 238, 0.08);
+  border: 1px solid rgba(251, 246, 238, 0.2);
+}
+.choix[data-variante='clair'] .carteChoix {
+  background: #ffffff;
+  border: 1px solid #e6dccf;
+}
+.choixTitre {
+  font-family: var(--k-font-titre);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+}
+.choixTexte {
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.9;
+  flex: 1;
+}
+.carteChoix .boutonPiment,
+.boutonClair {
+  height: 48px;
+  padding: 0 24px;
+  margin-top: 4px;
+}
+.boutonClair {
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 700;
+  background: #fbf6ee;
+  color: #211c18;
+}
+.choix[data-variante='clair'] .boutonClair {
+  background: #211c18;
+  color: #ffffff;
+}
+
+/* Accueil : comment ça marche, des deux côtés. */
+.deuxCotes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 16px;
+}
+.carteCote {
+  background: #ffffff;
+  color: #211c18;
+  border-radius: 12px 12px 64px 12px;
+  padding: clamp(24px, 3cqi, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.etapesCote {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.etapesCote li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.etapesCote .numero {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+.carteCote .lienInscription {
+  color: #9e3215;
+}
+
+/* Accueil : fin de page sur fond crème (un seul élément piment par écran). */
+.finChoix {
+  background: #fbf6ee;
+  color: #211c18;
+  align-items: center;
+}
+
+/* En-tête commun : le logo ne rétrécit pas ; boutons resserrés sur les petits téléphones. */
+.entete > a:first-child {
+  display: flex;
+  flex: none;
+}
+@media (max-width: 420px) {
+  .entete {
+    gap: 8px;
+  }
+  .compte {
+    gap: 2px;
+  }
+  .lienConnexion {
+    padding: 0 6px;
+    font-size: 14px;
+  }
+  .connexion {
+    padding: 0 10px;
+    font-size: 14px;
+  }
+}
