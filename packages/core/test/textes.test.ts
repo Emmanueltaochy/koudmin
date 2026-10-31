@@ -143,7 +143,7 @@ describe('page d’accueil', () => {
     expect(l(montantsVitrine(1300, 2500).brut)).toBe('85,80 €');
   });
   it('reprend les textes de la maquette', () => {
-    expect(textesVitrine.promesse.titre).toBe("Un extra pour ce soir, sans passer par l'intérim.");
+    expect(l(textesVitrine.promesse.titre)).toBe("Un extra pour aujourd'hui, environ 20 % moins cher que l'intérim.");
     expect(l(textesVitrine.promesse.confirmation)).toBe('Kévin a dit mi lé la. Arrivée prévue à 18 h.');
     expect(textesVitrine.pied.signature).toBe('Les extras péi, près de chez vous.');
   });

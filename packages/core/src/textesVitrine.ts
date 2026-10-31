@@ -25,10 +25,10 @@ export const textesVitrine = {
   },
   promesse: {
     surtitre: 'Restaurants, hôtels et bars de La Réunion',
-    titre: "Un extra pour ce soir, sans passer par l'intérim.",
+    titre: h("Un extra pour aujourd'hui, environ 20 % moins cher que l'intérim."),
     texte: 'Salle, plonge, commis, bar, réception. Pour ce soir, demain ou samedi.',
     bouton: 'Trouver un extra',
-    sousBouton: "Contrat d'extra rédigé pour vous. Environ 20 % moins cher que l’intérim.",
+    sousBouton: "Contrat d'extra rédigé pour vous, signé en ligne. Rien à payer en cas d'absence.",
     chiffreDelai: h('2 h'),
     legendeDelai: 'notre objectif pour trouver',
     legendeFrais: 'la mise en relation',

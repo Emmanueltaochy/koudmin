@@ -24,7 +24,7 @@ const figtree = localFont({
 
 export const metadata: Metadata = {
   title: { default: 'Kivien · Les extras péi, près de chez vous.', template: '%s · Kivien' },
-  description: "Trouvez un extra pour ce soir à La Réunion, sans passer par l'intérim : restaurants, hôtels, bars. Contrat d'extra rédigé pour vous.",
+  description: "Trouvez un extra pour aujourd'hui à La Réunion, environ 20 % moins cher que l'intérim : restaurants, hôtels, bars. Contrat d'extra rédigé pour vous.",
 };
 
 export const viewport: Viewport = {
