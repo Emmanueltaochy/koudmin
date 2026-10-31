@@ -23,8 +23,8 @@ const figtree = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: 'Kivien · Les extras péi, en 2 heures.', template: '%s · Kivien' },
-  description: 'Un extra trouvé en 2 heures maximum, pour les restaurants, hôtels et bars de La Réunion.',
+  title: { default: 'Kivien · Les extras péi, près de chez vous.', template: '%s · Kivien' },
+  description: "Trouvez un extra pour ce soir à La Réunion, sans passer par l'intérim : restaurants, hôtels, bars. Contrat d'extra rédigé pour vous.",
 };
 
 export const viewport: Viewport = {

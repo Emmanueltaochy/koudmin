@@ -25,7 +25,7 @@ export const textesVitrine = {
   },
   promesse: {
     surtitre: 'Restaurants, hôtels et bars de La Réunion',
-    titre: 'Un extra en 2 heures.',
+    titre: "Un extra pour ce soir, sans passer par l'intérim.",
     texte: 'Salle, plonge, commis, bar, réception. Pour ce soir, demain ou samedi.',
     bouton: 'Trouver un extra',
     sousBouton: "Contrat d'extra rédigé pour vous. Environ 20 % moins cher que l’intérim.",
@@ -172,7 +172,7 @@ export const textesVitrine = {
     erreurReseau: 'Inscription impossible pour le moment. Réessayez dans un instant.',
   },
   pied: {
-    signature: 'Les extras péi, en 2 heures.',
+    signature: 'Les extras péi, près de chez vous.',
     colonnes: [
       { titre: 'Restaurateurs', liens: ['Trouver un extra', 'Tarif', "Le contrat d'extra", 'Se connecter'] },
       { titre: 'Extras', liens: ['Devenir extra', 'Missions près de chez moi', 'Mes droits'] },

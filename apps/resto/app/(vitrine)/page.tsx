@@ -10,7 +10,7 @@ import s from './vitrine.module.css';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: { absolute: 'Kivien · Les extras péi, en 2 heures.' },
+  title: { absolute: 'Kivien · Les extras péi, près de chez vous.' },
 };
 
 const CREME = '#FBF6EE';

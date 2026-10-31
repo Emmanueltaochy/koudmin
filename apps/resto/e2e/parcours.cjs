@@ -25,7 +25,7 @@ let pageCourante = null;
 
   // Page d'accueil publique : montants tirés des paramètres, témoignages, lettre, accès à l'espace.
   await p.goto(URL_SITE + '/');
-  await p.getByRole('heading', { name: 'Un extra en 2 heures.' }).waitFor(); ok('accueil public : promesse');
+  await p.getByRole('heading', { name: "Un extra pour ce soir, sans passer par l'intérim." }).waitFor(); ok('accueil public : promesse');
   await p.getByText(/81,25\s€\sbrut, congés payés compris/).waitFor();
   await p.getByText(/≈\s63\s€\snet/).waitFor();
   await p.getByText(/^19,00\s€\sHT$/).waitFor(); ok('accueil public : 6 h au SMIC = 81,25 € brut, ≈ 63 € net, frais 19 € HT');

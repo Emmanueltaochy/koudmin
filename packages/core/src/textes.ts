@@ -8,7 +8,7 @@ import { formatDuree, formatHeure } from './temps';
  * aucune mention d'âge, formulations neutres en genre. Vérifié par test/textes.test.ts.
  */
 export const textes = {
-  signature: 'Les extras péi, en 2 heures.',
+  signature: 'Les extras péi, près de chez vous.',
   resto: {
     demande: {
       titre: 'Trouver un extra',
