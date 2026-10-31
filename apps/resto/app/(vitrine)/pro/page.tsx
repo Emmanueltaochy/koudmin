@@ -3,7 +3,8 @@ import { montantsVitrine, textesVitrine as t } from '@kivien/core';
 import { BandeauLancement, EnteteVitrine } from '@/components/vitrine/EnteteVitrine';
 import { PhotosDefilantes } from '@/components/vitrine/Photos';
 import { PiedVitrine } from '@/components/vitrine/PiedVitrine';
-import { LIENS_VITRINE, PARTENAIRES, PHOTOS_TEMOIGNAGES } from '@/lib/vitrine/liens';
+import { QuestionsFrequentes } from '@/components/vitrine/QuestionsFrequentes';
+import { LIENS_VITRINE, PARTENAIRES, PHOTOS_TEMOIGNAGES, TEMOIGNAGES_VISIBLES } from '@/lib/vitrine/liens';
 import { parametresPublics } from '@/lib/vitrine/parametres';
 import { Lettre } from '../Lettre';
 import { Temoignages } from '../Temoignages';
@@ -155,6 +156,7 @@ export default async function PourLesEtablissements() {
           </div>
         </section>
 
+        {TEMOIGNAGES_VISIBLES && (
         <section className={s.temoignages}>
           <div className={s.introCentree}>
             <span className={`${s.surtitre} ${s.piment}`}>{t.temoignages.surtitre}</span>
@@ -163,6 +165,7 @@ export default async function PourLesEtablissements() {
           </div>
           <Temoignages photos={PHOTOS_TEMOIGNAGES} />
         </section>
+        )}
 
         <section id="garanties" className={s.garanties}>
           <div className={s.intro}>
@@ -210,6 +213,8 @@ export default async function PourLesEtablissements() {
             <span className={`${s.legende} ${s.galet}`}>{m.noteTarif}</span>
           </div>
         </section>
+
+        <QuestionsFrequentes />
 
         <section className={s.lettre} aria-label={t.lettre.titre}>
           <div className={s.lettreIntro}>

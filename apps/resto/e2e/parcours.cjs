@@ -42,10 +42,11 @@ let pageCourante = null;
   await p.getByText(/^19,00\s€\sHT$/).waitFor(); ok('page pro : 6 h au SMIC = 81,25 € brut, frais 19 € HT');
   await p.getByText('Environ 20 % moins cher que l’intérim', { exact: false }).first().waitFor(); ok('page pro : comparaison avec l’intérim');
   if (await p.getByText(/Serveur|Barman|s'il ne vient pas|embauché/).count()) throw new Error('texte genré sur la page pro');
-  await p.getByRole('button', { name: 'Témoignage suivant' }).click();
-  await p.locator('[aria-hidden="false"]', { hasText: 'Je coche mes soirées libres' }).waitFor(); ok('page pro : témoignage suivant');
-  await p.getByRole('button', { name: 'Témoignage précédent' }).click();
-  await p.locator('[aria-hidden="false"]', { hasText: 'il me manquait un commis' }).waitFor(); ok('page pro : témoignage précédent');
+  if (await p.getByRole('button', { name: 'Témoignage suivant' }).count()) throw new Error('témoignages d’exemple affichés');
+  ok('page pro : témoignages d’exemple masqués');
+  await p.getByRole('heading', { name: 'Vous vous demandez peut-être…' }).waitFor();
+  await p.getByText('Qui est l’employeur de l’extra ?').click();
+  await p.getByText('Kivien trouve la personne et prépare le contrat', { exact: false }).first().waitFor(); ok('page pro : questions fréquentes dépliables');
   await p.getByLabel('Votre e-mail').fill('pas-une-adresse');
   await p.getByRole('button', { name: "S'inscrire" }).click();
   await p.getByText('Indiquez une adresse e-mail valide.').waitFor(); ok('lettre : adresse invalide refusée');
@@ -55,6 +56,23 @@ let pageCourante = null;
   await capture('vitrine');
   await p.getByRole('link', { name: 'Se connecter' }).first().click();
   await p.waitForURL(URL_SITE + '/connexion'); ok('page pro : lien Se connecter');
+
+  // Pages légales, questions fréquentes et présentation, reliées depuis le pied de page.
+  for (const [chemin, titre] of [
+    ['/mentions-legales', 'Mentions légales'],
+    ['/conditions', 'Conditions générales d’utilisation et de vente'],
+    ['/confidentialite', 'Politique de confidentialité'],
+    ['/cookies', 'Cookies et stockage'],
+    ['/questions-frequentes', 'Vous vous demandez peut-être…'],
+    ['/qui-sommes-nous', 'Qui sommes-nous'],
+  ]) {
+    await p.goto(URL_SITE + chemin);
+    await p.getByRole('heading', { level: 1, name: titre }).waitFor();
+    if (!(await p.locator(`footer a[href="${chemin}"]`).count())) throw new Error('lien absent du pied : ' + chemin);
+  }
+  await p.goto(URL_SITE + '/mentions-legales');
+  await p.getByText('884 270 604 00025', { exact: false }).first().waitFor();
+  ok('pages légales, questions fréquentes, qui sommes-nous : en ligne et reliées au pied de page');
 
   // Recrutement des extras : page des annonces, inscription dans l'app.
   await p.goto(URL_SITE + '/extras');
@@ -142,7 +160,8 @@ let pageCourante = null;
   await p.getByText("Choisissez le secteur d'activité.").waitFor();
   await p.getByText("Choisissez l'adresse dans la liste.").waitFor();
   await p.getByText('Vérifiez le numéro SIRET : 14 chiffres.').waitFor();
-  await p.getByText('Choisissez un mot de passe de 8 caractères minimum.').waitFor(); ok('inscription : champs obligatoires');
+  await p.getByText('Choisissez un mot de passe de 8 caractères minimum.').waitFor();
+  await p.getByText('Cochez la case pour accepter les conditions générales.').waitFor(); ok('inscription : champs obligatoires, conditions générales à accepter');
   await p.locator('#etablissement').fill('Le Cari Péi');
   await p.locator('#secteur').selectOption('hotellerie_restauration');
   await p.locator('#adresse').fill('22 rue Labourdonnais Saint-Paul');
@@ -156,6 +175,8 @@ let pageCourante = null;
   await p.locator('#siret').fill('73282932000074');
   await p.locator('#siret').blur();
   if ((await p.locator('#siret').inputValue()) !== '732 829 320 00074') throw new Error('SIRET non mis en forme');
+  await p.getByRole('checkbox').check();
+  if (await p.getByText('Cochez la case pour accepter les conditions générales.').count()) throw new Error('erreur CGU restée affichée');
   await capture('inscription');
   await p.getByRole('button', { name: 'Créer mon compte' }).click();
   await p.waitForURL(URL_SITE + '/espace'); ok('inscription : compte créé, espace ouvert');
@@ -403,7 +424,7 @@ let pageCourante = null;
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });
-    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/pro', '/paiement', '/desinscription?j=demo', '/decouvrir/00000000-0000-0000-0000-000000000001', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
+    for (const u of ['/', '/extras', '/admin', '/compte', '/mot-de-passe-oublie', '/email-confirme', '/inscription', '/inscription/restaurant', '/connexion', '/invitation', '/planning', '/etablissements', '/utilisateurs', '/pro', '/paiement', '/desinscription?j=demo', '/mentions-legales', '/conditions', '/confidentialite', '/cookies', '/questions-frequentes', '/qui-sommes-nous', '/decouvrir/00000000-0000-0000-0000-000000000001', '/demande', '/historique', '/demandes/d001', '/demandes/d001/contrat?affectation=x']) {
       await p.goto(URL_SITE + u);
       await p.waitForTimeout(400);
       const deborde = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

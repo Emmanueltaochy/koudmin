@@ -1,16 +1,19 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   normaliserMobileReunion,
+  textesAcceptation,
   textesEcrans,
+  VERSION_CGU,
   validerInscription,
   validerMotDePasse,
   type SaisieInscription,
 } from '@kivien/core';
 import { ErreurReseau, source } from '../donnees';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
+import { CaseACocher } from '../ui/CaseACocher';
 import { ChampTexte } from '../ui/ChampTexte';
 import { Choix } from '../ui/Choix';
 import { ChoixCommune } from '../ui/ChoixCommune';
@@ -31,20 +34,22 @@ export default function Bienvenue() {
   const profilSeul = etapeUrl === 'profil';
   const [saisie, setSaisie] = useState<SaisieInscription>({ prenom: '', nom: '', telephone: '', commune: '', aVoiture: null });
   const [motDePasse, setMotDePasse] = useState('');
-  const [erreurs, setErreurs] = useState<Partial<Record<keyof SaisieInscription | 'motDePasse', string>>>({});
+  const [cgu, setCgu] = useState(false);
+  const [erreurs, setErreurs] = useState<Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>>>({});
   const [erreurEnvoi, setErreurEnvoi] = useState<string | null>(null);
   // Compte créé mais profil pas encore enregistré (coupure réseau) : on ne recrée pas le compte.
   const [compteCree, setCompteCree] = useState(profilSeul);
   const [envoi, setEnvoi] = useState(false);
 
   const [tente, setTente] = useState(false);
-  const valider = (si: SaisieInscription, mdp: string) => {
-    const e: Partial<Record<keyof SaisieInscription | 'motDePasse', string>> = validerInscription(si);
+  const valider = (si: SaisieInscription, mdp: string, accepte = cgu) => {
+    const e: Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>> = validerInscription(si);
     if (profilSeul) delete e.telephone;
     else {
       const m = validerMotDePasse(mdp);
       if (m) e.motDePasse = m;
     }
+    if (!accepte) e.cgu = textesAcceptation.erreurExtra;
     return e;
   };
   // Après une première tentative, les erreurs disparaissent au fil de la correction.
@@ -56,6 +61,11 @@ export default function Bienvenue() {
   const majMotDePasse = (v: string) => {
     setMotDePasse(v);
     if (tente) setErreurs(valider(saisie, v));
+  };
+
+  const cocherCgu = (v: boolean) => {
+    setCgu(v);
+    if (tente) setErreurs(valider(saisie, motDePasse, v));
   };
 
   async function continuer() {
@@ -78,6 +88,7 @@ export default function Bienvenue() {
         setCompteCree(true);
       }
       await source.inscrire({ prenom: saisie.prenom, nom: saisie.nom, telephone: e164 ?? '', commune: saisie.commune, aVoiture: !!saisie.aVoiture });
+      await source.accepterCgu(VERSION_CGU).catch(() => undefined);
       router.replace('/');
       return;
     } catch (err) {
@@ -143,6 +154,15 @@ export default function Bienvenue() {
           <Texte variante={erreurs.aVoiture ? 'legendeForte' : 'legende'} couleur={erreurs.aVoiture ? 'braise' : 'galet'}>
             {erreurs.aVoiture ?? ti.voitureAide}
           </Texte>
+        </View>
+        <View style={styles.bloc}>
+          <CaseACocher cochee={cgu} onChange={cocherCgu} libelle={textesAcceptation.extra} erreur={!!erreurs.cgu} />
+          <Lien libelle={textesAcceptation.lienConditions} onPress={() => void Linking.openURL('https://kivien.re/conditions')} variante="legende" couleur="galet" />
+          {erreurs.cgu ? (
+            <Texte variante="legendeForte" couleur="braise">
+              {erreurs.cgu}
+            </Texte>
+          ) : null}
         </View>
         {erreurEnvoi ? <Texte variante="legendeForte" couleur="braise" accessibilityLiveRegion="polite">{erreurEnvoi}</Texte> : null}
         <BoutonPrincipal libelle={tc.creerCompte} onPress={continuer} envoi={envoi} />

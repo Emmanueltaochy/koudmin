@@ -7,6 +7,7 @@ import {
   formatSiret,
   normaliserEmail,
   normaliserSiret,
+  textesAcceptation,
   textesEcrans,
   validerInscriptionResto,
   type ErreursInscriptionResto,
@@ -19,7 +20,7 @@ import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import type { AdresseGeo } from '@/lib/adresse';
-import { aUnEtablissement, changerEmail, connecte, inscrireRestaurateur } from '@/lib/auth';
+import { accepterCgu, aUnEtablissement, changerEmail, connecte, inscrireRestaurateur } from '@/lib/auth';
 import { donneesFictives, source } from '@/lib/donnees';
 import { noterInscription } from '@/lib/suivi';
 import s from '../inscription.module.css';
@@ -33,6 +34,7 @@ type Erreurs = ErreursInscriptionResto & { general?: string };
 export default function InscriptionRestaurant() {
   const router = useRouter();
   const [saisie, setSaisie] = useState({ etablissement: '', secteur: '' as Secteur | '', adresse: '', siret: '', telephone: '', email: '', motDePasse: '' });
+  const [cgu, setCgu] = useState(false);
   const [adresseGeo, setAdresseGeo] = useState<AdresseGeo | null>(null);
   const [erreurs, setErreurs] = useState<Erreurs>({});
   const [tente, setTente] = useState(false);
@@ -49,7 +51,7 @@ export default function InscriptionRestaurant() {
     })().catch(() => undefined);
   }, [router]);
 
-  const pourValidation = (v: typeof saisie, geo: AdresseGeo | null): SaisieInscriptionResto => ({
+  const pourValidation = (v: typeof saisie, geo: AdresseGeo | null, accepte = cgu): SaisieInscriptionResto => ({
     etablissement: v.etablissement,
     secteur: v.secteur,
     adresseChoisie: !!geo && geo.libelle === v.adresse,
@@ -57,12 +59,18 @@ export default function InscriptionRestaurant() {
     telephone: v.telephone,
     email: v.email,
     motDePasse: v.motDePasse,
+    cgu: accepte,
   });
   const modifier = (m: Partial<typeof saisie>, geo: AdresseGeo | null = adresseGeo) => {
     const suivante = { ...saisie, ...m };
     setSaisie(suivante);
     // Après une première tentative, les erreurs disparaissent au fil de la correction.
     if (tente) setErreurs(validerInscriptionResto(pourValidation(suivante, geo), compteOuvert));
+  };
+
+  const cocherCgu = (v: boolean) => {
+    setCgu(v);
+    if (tente) setErreurs(validerInscriptionResto(pourValidation(saisie, adresseGeo, v), compteOuvert));
   };
 
   async function soumettre(e: FormEvent) {
@@ -85,6 +93,7 @@ export default function InscriptionRestaurant() {
         compteOuvert,
       );
       if (r === 'ok') {
+        await accepterCgu().catch(() => undefined);
         // Lien de confirmation envoyé sur l'adresse ; l'inscription ne dépend pas de son envoi.
         if (!compteOuvert) await changerEmail(normaliserEmail(saisie.email)).catch(() => undefined);
         // Venu d'un e-mail de prospection : le compte est rattaché à la campagne.
@@ -224,6 +233,22 @@ export default function InscriptionRestaurant() {
             </div>
           </>
         )}
+        <div className={s.bloc}>
+          <label className={s.case}>
+            <input type="checkbox" checked={cgu} onChange={(e) => cocherCgu(e.target.checked)} disabled={envoi} aria-invalid={!!erreurs.cgu} />
+            <span className={ui.corps}>
+              {textesAcceptation.resto}{' '}
+              <a href="/conditions" target="_blank" rel="noopener" className={ui.lien}>
+                {textesAcceptation.lienConditions}
+              </a>
+            </span>
+          </label>
+          {erreurs.cgu && (
+            <p className={ui.messageErreur} role="alert">
+              {erreurs.cgu}
+            </p>
+          )}
+        </div>
         {erreurs.general && (
           <p className={ui.messageErreur} role="alert">
             {erreurs.general}

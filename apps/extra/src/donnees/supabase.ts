@@ -295,6 +295,9 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       if (!data.session) throw new Error('Compte créé sans session : vérification du numéro requise');
       return 'ok';
     },
+    async accepterCgu(version) {
+      verifier(await client.rpc('accepter_cgu', { p_version: version }));
+    },
     async inscrire(i) {
       const c = trouverCommune(i.commune);
       if (!c) throw new Error('Commune inconnue');

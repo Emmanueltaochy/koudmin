@@ -232,7 +232,7 @@ export const textesVitrine = {
     colonnes: [
       { titre: 'Établissements', liens: ['Trouver un extra', 'Tarif', "Le contrat d'extra", 'Se connecter'] },
       { titre: 'Extras', liens: ['Devenir extra', 'Missions près de chez moi', 'Mes droits'] },
-      { titre: 'Aide', liens: ['Questions fréquentes', 'Nous écrire', 'bonjour@kivien.re'] },
+      { titre: 'Aide', liens: ['Questions fréquentes', 'Qui sommes-nous', 'Nous écrire', 'bonjour@kivien.re'] },
       { titre: "Télécharger l'app", liens: ['Android', 'iPhone'] },
     ],
     copyright: '© Kivien 2026 · Saint-Denis · Saint-Paul · Saint-Pierre · Le Tampon',

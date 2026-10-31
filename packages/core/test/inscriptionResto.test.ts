@@ -8,6 +8,7 @@ import {
   postesDuSecteur,
   SECTEURS,
   siretValide,
+  textesAcceptation,
   validerInscriptionResto,
 } from '../src';
 
@@ -43,6 +44,12 @@ describe('inscription restaurateur', () => {
   });
   it('ne redemande pas mobile et mot de passe quand le compte est déjà ouvert', () => {
     expect(validerInscriptionResto({ ...ok, telephone: '', email: '', motDePasse: '' }, true)).toEqual({});
+  });
+
+  it('demande d’accepter les conditions générales', () => {
+    expect(validerInscriptionResto({ ...ok, cgu: false }).cgu).toBe(textesAcceptation.erreur);
+    expect(validerInscriptionResto({ ...ok, cgu: true })).toEqual({});
+    expect(validerInscriptionResto({ ...ok, cgu: false }, true).cgu).toBe(textesAcceptation.erreur);
   });
 });
 

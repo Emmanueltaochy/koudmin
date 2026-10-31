@@ -185,6 +185,8 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Créer mon compte').click();
   await p.getByText('Indique ton prénom.').waitFor(); await etape('inscription : champs obligatoires');
   await p.getByText('Choisis un mot de passe de 8 caractères minimum.').waitFor(); await etape('inscription : mot de passe obligatoire');
+  await p.getByText('Coche la case pour accepter les conditions générales.').waitFor(); await etape('inscription : conditions générales à accepter');
+  await p.getByRole('checkbox').click();
   await p.getByLabel('Prénom').fill('Johan');
   await p.getByLabel('Nom', { exact: true }).fill('Grondin');
   await p.getByLabel('Téléphone').fill('0693 00 00 01');

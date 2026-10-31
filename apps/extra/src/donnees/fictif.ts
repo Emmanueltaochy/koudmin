@@ -188,6 +188,7 @@ export function sourceFictive(): SourceDonnees {
       await attendre(600);
       return tel.endsWith('01') ? 'dejaInscrit' : 'ok';
     },
+    async accepterCgu() {},
     async inscrire(i) {
       profil = { prenom: i.prenom, nom: i.nom, telephone: i.telephone, commune: i.commune, aVoiture: i.aVoiture, competences: [], experience: null, langues: [], presentation: '' };
       photo = null;

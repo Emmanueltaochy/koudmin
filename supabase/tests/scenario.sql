@@ -445,3 +445,13 @@ select nom, categorie, email, source_email from admin_prospects() where nom = 'T
 select admin_ajouter_prospect('  ', 'bar', null, null, null);
 \set ON_ERROR_STOP 1
 reset role;
+\echo '--- Conditions générales : acceptation enregistrée une fois par version'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select accepter_cgu('2026-11-01');
+select accepter_cgu('2026-11-01');
+select version from acceptations_cgu;
+\set ON_ERROR_STOP 0
+select accepter_cgu('version-libre');
+\set ON_ERROR_STOP 1
+reset role;

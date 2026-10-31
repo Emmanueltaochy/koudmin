@@ -122,6 +122,8 @@ export interface SourceDonnees {
   creerCompte(telephoneE164: string, motDePasse: string): Promise<'ok' | 'dejaInscrit' | 'attente'>;
   /** Crée le profil, une fois la session ouverte. */
   inscrire(i: Inscription): Promise<void>;
+  /** Note l'acceptation des conditions générales (version donnée) pour le compte connecté. */
+  accepterCgu(version: string): Promise<void>;
   deconnecter(): Promise<void>;
 }
 

@@ -4,6 +4,7 @@ import { estSecteur } from './secteurs';
 import { siretValide } from './siret';
 import { normaliserMobileReunion } from './telephone';
 import { textesEcrans } from './textesEcrans';
+import { textesAcceptation } from './textesLegal';
 
 const ti = textesEcrans.resto.inscription;
 
@@ -18,6 +19,8 @@ export interface SaisieInscriptionResto {
   /** Pour le mot de passe oublié et les nouvelles des missions (confirmée par lien). */
   email: string;
   motDePasse: string;
+  /** Conditions générales acceptées (absent quand on ajoute un établissement depuis l'espace). */
+  cgu?: boolean;
 }
 
 export type ErreursInscriptionResto = Partial<Record<keyof SaisieInscriptionResto, string>>;
@@ -30,6 +33,7 @@ export function validerInscriptionResto(s: SaisieInscriptionResto, compteOuvert 
   if (!estSecteur(s.secteur)) e.secteur = ti.erreurSecteur;
   if (!s.adresseChoisie) e.adresseChoisie = ti.erreurAdresse;
   if (!siretValide(s.siret)) e.siret = ti.erreurSiret;
+  if (s.cgu === false) e.cgu = textesAcceptation.erreur;
   if (!compteOuvert) {
     if (!normaliserMobileReunion(s.telephone)) e.telephone = textesEcrans.connexion.erreurTelephone;
     if (!emailValide(s.email)) e.email = textesEcrans.resto.compte.erreurEmail;

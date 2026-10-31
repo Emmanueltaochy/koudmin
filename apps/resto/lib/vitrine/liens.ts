@@ -17,18 +17,22 @@ export const LIENS_VITRINE = {
     'Se connecter': '/connexion',
     'Devenir extra': '/extras',
     'Missions près de chez moi': `${URL_APP_EXTRA}/bienvenue`,
-    'Mes droits': '#',
-    'Questions fréquentes': '#',
+    'Mes droits': '/conditions#4',
+    'Questions fréquentes': '/questions-frequentes',
+    'Qui sommes-nous': '/qui-sommes-nous',
     'Nous écrire': 'mailto:bonjour@kivien.re',
     'bonjour@kivien.re': 'mailto:bonjour@kivien.re',
     Android: '#',
     iPhone: '#',
-    'Mentions légales': '#',
-    CGV: '#',
-    Confidentialité: '#',
-    Cookies: '#',
+    'Mentions légales': '/mentions-legales',
+    CGV: '/conditions',
+    Confidentialité: '/confidentialite',
+    Cookies: '/cookies',
   } as Record<string, string>,
 } as const;
+
+/** Témoignages : masqués tant qu'ils ne sont pas réels (accord écrit des personnes). */
+export const TEMOIGNAGES_VISIBLES = false;
 
 /** Logos des établissements partenaires. Vide : emplacements « Logo partenaire » de la maquette. */
 export const PARTENAIRES: { nom: string; src: string }[] = [];

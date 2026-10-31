@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  aPropos,
+  conditionsGenerales,
+  confidentialite,
+  cookies,
+  mentionsLegales,
+  questionsFrequentes,
+  textesAcceptation,
   champsACompleter,
   confirmationExtra,
   detailCalculExtra,
@@ -46,6 +53,7 @@ const corpus = [
   ...tousLesTextes(textes),
   ...tousLesTextes(textesEcrans),
   ...tousLesTextes(textesVitrine),
+  ...tousLesTextes([mentionsLegales, conditionsGenerales, confidentialite, cookies, questionsFrequentes, aPropos, textesAcceptation]),
   ...tousLesTextes(montantsVitrine(1231, 2500)),
   ...tousLesTextes(LIBELLES_POSTE),
   ...tousLesTextes(LIBELLES_EXPERIENCE),

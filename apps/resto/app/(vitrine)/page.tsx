@@ -3,6 +3,7 @@ import { textesVitrine as t } from '@kivien/core';
 import { BandeauLancement, EnteteVitrine } from '@/components/vitrine/EnteteVitrine';
 import { PhotosDefilantes } from '@/components/vitrine/Photos';
 import { PiedVitrine } from '@/components/vitrine/PiedVitrine';
+import { QuestionsFrequentes } from '@/components/vitrine/QuestionsFrequentes';
 import { LIENS_VITRINE } from '@/lib/vitrine/liens';
 import { Lettre } from './Lettre';
 import s from './vitrine.module.css';
@@ -104,6 +105,8 @@ export default function Accueil() {
             ))}
           </div>
         </section>
+
+        <QuestionsFrequentes />
 
         <section className={`${s.etapes} ${s.finChoix}`} aria-labelledby="commencer">
           <div className={s.introCentree}>

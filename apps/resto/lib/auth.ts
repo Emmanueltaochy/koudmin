@@ -1,6 +1,6 @@
 'use client';
 
-import { normaliserMobileReunion, type Secteur } from '@kivien/core';
+import { normaliserMobileReunion, VERSION_CGU, type Secteur } from '@kivien/core';
 import { donneesFictives, source } from './donnees';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AdresseGeo } from './adresse';
@@ -64,6 +64,13 @@ export async function inscrireRestaurateur(
   }
   const { resultat } = await source().ajouterEtablissement({ nom: i.etablissement, siret: i.siret, secteur: i.secteur, adresse: i.adresse });
   return resultat;
+}
+
+/** Note l'acceptation des conditions générales (version en vigueur) pour le compte connecté. */
+export async function accepterCgu(): Promise<void> {
+  if (donneesFictives) return;
+  const { error } = await client()!.rpc('accepter_cgu', { p_version: VERSION_CGU });
+  if (error) throw error;
 }
 
 /** Compte connecté sans établissement (inscription interrompue) : l'inscription reprend à l'établissement. */
