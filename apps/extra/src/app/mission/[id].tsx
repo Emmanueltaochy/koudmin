@@ -19,6 +19,7 @@ import { BarreAction } from '../../mission/BarreAction';
 import { CarteInfos } from '../../mission/CarteInfos';
 import { EcranDesistement } from '../../mission/EcranDesistement';
 import { FeuillePrise } from '../../mission/FeuillePrise';
+import { Pointage } from '../../mission/Pointage';
 import { useDetailMission, type DemoDetail } from '../../mission/useDetailMission';
 import { CarteSquelette } from '../../missions/CarteSquelette';
 import { EtatPlein } from '../../ui/EtatPlein';
@@ -32,7 +33,12 @@ function retourListe() {
 
 function BoutonRetour({ onPress }: { onPress: () => void }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Retour" onPress={onPress} style={styles.retour}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Retour"
+      onPress={onPress}
+      style={styles.retour}
+    >
       <ChevronLeft size={24} color={couleurs.basalte} strokeWidth={2} />
     </Pressable>
   );
@@ -138,7 +144,17 @@ export default function DetailMission() {
           {libellePoste(m.poste, m.intitule)} · {m.restaurant}
         </Texte>
 
-        <CarteInfos mission={m} lieu={d.detail?.lieu ?? null} position={d.detail?.position ?? null} descriptionPoste={d.detail?.descriptionPoste ?? null} tenue={d.detail?.tenue ?? null} />
+        <CarteInfos
+          mission={m}
+          lieu={d.detail?.lieu ?? null}
+          position={d.detail?.position ?? null}
+          descriptionPoste={d.detail?.descriptionPoste ?? null}
+          tenue={d.detail?.tenue ?? null}
+        />
+
+        {etat.nom === 'done' && (
+          <Pointage demandeId={id} jour={m.jour} debut={m.debut} fin={m.fin} />
+        )}
 
         {etat.nom !== 'done' && (
           <View style={styles.contrat}>
@@ -163,7 +179,11 @@ export default function DetailMission() {
       />
 
       {etat.nom === 'taken' && (
-        <FeuillePrise missionsRestantes={d.missionsRestantes} quand={quand} onVoirMissions={retourListe} />
+        <FeuillePrise
+          missionsRestantes={d.missionsRestantes}
+          quand={quand}
+          onVoirMissions={retourListe}
+        />
       )}
 
       {(etat.nom === 'cancel' || etat.nom === 'liberation') && (
@@ -209,7 +229,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: couleurs.basalte,
   },
-  contrat: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4, paddingBottom: 16 },
+  contrat: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'flex-start',
+    paddingHorizontal: 4,
+    paddingBottom: 16,
+  },
   iconeContrat: { marginTop: 3 },
   flex: { flex: 1 },
   squelettes: { paddingHorizontal: 16, gap: 16 },

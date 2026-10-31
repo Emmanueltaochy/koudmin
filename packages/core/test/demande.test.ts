@@ -6,6 +6,9 @@ import {
   saisieParDefaut,
   validerDemande,
   type SaisieDemande,
+  joursRecurrents,
+  legendeRepetition,
+  SEMAINES_MAX,
 } from '../src';
 import { l, SMIC } from './aide';
 
@@ -24,7 +27,9 @@ describe('montants saisis', () => {
     ['12,31 €', 1231],
     [' 13,50 ', 1350],
   ])('« %s » → %i', (s, c) => expect(lireMontant(s)).toBe(c));
-  it.each(['', 'abc', '12,345', '-12', '12,31,2'])('refuse « %s »', (s) => expect(lireMontant(s)).toBeNull());
+  it.each(['', 'abc', '12,345', '-12', '12,31,2'])('refuse « %s »', (s) =>
+    expect(lireMontant(s)).toBeNull(),
+  );
   it('préremplit au format français', () => expect(montantSaisie(1231)).toBe('12,31'));
 });
 
@@ -33,7 +38,9 @@ describe('validation de la demande', () => {
     const s = saisieParDefaut('2026-10-29', SMIC);
     expect(s.retourAssure).toBe(false);
     expect([s.jour, s.debut, s.fin, s.taux]).toEqual(['2026-10-29', '18:00', '00:00', '12,31']);
-    expect(validerDemande(s, SMIC, maintenant)).toEqual({ adresse: "Indiquez l'adresse du service." });
+    expect(validerDemande(s, SMIC, maintenant)).toEqual({
+      adresse: "Indiquez l'adresse du service.",
+    });
   });
 
   it('accepte une demande complète', () => {
@@ -51,7 +58,9 @@ describe('validation de la demande', () => {
   it('refuse un horaire déjà commencé ce jour-là, accepte le lendemain', () => {
     const tard = { jour: '2026-10-29', minute: 19 * 60 };
     expect(validerDemande(valide(), SMIC, tard).horaires).toBe('Cet horaire est déjà passé.');
-    expect(validerDemande({ ...valide(), jour: '2026-10-30' }, SMIC, tard).horaires).toBeUndefined();
+    expect(
+      validerDemande({ ...valide(), jour: '2026-10-30' }, SMIC, tard).horaires,
+    ).toBeUndefined();
   });
 
   it('refuse début = fin et les heures illisibles', () => {
@@ -69,15 +78,42 @@ describe('validation de la demande', () => {
     const libre = { ...valide(), poste: 'autre' as const };
     expect(validerDemande(libre, SMIC, maintenant).intitule).toBe('Indiquez le poste.');
     expect(validerDemande({ ...libre, intitule: 'Voiturier' }, SMIC, maintenant)).toEqual({});
-    expect(validerDemande({ ...libre, intitule: 'x'.repeat(61) }, SMIC, maintenant).intitule).toBeDefined();
-    expect(validerDemande({ ...libre, intitule: 'Voiturier', descriptionPoste: 'x'.repeat(501) }, SMIC, maintenant).descriptionPoste).toBeDefined();
+    expect(
+      validerDemande({ ...libre, intitule: 'x'.repeat(61) }, SMIC, maintenant).intitule,
+    ).toBeDefined();
+    expect(
+      validerDemande(
+        { ...libre, intitule: 'Voiturier', descriptionPoste: 'x'.repeat(501) },
+        SMIC,
+        maintenant,
+      ).descriptionPoste,
+    ).toBeDefined();
     // Poste de la liste : l'intitulé n'est pas demandé.
-    expect(validerDemande({ ...valide(), intitule: '' }, SMIC, maintenant).intitule).toBeUndefined();
+    expect(
+      validerDemande({ ...valide(), intitule: '' }, SMIC, maintenant).intitule,
+    ).toBeUndefined();
   });
 
   it('borne le nombre d’extras et les consignes', () => {
     expect(validerDemande({ ...valide(), nbExtras: 0 }, SMIC, maintenant).nbExtras).toBeDefined();
     expect(validerDemande({ ...valide(), nbExtras: 11 }, SMIC, maintenant).nbExtras).toBeDefined();
-    expect(validerDemande({ ...valide(), consignes: 'x'.repeat(501) }, SMIC, maintenant).consignes).toBeDefined();
+    expect(
+      validerDemande({ ...valide(), consignes: 'x'.repeat(501) }, SMIC, maintenant).consignes,
+    ).toBeDefined();
+  });
+});
+
+describe('mission répétée chaque semaine', () => {
+  it('donne le même jour de la semaine, 8 semaines au plus', () => {
+    expect(joursRecurrents('2026-11-03', 3)).toEqual(['2026-11-03', '2026-11-10', '2026-11-17']);
+    expect(joursRecurrents('2026-11-03', 1)).toEqual(['2026-11-03']);
+    expect(joursRecurrents('2026-11-03', 20)).toHaveLength(SEMAINES_MAX);
+    expect(joursRecurrents('2026-12-29', 2)).toEqual(['2026-12-29', '2027-01-05']);
+  });
+  it('résume la répétition', () => {
+    expect(legendeRepetition('2026-11-03', 1)).toBe('Une seule mission, ce jour-là.');
+    expect(legendeRepetition('2026-11-03', 4)).toBe(
+      '4 missions, chaque mardi jusqu’au mardi 24 novembre. Une demande par semaine, chacune avec son contrat.',
+    );
   });
 });

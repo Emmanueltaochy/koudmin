@@ -26,7 +26,6 @@ export function choisirEtablissement(id: string) {
   ecouteurs.forEach((f) => f());
 }
 
-
 /** Choix retenu (stockage ou mémoire de la page), parmi les identifiants permis. */
 export function resoudreEtablissement<T extends { id: string }>(liste: T[]): T {
   if (!liste.length) throw new Error('Aucun établissement');

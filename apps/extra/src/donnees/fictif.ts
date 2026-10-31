@@ -131,6 +131,7 @@ const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Démonstration : adresse e-mail du compte. */
 let alertesDemo = true;
+const pointagesDemo = new Map<string, { arriveeLe: string | null; departLe: string | null }>();
 let emailDemo: { email: string | null; enAttente: string | null } = {
   email: null,
   enAttente: null,
@@ -208,6 +209,20 @@ export function sourceFictive(): SourceDonnees {
     },
     async emailDuCompte() {
       return emailDemo;
+    },
+    async monPointage(id) {
+      return pointagesDemo.get(id) ?? null;
+    },
+    async pointer(id, moment) {
+      await attendre(400);
+      const p = pointagesDemo.get(id) ?? { arriveeLe: null, departLe: null };
+      const maintenant = new Date().toISOString();
+      const suivant =
+        moment === 'arrivee'
+          ? { ...p, arriveeLe: p.arriveeLe ?? maintenant }
+          : { ...p, departLe: p.departLe ?? maintenant };
+      pointagesDemo.set(id, suivant);
+      return suivant;
     },
     async alertesEmail() {
       return alertesDemo;

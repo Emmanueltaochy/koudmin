@@ -5,7 +5,13 @@ export function agregerFavoris(demandes: readonly DemandeSuivi[]): Favori[] {
   const parExtra = new Map<string, Favori & { favori: boolean }>();
   for (const d of demandes)
     for (const e of d.extras) {
-      const f = parExtra.get(e.extraId) ?? { extraId: e.extraId, prenom: e.prenom, nom: e.nom, missions: 0, favori: false };
+      const f = parExtra.get(e.extraId) ?? {
+        extraId: e.extraId,
+        prenom: e.prenom,
+        nom: e.nom,
+        missions: 0,
+        favori: false,
+      };
       f.missions += e.statut === 'terminee' ? 1 : 0;
       f.favori ||= e.favori;
       parExtra.set(e.extraId, f);

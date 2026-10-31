@@ -530,3 +530,32 @@ begin
   assert programmer_rappels() = 0, 'rappels programmés une seule fois';
 end $$;
 select type, count(*) from notifications_email group by type order by type;
+\echo '--- Pointage : trop tôt refusé, puis arrivée et départ ; badges de confiance'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+\set ON_ERROR_STOP 0
+select * from pointer('00000000-0000-0000-0000-00000000d0a1', 'arrivee');
+\set ON_ERROR_STOP 1
+reset role;
+update demandes set jour = ((now() - interval '10 minutes') at time zone 'Indian/Reunion')::date,
+  debut = (extract(hour from (now() - interval '10 minutes') at time zone 'Indian/Reunion') * 60
+         + extract(minute from (now() - interval '10 minutes') at time zone 'Indian/Reunion'))::smallint,
+  fin = ((extract(hour from (now() - interval '10 minutes') at time zone 'Indian/Reunion') * 60
+         + extract(minute from (now() - interval '10 minutes') at time zone 'Indian/Reunion'))::integer + 240) % 1440
+ where id = '00000000-0000-0000-0000-00000000d0a1';
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select arrivee_le is not null as arrivee, depart_le is null as pas_de_depart from pointer('00000000-0000-0000-0000-00000000d0a1', 'arrivee');
+select arrivee_le is not null and depart_le is not null as pointe from pointer('00000000-0000-0000-0000-00000000d0a1', 'depart');
+select depart_le is not null as depart from mon_pointage('00000000-0000-0000-0000-00000000d0a1');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select count(*) as pointages_vus from pointages;
+select missions >= 0 as ok, dossier_complet from confiance_extras('00000000-0000-0000-0000-00000000d0a1');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e2';
+select count(*) as confiance_hors_etablissement from confiance_extras('00000000-0000-0000-0000-00000000d0a1');
+select count(*) as pointages_autre_extra from pointages;
+reset role;
+do $$ begin
+  assert (select depart_le >= arrivee_le from pointages p join affectations a on a.id = p.affectation_id
+          where a.demande_id = '00000000-0000-0000-0000-00000000d0a1');
+end $$;

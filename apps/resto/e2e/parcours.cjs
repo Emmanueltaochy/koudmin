@@ -223,6 +223,12 @@ let pageCourante = null;
   await p.locator('#description-poste').fill('Accueil des clients et stationnement des véhicules.');
   await p.getByRole('radio', { name: /Demain/ }).click();
   await p.getByText('Je peux raccompagner').click();
+  await p.getByRole('button', { name: 'Une semaine de plus' }).click();
+  await p.getByRole('button', { name: 'Une semaine de plus' }).click();
+  await p.getByText(/^3 missions, chaque \S+ jusqu’au /).waitFor(); ok('mission répétée : 3 semaines, même jour et mêmes horaires');
+  await p.getByRole('button', { name: 'Une semaine de moins' }).click();
+  await p.getByRole('button', { name: 'Une semaine de moins' }).click();
+  await p.getByText('Une seule mission, ce jour-là.').waitFor();
   await capture('demande-remplie');
   await p.getByRole('button', { name: 'Trouver un extra' }).click();
   await p.getByText('Envoi de la demande').waitFor(); ok('envoi : bouton occupé, champs désactivés');
@@ -235,6 +241,7 @@ let pageCourante = null;
   await p.getByText("Commis, Plonge · Moins d'un an de métier · Français, Créole, Anglais").waitFor();
   await p.getByText("« Rapide en plonge, à l'aise en cuisine. »").waitFor();
   await p.getByRole('img', { name: 'Photo de Maëlle' }).waitFor(); ok('suivi : profil de Maëlle (postes, expérience, langues, présentation, initiales)');
+  await p.getByText('Première mission sur Kivien').waitFor(); ok('suivi : badges de confiance d’un extra sans historique');
   await capture('suivi-trouve');
 
   // Contrat
@@ -328,6 +335,10 @@ let pageCourante = null;
   await photoKevin.waitFor();
   await p.waitForFunction(() => { const i = document.querySelector('img[alt="Photo de Kévin"]'); return i && i.complete && i.naturalWidth > 0; });
   ok('suivi : photo de Kévin affichée');
+  await p.getByText('6 missions réalisées sur Kivien').waitFor();
+  await p.getByText(/^Note 4,8\ssur\s5$/).waitFor(); ok('suivi : badges de confiance de Kévin (missions, note)');
+  await p.goto(URL_SITE + '/demandes/d100');
+  await p.getByText(/Arrivée pointée à 17\sh\s56 · départ à 23\sh\s58/).waitFor(); ok('suivi : pointage de Maëlle (arrivée et départ)');
 
   // Connexion (démo : mot de passe kivien974)
   await p.goto(URL_SITE + '/connexion');

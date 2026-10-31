@@ -27,3 +27,4 @@ export * from './email';
 export * from './prospection';
 export * from './textesLegal';
 export * from './textesNotifications';
+export * from './confiance';

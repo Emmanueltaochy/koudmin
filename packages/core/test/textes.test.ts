@@ -9,6 +9,9 @@ import {
   textesAcceptation,
   textesAlertes,
   textesNotifications,
+  textesPointage,
+  badgesConfiance,
+  lignePointage,
   champsACompleter,
   confirmationExtra,
   detailCalculExtra,
@@ -20,6 +23,7 @@ import {
   questionDesistement,
   legendeAcces,
   textePrise,
+  legendeRepetition,
   textes,
   LIBELLES_POSTE,
   textesEcrans,
@@ -50,13 +54,38 @@ const generes = [
   textePrise(3),
   textePrise(1),
   questionDesistement('ce soir'),
+  legendeRepetition('2026-11-03', 1),
+  legendeRepetition('2026-11-03', 4),
 ];
 const corpus = [
   ...tousLesTextes(textes),
   ...tousLesTextes(textesEcrans),
   ...tousLesTextes(textesVitrine),
-  ...tousLesTextes([mentionsLegales, conditionsGenerales, confidentialite, cookies, questionsFrequentes, aPropos, textesAcceptation]),
-  ...tousLesTextes([textesNotifications, textesAlertes]),
+  ...tousLesTextes([
+    mentionsLegales,
+    conditionsGenerales,
+    confidentialite,
+    cookies,
+    questionsFrequentes,
+    aPropos,
+    textesAcceptation,
+  ]),
+  ...tousLesTextes([textesNotifications, textesAlertes, textesPointage]),
+  ...badgesConfiance({
+    missions: 5,
+    notes: 4,
+    noteMoyenneDixiemes: 48,
+    absences: 0,
+    dossierComplet: true,
+  }),
+  ...badgesConfiance({
+    missions: 0,
+    notes: 0,
+    noteMoyenneDixiemes: null,
+    absences: 0,
+    dossierComplet: false,
+  }),
+  lignePointage(1082, 1390)!,
   ...tousLesTextes(montantsVitrine(1231, 2500)),
   ...tousLesTextes(LIBELLES_POSTE),
   ...tousLesTextes(LIBELLES_EXPERIENCE),
@@ -74,17 +103,23 @@ describe('règles d’écriture', () => {
   });
   it('aucune mention d’âge', () => {
     // « ans de métier » : durée d'expérience, écrite ainsi pour ne jamais se lire comme un âge.
-    for (const t of corpus) expect(t, t).not.toMatch(/\bjeunes?\b|étudiant|\d+\s*ans\b(?! de métier)|\d+-\d+ ans/i);
+    for (const t of corpus)
+      expect(t, t).not.toMatch(/\bjeunes?\b|étudiant|\d+\s*ans\b(?! de métier)|\d+-\d+ ans/i);
   });
   it('aucune forme genrée retirée', () => {
-    for (const t of corpus) expect(t, t).not.toMatch(/Empêché|prévenu dès|Il arrive|Serveur|Barman/);
+    for (const t of corpus)
+      expect(t, t).not.toMatch(/Empêché|prévenu dès|Il arrive|Serveur|Barman/);
   });
   it('aucun accord au masculin sur la personne (venu, absent, inscrit, prêt…)', () => {
     // « Extra absent et non remplacé » : texte validé de la maquette, « un extra » y désigne le poste.
     // « Le contrat est prêt » : c'est le contrat qui est prêt, pas une personne.
-    const corpusPersonne = corpus.map((t) => t.replace('Extra absent et non remplacé', '').replace('Le contrat est prêt', ''));
+    const corpusPersonne = corpus.map((t) =>
+      t.replace('Extra absent et non remplacé', '').replace('Le contrat est prêt', ''),
+    );
     for (const t of corpusPersonne)
-      expect(t, t).not.toMatch(/(?<!\p{L})(venu|absent|inscrit|prêt|connecté|déclaré|payé par toi)(?!\p{L})/iu);
+      expect(t, t).not.toMatch(
+        /(?<!\p{L})(venu|absent|inscrit|prêt|connecté|déclaré|payé par toi)(?!\p{L})/iu,
+      );
   });
 });
 
@@ -97,7 +132,9 @@ describe('textes calculés (README)', () => {
     expect(l(legendeSalaires(2, 360, SMIC))).toBe(
       '2 × 6 h × 12,31 €, + 10 % de congés payés. Versés par vous aux extras, hors charges patronales.',
     );
-    expect(l(legendeFrais(2, FRAIS))).toBe('2 × 25 € HT. Extra absent et non remplacé : non facturé.');
+    expect(l(legendeFrais(2, FRAIS))).toBe(
+      '2 × 25 € HT. Extra absent et non remplacé : non facturé.',
+    );
     expect(champsACompleter(2)).toBe('2 champs à compléter.');
     expect(champsACompleter(1)).toBe('1 champ à compléter.');
     expect(l(confirmationExtra(1080))).toBe("C'est confirmé. On t'attend à 18 h.");
@@ -105,7 +142,9 @@ describe('textes calculés (README)', () => {
   });
 
   it('applique les textes neutres validés', () => {
-    expect(l(notificationConfirmation('Kévin', 1080))).toBe('Kévin a dit mi lé la. Arrivée prévue à 18 h.');
+    expect(l(notificationConfirmation('Kévin', 1080))).toBe(
+      'Kévin a dit mi lé la. Arrivée prévue à 18 h.',
+    );
     expect(textes.extra.missions.videTexte).toBe(
       "Coche tes soirées libres. On te prévient dès qu'un restaurant a besoin de toi.",
     );
@@ -115,7 +154,9 @@ describe('textes calculés (README)', () => {
   });
 
   it('accorde le nombre de missions restantes', () => {
-    expect(textePrise(3)).toBe("Quelqu'un a répondu avant toi. 3 missions t'attendent encore ce soir.");
+    expect(textePrise(3)).toBe(
+      "Quelqu'un a répondu avant toi. 3 missions t'attendent encore ce soir.",
+    );
     expect(textePrise(1)).toBe("Quelqu'un a répondu avant toi. 1 mission t'attend encore ce soir.");
     expect(textePrise(0)).toBe("Quelqu'un a répondu avant toi.");
   });
@@ -129,13 +170,17 @@ describe('textes selon le jour de la mission', () => {
     expect(l(confirmationExtra(1080, 'samedi'))).toBe("C'est confirmé. On t'attend samedi à 18 h.");
   });
   it('mission déjà prise', () => {
-    expect(textePrise(2, 'demain')).toBe("Quelqu'un a répondu avant toi. 2 missions t'attendent encore demain.");
+    expect(textePrise(2, 'demain')).toBe(
+      "Quelqu'un a répondu avant toi. 2 missions t'attendent encore demain.",
+    );
   });
   it('désistement', () => {
     expect(l(questionDesistement('samedi'))).toBe('Tu ne viens plus samedi ?');
   });
   it('accès', () => {
-    expect(legendeAcces('2,1 km', 'entrée du personnel côté cuisine')).toBe('2,1 km · entrée du personnel côté cuisine');
+    expect(legendeAcces('2,1 km', 'entrée du personnel côté cuisine')).toBe(
+      '2,1 km · entrée du personnel côté cuisine',
+    );
     expect(legendeAcces('2,1 km', null)).toBe('2,1 km');
   });
 });
@@ -148,14 +193,20 @@ describe('page d’accueil', () => {
     expect(l(m.net)).toBe('63 €');
     expect(l(m.fraisCourt)).toBe('25 € HT');
     expect(l(m.fraisDetail)).toBe('25,00 € HT');
-    expect(l(m.detailSalaire)).toBe('6 h × 12,31 € + 10 % de congés payés. Versé par vous, hors charges patronales.');
+    expect(l(m.detailSalaire)).toBe(
+      '6 h × 12,31 € + 10 % de congés payés. Versé par vous, hors charges patronales.',
+    );
   });
   it('suit le taux en vigueur', () => {
     expect(l(montantsVitrine(1300, 2500).brut)).toBe('85,80 €');
   });
   it('reprend les textes de la maquette', () => {
-    expect(l(textesVitrine.promesse.titre)).toBe("Un extra pour aujourd'hui, environ 20 % moins cher que l'intérim.");
-    expect(l(textesVitrine.promesse.confirmation)).toBe('Kévin a dit mi lé la. Arrivée prévue à 18 h.');
+    expect(l(textesVitrine.promesse.titre)).toBe(
+      "Un extra pour aujourd'hui, environ 20 % moins cher que l'intérim.",
+    );
+    expect(l(textesVitrine.promesse.confirmation)).toBe(
+      'Kévin a dit mi lé la. Arrivée prévue à 18 h.',
+    );
     expect(textesVitrine.pied.signature).toBe('Les extras péi, près de chez vous.');
   });
 });

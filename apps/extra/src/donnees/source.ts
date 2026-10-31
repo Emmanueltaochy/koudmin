@@ -108,6 +108,9 @@ export interface SourceDonnees {
   majProfil(p: Partial<ProfilExtra & ProfilPublic>): Promise<void>;
   /** Adresse e-mail confirmée et celle en attente de confirmation. */
   emailDuCompte(): Promise<{ email: string | null; enAttente: string | null }>;
+  /** Pointage de la mission (ISO), null tant que rien n'est pointé. */
+  monPointage(demandeId: string): Promise<Pointage | null>;
+  pointer(demandeId: string, moment: 'arrivee' | 'depart'): Promise<Pointage>;
   /** Alertes des nouvelles missions par e-mail (activées par défaut). */
   alertesEmail(): Promise<boolean>;
   reglerAlertesEmail(actives: boolean): Promise<void>;
@@ -128,6 +131,11 @@ export interface SourceDonnees {
   /** Note l'acceptation des conditions générales (version donnée) pour le compte connecté. */
   accepterCgu(version: string): Promise<void>;
   deconnecter(): Promise<void>;
+}
+
+export interface Pointage {
+  arriveeLe: string | null;
+  departLe: string | null;
 }
 
 /** Échec réseau : l'écran affiche « Pas de réseau. » et propose de réessayer. */

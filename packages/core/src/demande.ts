@@ -1,13 +1,30 @@
 import { NBSP } from './espaces';
-import type { JourISO } from './dates';
+import { ajouterJours, dateLongue, type JourISO } from './dates';
 import { formatEuros } from './montants';
 import { DESCRIPTION_POSTE_MAX, INTITULE_MAX, POSTE_LIBRE, type Poste } from './postes';
 import { tauxAutorise } from './salaire';
 import { dureeMinutes, lireHeure } from './temps';
 
+/** « Une seule mission. » ou « 4 missions, chaque mardi jusqu'au mardi 24 novembre. » */
+export function legendeRepetition(jour: JourISO | null, semaines: number): string {
+  if (!jour || semaines <= 1) return 'Une seule mission, ce jour-là.';
+  const jours = joursRecurrents(jour, semaines);
+  const dernier = dateLongue(jours[jours.length - 1]!);
+  return `${jours.length} missions, chaque ${dernier.split(' ')[0]!.toLowerCase()} jusqu’au ${dernier.toLowerCase()}. Une demande par semaine, chacune avec son contrat.`;
+}
+
 /** Nombre d'extras par demande. Au-delà, le restaurateur publie une seconde demande. */
 export const NB_EXTRAS_MIN = 1;
 export const NB_EXTRAS_MAX = 10;
+/** Mission récurrente : le même jour de la semaine, aux mêmes horaires, jusqu'à 8 semaines. */
+export const SEMAINES_MIN = 1;
+export const SEMAINES_MAX = 8;
+
+/** Jours d'une mission répétée chaque semaine : « 2026-11-03 », « 2026-11-10 »… */
+export function joursRecurrents(jour: JourISO, semaines: number): JourISO[] {
+  const n = Math.min(Math.max(Math.trunc(semaines), SEMAINES_MIN), SEMAINES_MAX);
+  return Array.from({ length: n }, (_, i) => ajouterJours(jour, 7 * i));
+}
 export const CONSIGNES_MAX = 500;
 /** Garde-fou de saisie : un taux au-delà est presque sûrement une faute de frappe. */
 export const TAUX_MAX_CENTIMES = 10_000;
@@ -54,7 +71,17 @@ export type ChampDemande =
   | 'consignes';
 
 /** Ordre d'affichage des champs, pour placer le focus sur la première erreur. */
-export const ORDRE_CHAMPS: ChampDemande[] = ['poste', 'intitule', 'descriptionPoste', 'jour', 'horaires', 'taux', 'adresse', 'nbExtras', 'consignes'];
+export const ORDRE_CHAMPS: ChampDemande[] = [
+  'poste',
+  'intitule',
+  'descriptionPoste',
+  'jour',
+  'horaires',
+  'taux',
+  'adresse',
+  'nbExtras',
+  'consignes',
+];
 
 export type ErreursDemande = Partial<Record<ChampDemande, string>>;
 
@@ -89,8 +116,10 @@ export function validerDemande(
   if (s.poste === POSTE_LIBRE) {
     const intitule = s.intitule.trim();
     if (!intitule) e.intitule = 'Indiquez le poste.';
-    else if (intitule.length < 2 || intitule.length > INTITULE_MAX) e.intitule = `Entre 2 et ${INTITULE_MAX} caractères.`;
-    if (s.descriptionPoste.length > DESCRIPTION_POSTE_MAX) e.descriptionPoste = `${DESCRIPTION_POSTE_MAX} caractères maximum.`;
+    else if (intitule.length < 2 || intitule.length > INTITULE_MAX)
+      e.intitule = `Entre 2 et ${INTITULE_MAX} caractères.`;
+    if (s.descriptionPoste.length > DESCRIPTION_POSTE_MAX)
+      e.descriptionPoste = `${DESCRIPTION_POSTE_MAX} caractères maximum.`;
   }
   if (!s.jour) e.jour = 'Choisissez une date.';
   else if (s.jour < maintenant.jour) e.jour = 'Cette date est passée.';
@@ -98,8 +127,10 @@ export function validerDemande(
   const debut = lireHeure(s.debut);
   const fin = lireHeure(s.fin);
   if (debut === null || fin === null) e.horaires = "Indiquez l'heure de début et de fin.";
-  else if (dureeMinutes(debut, fin) === null) e.horaires = "L'heure de fin doit être différente du début.";
-  else if (s.jour === maintenant.jour && debut <= maintenant.minute) e.horaires = 'Cet horaire est déjà passé.';
+  else if (dureeMinutes(debut, fin) === null)
+    e.horaires = "L'heure de fin doit être différente du début.";
+  else if (s.jour === maintenant.jour && debut <= maintenant.minute)
+    e.horaires = 'Cet horaire est déjà passé.';
 
   const taux = lireMontant(s.taux);
   if (taux === null) e.taux = 'Indiquez un taux horaire, par exemple 12,31.';

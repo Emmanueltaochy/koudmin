@@ -15,6 +15,8 @@ import {
   legendeSalaires,
   libellePoste,
   minuteReunion,
+  badgesConfiance,
+  lignePointage,
   notificationConfirmation,
   recapDemande,
   resumeProfil,
@@ -32,6 +34,8 @@ import { useDonnees } from '@/lib/useDonnees';
 import s from './suivi.module.css';
 
 const ts = textesEcrans.resto.suivi;
+
+const minuteOuNull = (iso: string | null) => (iso ? minuteReunion(new Date(iso)) : null);
 
 export default function SuiviDemande() {
   const { id } = useParams<{ id: string }>();
@@ -67,7 +71,9 @@ export default function SuiviDemande() {
           <ChevronLeft size={20} strokeWidth={2} aria-hidden />
           {ts.retour}
         </Link>
-        <p className={ui.sousTitre}>{etat.statut === 'erreur' ? t.extra.missions.horsLigneTitre : ts.introuvable}</p>
+        <p className={ui.sousTitre}>
+          {etat.statut === 'erreur' ? t.extra.missions.horsLigneTitre : ts.introuvable}
+        </p>
       </div>
     );
   }
@@ -106,7 +112,8 @@ export default function SuiviDemande() {
         <p className={`${ui.corps} ${ui.galet}`}>{dateLongue(d.jour)}</p>
         <p className={p.pilule}>{formatPlage(d.debut, d.fin)}</p>
         <h1 className={`${ui.sousTitre} ${s.titre}`}>
-          {libellePoste(d.poste, d.intitule, 'court')} · {d.nbExtras} extra{d.nbExtras > 1 ? 's' : ''}
+          {libellePoste(d.poste, d.intitule, 'court')} · {d.nbExtras} extra
+          {d.nbExtras > 1 ? 's' : ''}
         </h1>
       </div>
 
@@ -123,14 +130,40 @@ export default function SuiviDemande() {
       <section className={s.carte} aria-label={ts.trouve}>
         {actifs.map((e) => (
           <div key={e.affectationId} className={s.ligne}>
-            <AvatarExtra extraId={e.extraId} prenom={e.prenom} nom={e.nom} alt={`${ts.photoDe} ${e.prenom}`} />
+            <AvatarExtra
+              extraId={e.extraId}
+              prenom={e.prenom}
+              nom={e.nom}
+              alt={`${ts.photoDe} ${e.prenom}`}
+            />
             <div className={s.contenu}>
               <span className={`${ui.corpsFort} ${s.nomExtra}`}>
                 <Check size={18} strokeWidth={2.5} className={ui.vacoa} aria-hidden />
                 {e.prenom} {e.nom}
               </span>
               {resumeProfil(e) && <span className={ui.legende}>{resumeProfil(e)}</span>}
-              {e.presentation && <span className={`${ui.corps} ${s.presentation}`}>« {e.presentation} »</span>}
+              {e.confiance && (
+                <ul className={s.badges} aria-label="Confiance">
+                  {badgesConfiance(e.confiance).map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+              )}
+              {e.pointage &&
+                lignePointage(
+                  minuteOuNull(e.pointage.arriveeLe),
+                  minuteOuNull(e.pointage.departLe),
+                ) && (
+                  <span className={`${ui.legendeForte} ${ui.vacoa}`}>
+                    {lignePointage(
+                      minuteOuNull(e.pointage.arriveeLe),
+                      minuteOuNull(e.pointage.departLe),
+                    )}
+                  </span>
+                )}
+              {e.presentation && (
+                <span className={`${ui.corps} ${s.presentation}`}>« {e.presentation} »</span>
+              )}
               <span className={ui.legende}>
                 {e.contratSigneRestaurant && e.contratSigneExtra
                   ? ts.contratSigne
@@ -141,17 +174,26 @@ export default function SuiviDemande() {
               <div className={s.actions}>
                 <ContactExtra prenom={e.prenom} telephone={e.telephone} />
                 {phase === 'aNoter' && !e.notation && (
-                  <Link href={`/demandes/${d.id}/notation?affectation=${e.affectationId}`} className={ui.lien}>
+                  <Link
+                    href={`/demandes/${d.id}/notation?affectation=${e.affectationId}`}
+                    className={ui.lien}
+                  >
                     {ts.noter}
                   </Link>
                 )}
                 {e.contratSigneRestaurant && (
-                  <Link href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`} className={ui.lien}>
+                  <Link
+                    href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`}
+                    className={ui.lien}
+                  >
                     <FileText size={16} strokeWidth={2} aria-hidden /> {ts.contratEtDpae}
                   </Link>
                 )}
                 {!e.contratSigneRestaurant && e !== premierASigner && e.statut === 'confirmee' && (
-                  <Link href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`} className={ui.lien}>
+                  <Link
+                    href={`/demandes/${d.id}/contrat?affectation=${e.affectationId}`}
+                    className={ui.lien}
+                  >
                     {ts.signerContrat}
                   </Link>
                 )}
@@ -192,8 +234,12 @@ export default function SuiviDemande() {
           <MapPin size={20} strokeWidth={2} className={ui.galet} aria-hidden />
           <div className={s.contenu}>
             <span className={ui.corpsFort}>{d.adresse}</span>
-            <span className={ui.corpsFort}>{[d.codePostal, d.commune].filter(Boolean).join(' ')}</span>
-            {d.retourAssure && <span className={`${ui.legendeForte} ${ui.vacoa}`}>{ts.retourAssure}</span>}
+            <span className={ui.corpsFort}>
+              {[d.codePostal, d.commune].filter(Boolean).join(' ')}
+            </span>
+            {d.retourAssure && (
+              <span className={`${ui.legendeForte} ${ui.vacoa}`}>{ts.retourAssure}</span>
+            )}
           </div>
         </div>
         {d.descriptionPoste && (
@@ -215,12 +261,16 @@ export default function SuiviDemande() {
               <span className={ui.corps}>{t.resto.demande.salaires}</span>
               <span className={ui.corpsFort}>{formatEuros(recap.salairesBrutsCentimes)}</span>
             </div>
-            <span className={ui.legende}>{legendeSalaires(d.nbExtras, minutes, d.tauxHoraireBrutCentimes)}</span>
+            <span className={ui.legende}>
+              {legendeSalaires(d.nbExtras, minutes, d.tauxHoraireBrutCentimes)}
+            </span>
             <div className={`${p.entreDeux} ${s.espace}`}>
               <span className={ui.corps}>{t.resto.demande.frais}</span>
               <span className={ui.corpsFort}>{formatHT(recap.fraisHTCentimes)}</span>
             </div>
-            <span className={ui.legende}>{legendeFrais(d.nbExtras, d.fraisMiseEnRelationHTCentimes)}</span>
+            <span className={ui.legende}>
+              {legendeFrais(d.nbExtras, d.fraisMiseEnRelationHTCentimes)}
+            </span>
           </div>
         </div>
       </section>
@@ -228,11 +278,20 @@ export default function SuiviDemande() {
       {(phase === 'recherche' || phase === 'pourvue') && (
         <section className={s.annulation}>
           {annulation === 'ferme' ? (
-            <button type="button" className={ui.lienDiscret} onClick={() => setAnnulation('question')}>
+            <button
+              type="button"
+              className={ui.lienDiscret}
+              onClick={() => setAnnulation('question')}
+            >
               {ts.annuler}
             </button>
           ) : (
-            <div className={s.carte} role="alertdialog" aria-labelledby="q-annuler" aria-describedby="i-annuler">
+            <div
+              className={s.carte}
+              role="alertdialog"
+              aria-labelledby="q-annuler"
+              aria-describedby="i-annuler"
+            >
               <div className={s.contenuSeul}>
                 <p id="q-annuler" className={ui.sousTitre}>
                   {ts.annulerQuestion}
@@ -241,7 +300,12 @@ export default function SuiviDemande() {
                   {ts.annulerInfo}
                 </p>
                 <div className={s.actions}>
-                  <button type="button" className={ui.boutonSecondaire} onClick={annuler} disabled={annulation === 'envoi'}>
+                  <button
+                    type="button"
+                    className={ui.boutonSecondaire}
+                    onClick={annuler}
+                    disabled={annulation === 'envoi'}
+                  >
                     {annulation === 'envoi' && <Spinner taille={16} />}
                     {ts.annulerConfirmer}
                   </button>

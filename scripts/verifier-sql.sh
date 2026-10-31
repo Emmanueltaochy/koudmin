@@ -54,11 +54,12 @@ permission denied for table prospects
 permission denied for function importer_prospects
 Nom obligatoire
 new row for relation "acceptations_cgu" violates check constraint "acceptations_cgu_version_check"
-permission denied for function prendre_notifications'
+permission denied for function prendre_notifications
+Pointage possible 1 h avant le début'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   echo "ÉCHEC : erreurs SQL inattendues" >&2
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (32 refus attendus)."
+echo "Scénario SQL conforme (33 refus attendus)."

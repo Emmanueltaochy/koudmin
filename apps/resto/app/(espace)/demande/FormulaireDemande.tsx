@@ -8,6 +8,10 @@ import {
   ajouterJours,
   champsACompleter,
   choixDates,
+  joursRecurrents,
+  legendeRepetition,
+  SEMAINES_MAX,
+  SEMAINES_MIN,
   dureeMinutes,
   formatEuros,
   formatHT,
@@ -54,7 +58,8 @@ const PRESETS = [
 /** Une demande se publie au plus 30 jours à l'avance. */
 const HORIZON_JOURS = 30;
 const ERREUR_ENVOI = "La demande n'est pas partie. Vérifiez la connexion et réessayez.";
-const ERREUR_ADRESSE_INTROUVABLE = 'Adresse introuvable à La Réunion. Choisissez une proposition de la liste.';
+const ERREUR_ADRESSE_INTROUVABLE =
+  'Adresse introuvable à La Réunion. Choisissez une proposition de la liste.';
 
 type Demo = 'envoi' | 'erreur';
 
@@ -74,6 +79,8 @@ export function FormulaireDemande() {
   const [erreurs, setErreurs] = useState<ErreursDemande>({});
   const [tente, setTente] = useState(false);
   const [envoi, setEnvoi] = useState(false);
+  // Mission récurrente : une demande par semaine, même jour et mêmes horaires.
+  const [semaines, setSemaines] = useState(1);
   const [erreurEnvoi, setErreurEnvoi] = useState<string | null>(null);
   const resume = useRef<HTMLDivElement>(null);
   const champDate = useRef<HTMLInputElement>(null);
@@ -91,7 +98,9 @@ export function FormulaireDemande() {
       if (demo === 'erreur') {
         setSaisie(base);
         setTente(true);
-        setErreurs(validerDemande(base, p.tauxHoraireBrutCentimes, { jour: aujourdhuiReunion(), minute: 0 }));
+        setErreurs(
+          validerDemande(base, p.tauxHoraireBrutCentimes, { jour: aujourdhuiReunion(), minute: 0 }),
+        );
         return;
       }
       setSaisie({ ...base, adresse: r.adresse?.libelle ?? '', consignes: '' });
@@ -111,8 +120,14 @@ export function FormulaireDemande() {
     if (tente && parametres) setErreurs(validerDemande(suivante, smic, maintenant()));
   }
 
-  const minutes = saisie ? dureeMinutes(lireHeure(saisie.debut) ?? -1, lireHeure(saisie.fin) ?? -1) : null;
-  const heuresValides = saisie && lireHeure(saisie.debut) !== null && lireHeure(saisie.fin) !== null && minutes !== null;
+  const minutes = saisie
+    ? dureeMinutes(lireHeure(saisie.debut) ?? -1, lireHeure(saisie.fin) ?? -1)
+    : null;
+  const heuresValides =
+    saisie &&
+    lireHeure(saisie.debut) !== null &&
+    lireHeure(saisie.fin) !== null &&
+    minutes !== null;
   const tauxSaisi = saisie ? lireMontant(saisie.taux) : null;
   const tauxCalcul = tauxSaisi !== null && tauxSaisi >= smic ? tauxSaisi : smic;
 
@@ -132,7 +147,9 @@ export function FormulaireDemande() {
 
   const dates = choixDates(aujourdhui);
   const dateLibre = saisie.jour && !dates.some((d) => d.jour === saisie.jour) ? saisie.jour : null;
-  const presetActif = PRESETS.findIndex((p) => libellePlage(p.debut, p.fin) === libellePlage(saisie.debut, saisie.fin));
+  const presetActif = PRESETS.findIndex(
+    (p) => libellePlage(p.debut, p.fin) === libellePlage(saisie.debut, saisie.fin),
+  );
   const nbErreurs = Object.keys(erreurs).length;
 
   async function envoyer(e: FormEvent) {
@@ -159,20 +176,25 @@ export function FormulaireDemande() {
           return;
         }
       }
-      const { id } = await source().publier({
-        poste: saisie.poste!,
-        intitule: saisie.poste === POSTE_LIBRE ? saisie.intitule.trim() : null,
-        descriptionPoste: saisie.poste === POSTE_LIBRE ? saisie.descriptionPoste.trim() || null : null,
-        jour: saisie.jour!,
-        debut: lireHeure(saisie.debut)!,
-        fin: lireHeure(saisie.fin)!,
-        tauxHoraireBrutCentimes: lireMontant(saisie.taux)!,
-        adresse: geo,
-        retourAssure: saisie.retourAssure,
-        nbExtras: saisie.nbExtras,
-        consignes: saisie.consignes.trim() || null,
-      });
-      router.push(`/demandes/${id}`);
+      const ids: string[] = [];
+      for (const jour of joursRecurrents(saisie.jour!, semaines)) {
+        const { id } = await source().publier({
+          poste: saisie.poste!,
+          intitule: saisie.poste === POSTE_LIBRE ? saisie.intitule.trim() : null,
+          descriptionPoste:
+            saisie.poste === POSTE_LIBRE ? saisie.descriptionPoste.trim() || null : null,
+          jour,
+          debut: lireHeure(saisie.debut)!,
+          fin: lireHeure(saisie.fin)!,
+          tauxHoraireBrutCentimes: lireMontant(saisie.taux)!,
+          adresse: geo,
+          retourAssure: saisie.retourAssure,
+          nbExtras: saisie.nbExtras,
+          consignes: saisie.consignes.trim() || null,
+        });
+        ids.push(id);
+      }
+      router.push(`/demandes/${ids[0]}`);
     } catch (err) {
       if (!(err instanceof ErreurReseau || err instanceof TypeError)) console.error(err);
       setErreurEnvoi(ERREUR_ENVOI);
@@ -200,7 +222,13 @@ export function FormulaireDemande() {
 
       {(tente && nbErreurs > 0) || erreurEnvoi ? (
         <div ref={resume} tabIndex={-1} role="alert" className={`${ui.encadreErreur} ${s.resume}`}>
-          <CircleAlert size={20} strokeWidth={2} className={ui.icone} style={{ marginTop: 2 }} aria-hidden />
+          <CircleAlert
+            size={20}
+            strokeWidth={2}
+            className={ui.icone}
+            style={{ marginTop: 2 }}
+            aria-hidden
+          />
           <div>
             {nbErreurs > 0 ? (
               <a href={`#champ-${premiereErreur}`} className={s.lienResume}>
@@ -247,7 +275,11 @@ export function FormulaireDemande() {
                 className={s.chip}
                 onClick={() => modifier({ poste: POSTE_LIBRE })}
               >
-                {saisie.poste === POSTE_LIBRE ? <Check size={16} strokeWidth={2.5} aria-hidden /> : <PenLine size={16} strokeWidth={2} aria-hidden />}
+                {saisie.poste === POSTE_LIBRE ? (
+                  <Check size={16} strokeWidth={2.5} aria-hidden />
+                ) : (
+                  <PenLine size={16} strokeWidth={2} aria-hidden />
+                )}
                 {td.posteLibre}
               </button>
             </div>
@@ -293,7 +325,9 @@ export function FormulaireDemande() {
                   maxLength={DESCRIPTION_POSTE_MAX}
                   onChange={(e) => modifier({ descriptionPoste: e.target.value })}
                 />
-                {err('descriptionPoste') && <p className={ui.messageErreur}>{err('descriptionPoste')}</p>}
+                {err('descriptionPoste') && (
+                  <p className={ui.messageErreur}>{err('descriptionPoste')}</p>
+                )}
               </div>
             </div>
           )}
@@ -496,7 +530,9 @@ export function FormulaireDemande() {
               <span className={ui.corpsFort} id="lib-nb">
                 {td.nbExtras}
               </span>
-              <span className={ui.legende}>{fraisParExtra(parametres.fraisMiseEnRelationHTCentimes)}</span>
+              <span className={ui.legende}>
+                {fraisParExtra(parametres.fraisMiseEnRelationHTCentimes)}
+              </span>
             </div>
             <div className={s.stepper} role="group" aria-labelledby="lib-nb">
               <button
@@ -515,6 +551,37 @@ export function FormulaireDemande() {
                 aria-label="Un extra de plus"
                 disabled={saisie.nbExtras >= NB_EXTRAS_MAX}
                 onClick={() => modifier({ nbExtras: saisie.nbExtras + 1 })}
+              >
+                <Plus size={20} strokeWidth={2} aria-hidden />
+              </button>
+            </div>
+          </div>
+
+          {/* Répétition chaque semaine */}
+          <div className={s.nombre} id="champ-semaines">
+            <div className={s.nombreTextes}>
+              <span className={ui.corpsFort} id="lib-semaines">
+                {td.repeter}
+              </span>
+              <span className={ui.legende}>{legendeRepetition(saisie.jour, semaines)}</span>
+            </div>
+            <div className={s.stepper} role="group" aria-labelledby="lib-semaines">
+              <button
+                type="button"
+                aria-label={td.semaineMoins}
+                disabled={semaines <= SEMAINES_MIN}
+                onClick={() => setSemaines(semaines - 1)}
+              >
+                <Minus size={20} strokeWidth={2} className={ui.galet} aria-hidden />
+              </button>
+              <output aria-live="polite" className={s.valeur}>
+                {semaines}
+              </output>
+              <button
+                type="button"
+                aria-label={td.semainePlus}
+                disabled={semaines >= SEMAINES_MAX}
+                onClick={() => setSemaines(semaines + 1)}
               >
                 <Plus size={20} strokeWidth={2} aria-hidden />
               </button>
@@ -563,7 +630,9 @@ export function FormulaireDemande() {
                 {formatHT(recap.fraisHTCentimes)}
               </span>
             </div>
-            <p className={ui.legende}>{legendeFrais(saisie.nbExtras, parametres.fraisMiseEnRelationHTCentimes)}</p>
+            <p className={ui.legende}>
+              {legendeFrais(saisie.nbExtras, parametres.fraisMiseEnRelationHTCentimes)}
+            </p>
           </div>
           <button type="submit" className={ui.boutonPrincipal} aria-busy={envoi} disabled={envoi}>
             {envoi ? (

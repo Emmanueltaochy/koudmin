@@ -60,3 +60,19 @@
   display: flex;
   justify-content: center;
 }
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.badges li {
+  font: var(--k-legende-font);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--k-creme);
+  border: 1px solid var(--k-galet);
+  color: var(--k-basalte);
+}

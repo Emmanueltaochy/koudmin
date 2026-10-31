@@ -199,6 +199,19 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       const u = data.user as { email?: string; new_email?: string } | null;
       return { email: u?.email || null, enAttente: u?.new_email || null };
     },
+    async monPointage(demandeId) {
+      const [l] = verifier(await client.rpc('mon_pointage', { p_demande: demandeId })) as {
+        arrivee_le: string | null;
+        depart_le: string | null;
+      }[];
+      return l ? { arriveeLe: l.arrivee_le, departLe: l.depart_le } : null;
+    },
+    async pointer(demandeId, moment) {
+      const [l] = verifier(
+        await client.rpc('pointer', { p_demande: demandeId, p_moment: moment }),
+      ) as { arrivee_le: string | null; depart_le: string | null }[];
+      return { arriveeLe: l?.arrivee_le ?? null, departLe: l?.depart_le ?? null };
+    },
     async alertesEmail() {
       const ligne = verifier(
         await client

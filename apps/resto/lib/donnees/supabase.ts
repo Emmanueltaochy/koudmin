@@ -8,6 +8,7 @@ import {
   type Poste,
   type StatutAffectation,
   type StatutDemande,
+  type ConfianceExtra,
 } from '@kivien/core';
 import { resoudreEtablissement } from './etablissementCourant';
 import {
@@ -30,7 +31,7 @@ import {
 import { agregerFavoris } from './favoris';
 
 type UnOuPlusieurs<T> = T | T[] | null;
-const premier = <T,>(v: UnOuPlusieurs<T>): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
+const premier = <T>(v: UnOuPlusieurs<T>): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 
 interface LigneDemande {
   id: string;
@@ -68,6 +69,7 @@ interface LigneDemande {
     }>;
     contrats: UnOuPlusieurs<{ signe_restaurant_le: string | null; signe_extra_le: string | null }>;
     notations: UnOuPlusieurs<{ present: boolean; note: number | null }>;
+    pointages: UnOuPlusieurs<{ arrivee_le: string | null; depart_le: string | null }>;
   }[];
 }
 
@@ -76,13 +78,19 @@ const SELECTION = `id, restaurant_id, poste, intitule, description_poste, jour, 
   affectations ( id, extra_id, statut, created_at, updated_at,
     extras ( prenom, nom, telephone, competences, experience, langues, presentation ),
     contrats ( signe_restaurant_le, signe_extra_le ),
-    notations ( present, note ) )`;
+    notations ( present, note ),
+    pointages ( arrivee_le, depart_le ) )`;
 
 /**
  * Toutes les lignes d'une fonction de la base : le serveur en renvoie 1 000 au plus par appel
  * (PGRST_DB_MAX_ROWS), d'où la lecture par pages.
  */
-async function toutesLesLignes<T>(page: (debut: number, fin: number) => PromiseLike<{ data: unknown; error: { message: string } | null }>): Promise<T[]> {
+async function toutesLesLignes<T>(
+  page: (
+    debut: number,
+    fin: number,
+  ) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
+): Promise<T[]> {
   const TAILLE = 1000;
   const lignes: T[] = [];
   for (let debut = 0; ; debut += TAILLE) {
@@ -102,7 +110,11 @@ function verifier<T>(r: { data: T | null; error: { message: string } | null }): 
   return r.data as T;
 }
 
-function versDemande(l: LigneDemande, favoris: Set<string>): DemandeSuivi {
+function versDemande(
+  l: LigneDemande,
+  favoris: Set<string>,
+  confiance = new Map<string, ConfianceExtra>(),
+): DemandeSuivi {
   return {
     id: l.id,
     restaurantId: l.restaurant_id,
@@ -126,6 +138,7 @@ function versDemande(l: LigneDemande, favoris: Set<string>): DemandeSuivi {
       const e = premier(a.extras);
       const c = premier(a.contrats);
       const n = premier(a.notations);
+      const pt = premier(a.pointages);
       return {
         affectationId: a.id,
         extraId: a.extra_id,
@@ -144,6 +157,8 @@ function versDemande(l: LigneDemande, favoris: Set<string>): DemandeSuivi {
         contratSigneExtraLe: c?.signe_extra_le ?? null,
         notation: n ? { present: n.present, note: n.note } : null,
         favori: favoris.has(a.extra_id),
+        confiance: confiance.get(a.extra_id) ?? null,
+        pointage: pt ? { arriveeLe: pt.arrivee_le, departLe: pt.depart_le } : null,
       };
     }),
   };
@@ -208,7 +223,9 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       return verifier(await client.rpc('photo_extra', { p_extra: extraId })) as string | null;
     },
     async etablissements(): Promise<Restaurant[]> {
-      return (verifier(await client.rpc('mes_etablissements')) as LigneEtablissement[]).map(versRestaurant);
+      return (verifier(await client.rpc('mes_etablissements')) as LigneEtablissement[]).map(
+        versRestaurant,
+      );
     },
     async restaurant(): Promise<Restaurant> {
       return resoudreEtablissement(await source.etablissements());
@@ -229,7 +246,9 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       if (refus(error, /SIRET invalide/)) return { resultat: 'siretInvalide' as const };
       if (refus(error, /compte extra/)) return { resultat: 'extra' as const };
       if (refus(error, /hors de La Réunion/)) return { resultat: 'adresse' as const };
-      throw /network|fetch/i.test(error.message) ? new ErreurReseau(error.message) : new Error(error.message);
+      throw /network|fetch/i.test(error.message)
+        ? new ErreurReseau(error.message)
+        : new Error(error.message);
     },
     async modifierEtablissement(id, m) {
       const { error } = await client.rpc('modifier_etablissement', {
@@ -250,14 +269,24 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         const l = verifier(
           await client
             .from('moyens_paiement')
-            .select('mode, carte_libelle, sepa_libelle, gocardless_demande, gocardless_mandat, mandat_statut')
+            .select(
+              'mode, carte_libelle, sepa_libelle, gocardless_demande, gocardless_mandat, mandat_statut',
+            )
             .eq('restaurant_id', restaurantId)
             .maybeSingle(),
         ) as {
-          mode: MoyenPaiement['mode']; carte_libelle: string | null; sepa_libelle: string | null;
-          gocardless_demande: string | null; gocardless_mandat: string | null; mandat_statut: string | null;
+          mode: MoyenPaiement['mode'];
+          carte_libelle: string | null;
+          sepa_libelle: string | null;
+          gocardless_demande: string | null;
+          gocardless_mandat: string | null;
+          mandat_statut: string | null;
         } | null;
-        const valide = !!l?.mandat_statut && ['pending_customer_approval', 'pending_submission', 'submitted', 'active'].includes(l.mandat_statut);
+        const valide =
+          !!l?.mandat_statut &&
+          ['pending_customer_approval', 'pending_submission', 'submitted', 'active'].includes(
+            l.mandat_statut,
+          );
         return {
           mode: l?.mode ?? 'carte_mission',
           carte: l?.carte_libelle ?? null,
@@ -274,24 +303,48 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
             .eq('restaurant_id', restaurantId)
             .order('cree_le', { ascending: false })
             .limit(100),
-        ) as { id: string; type: PaiementFrais['type']; libelle: string; moyen: PaiementFrais['moyen']; montant_ttc_centimes: number;
-               statut: PaiementFrais['statut']; erreur: string | null; cree_le: string }[];
+        ) as {
+          id: string;
+          type: PaiementFrais['type'];
+          libelle: string;
+          moyen: PaiementFrais['moyen'];
+          montant_ttc_centimes: number;
+          statut: PaiementFrais['statut'];
+          erreur: string | null;
+          cree_le: string;
+        }[];
         return l.map((p) => ({
-          id: p.id, type: p.type, libelle: p.libelle, moyen: p.moyen, montantTTCCentimes: p.montant_ttc_centimes,
-          statut: p.statut, erreur: p.erreur, creeLe: p.cree_le,
+          id: p.id,
+          type: p.type,
+          libelle: p.libelle,
+          moyen: p.moyen,
+          montantTTCCentimes: p.montant_ttc_centimes,
+          statut: p.statut,
+          erreur: p.erreur,
+          creeLe: p.cree_le,
         }));
       },
       async aRegler(restaurantId) {
-        const [l] = verifier(await client.rpc('a_regler', { p_restaurant: restaurantId })) as
-          { mises_en_relation: number; montant_ht_centimes: number; tva_centimes: number }[];
-        return { misesEnRelation: l?.mises_en_relation ?? 0, ttcCentimes: (l?.montant_ht_centimes ?? 0) + (l?.tva_centimes ?? 0) };
+        const [l] = verifier(await client.rpc('a_regler', { p_restaurant: restaurantId })) as {
+          mises_en_relation: number;
+          montant_ht_centimes: number;
+          tva_centimes: number;
+        }[];
+        return {
+          misesEnRelation: l?.mises_en_relation ?? 0,
+          ttcCentimes: (l?.montant_ht_centimes ?? 0) + (l?.tva_centimes ?? 0),
+        };
       },
       async agir(restaurantId, a) {
-        const { data, error } = await client.functions.invoke('paiement', { body: { ...a, restaurant: restaurantId } });
+        const { data, error } = await client.functions.invoke('paiement', {
+          body: { ...a, restaurant: restaurantId },
+        });
         if (error) {
           // Refus expliqué par la fonction (« Enregistrez d'abord une carte. ») : relu dans la réponse.
           const reponse = (error as { context?: Response }).context;
-          const corps = reponse ? ((await reponse.json().catch(() => null)) as { erreur?: string } | null) : null;
+          const corps = reponse
+            ? ((await reponse.json().catch(() => null)) as { erreur?: string } | null)
+            : null;
           return { erreur: corps?.erreur ?? null, statut: 'echoue' };
         }
         return data as ReponsePaiement;
@@ -304,28 +357,77 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         return verifier({ data, error }) as TableauAdmin;
       },
       async etablissements() {
-        const l = (await toutesLesLignes((debut, fin) => client.rpc('admin_etablissements').range(debut, fin))) as {
-          id: string; nom: string; commune: string | null; lat: number | null; lng: number | null; secteur: string; siret: string | null;
-          telephone: string | null; inscrit_le: string; utilisateurs: number; demandes: number; places_pourvues: number;
-          frais_ht_centimes: number; derniere_demande: string | null;
+        const l = (await toutesLesLignes((debut, fin) =>
+          client.rpc('admin_etablissements').range(debut, fin),
+        )) as {
+          id: string;
+          nom: string;
+          commune: string | null;
+          lat: number | null;
+          lng: number | null;
+          secteur: string;
+          siret: string | null;
+          telephone: string | null;
+          inscrit_le: string;
+          utilisateurs: number;
+          demandes: number;
+          places_pourvues: number;
+          frais_ht_centimes: number;
+          derniere_demande: string | null;
         }[];
         return l.map((r) => ({
-          id: r.id, nom: r.nom, commune: r.commune, lat: r.lat, lng: r.lng, secteur: r.secteur, siret: r.siret, telephone: r.telephone,
-          inscritLe: r.inscrit_le, utilisateurs: r.utilisateurs, demandes: r.demandes, placesPourvues: r.places_pourvues,
-          fraisHTCentimes: r.frais_ht_centimes, derniereDemande: r.derniere_demande,
+          id: r.id,
+          nom: r.nom,
+          commune: r.commune,
+          lat: r.lat,
+          lng: r.lng,
+          secteur: r.secteur,
+          siret: r.siret,
+          telephone: r.telephone,
+          inscritLe: r.inscrit_le,
+          utilisateurs: r.utilisateurs,
+          demandes: r.demandes,
+          placesPourvues: r.places_pourvues,
+          fraisHTCentimes: r.frais_ht_centimes,
+          derniereDemande: r.derniere_demande,
         }));
       },
       async extras() {
-        const l = (await toutesLesLignes((debut, fin) => client.rpc('admin_extras').range(debut, fin))) as {
-          id: string; prenom: string; nom: string; telephone: string; commune: string; competences: Poste[] | null; experience: string | null;
-          a_voiture: boolean; inscrit_le: string; missions: number; absences: number; desistements: number; note_moyenne: number | null;
-          dispo_7_jours: boolean; avec_photo: boolean;
+        const l = (await toutesLesLignes((debut, fin) =>
+          client.rpc('admin_extras').range(debut, fin),
+        )) as {
+          id: string;
+          prenom: string;
+          nom: string;
+          telephone: string;
+          commune: string;
+          competences: Poste[] | null;
+          experience: string | null;
+          a_voiture: boolean;
+          inscrit_le: string;
+          missions: number;
+          absences: number;
+          desistements: number;
+          note_moyenne: number | null;
+          dispo_7_jours: boolean;
+          avec_photo: boolean;
         }[];
         return l.map((e) => ({
-          id: e.id, prenom: e.prenom, nom: e.nom, telephone: e.telephone, commune: e.commune, competences: e.competences ?? [],
-          experience: e.experience, aVoiture: e.a_voiture, inscritLe: e.inscrit_le, missions: e.missions, absences: e.absences,
-          desistements: e.desistements, noteMoyenne: e.note_moyenne === null ? null : Number(e.note_moyenne),
-          dispo7Jours: e.dispo_7_jours, avecPhoto: e.avec_photo,
+          id: e.id,
+          prenom: e.prenom,
+          nom: e.nom,
+          telephone: e.telephone,
+          commune: e.commune,
+          competences: e.competences ?? [],
+          experience: e.experience,
+          aVoiture: e.a_voiture,
+          inscritLe: e.inscrit_le,
+          missions: e.missions,
+          absences: e.absences,
+          desistements: e.desistements,
+          noteMoyenne: e.note_moyenne === null ? null : Number(e.note_moyenne),
+          dispo7Jours: e.dispo_7_jours,
+          avecPhoto: e.avec_photo,
         }));
       },
       prospection: {
@@ -334,23 +436,62 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         },
         async derniereRecherche() {
           const [r] = verifier(await client.rpc('admin_derniere_recherche')) as {
-            statut: StatutRecherche; demandee_le: string; fin_le: string | null; trouves: number | null; ajoutes: number | null;
-            emails_trouves: number | null; erreur: string | null;
+            statut: StatutRecherche;
+            demandee_le: string;
+            fin_le: string | null;
+            trouves: number | null;
+            ajoutes: number | null;
+            emails_trouves: number | null;
+            erreur: string | null;
           }[];
           return r
-            ? { statut: r.statut, demandeeLe: r.demandee_le, finLe: r.fin_le, trouves: r.trouves, ajoutes: r.ajoutes, emailsTrouves: r.emails_trouves, erreur: r.erreur }
+            ? {
+                statut: r.statut,
+                demandeeLe: r.demandee_le,
+                finLe: r.fin_le,
+                trouves: r.trouves,
+                ajoutes: r.ajoutes,
+                emailsTrouves: r.emails_trouves,
+                erreur: r.erreur,
+              }
             : null;
         },
         async prospects() {
           const l = await toutesLesLignes<{
-            id: string; nom: string; categorie: Prospect['categorie']; commune: string | null; adresse: string | null;
-            lat: number | null; lng: number | null; telephone: string | null; email: string | null; source_email: Prospect['sourceEmail']; site: string | null;
-            statut: Prospect['statut']; notes: string | null; desinscrit: boolean; dernier_envoi: string | null; envois: number;
+            id: string;
+            nom: string;
+            categorie: Prospect['categorie'];
+            commune: string | null;
+            adresse: string | null;
+            lat: number | null;
+            lng: number | null;
+            telephone: string | null;
+            email: string | null;
+            source_email: Prospect['sourceEmail'];
+            site: string | null;
+            statut: Prospect['statut'];
+            notes: string | null;
+            desinscrit: boolean;
+            dernier_envoi: string | null;
+            envois: number;
           }>((debut, fin) => client.rpc('admin_prospects').range(debut, fin));
           return l.map((p) => ({
-            id: p.id, nom: p.nom, categorie: p.categorie, commune: p.commune, adresse: p.adresse, lat: p.lat, lng: p.lng,
-            telephone: p.telephone, email: p.email, sourceEmail: p.source_email, site: p.site, statut: p.statut, notes: p.notes, desinscrit: p.desinscrit,
-            dernierEnvoi: p.dernier_envoi, envois: p.envois,
+            id: p.id,
+            nom: p.nom,
+            categorie: p.categorie,
+            commune: p.commune,
+            adresse: p.adresse,
+            lat: p.lat,
+            lng: p.lng,
+            telephone: p.telephone,
+            email: p.email,
+            sourceEmail: p.source_email,
+            site: p.site,
+            statut: p.statut,
+            notes: p.notes,
+            desinscrit: p.desinscrit,
+            dernierEnvoi: p.dernier_envoi,
+            envois: p.envois,
           }));
         },
         async importer(fiches) {
@@ -358,8 +499,9 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           let ajoutes = 0;
           let misAJour = 0;
           for (let i = 0; i < fiches.length; i += 1000) {
-            const [r] = verifier(await client.rpc('admin_importer_prospects', { p_lignes: fiches.slice(i, i + 1000) })) as
-              { ajoutes: number; mis_a_jour: number }[];
+            const [r] = verifier(
+              await client.rpc('admin_importer_prospects', { p_lignes: fiches.slice(i, i + 1000) }),
+            ) as { ajoutes: number; mis_a_jour: number }[];
             ajoutes += r?.ajoutes ?? 0;
             misAJour += r?.mis_a_jour ?? 0;
           }
@@ -367,7 +509,11 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         },
         async modifier(id, m) {
           const { error } = await client.rpc('admin_modifier_prospect', {
-            p_id: id, p_email: m.email, p_telephone: m.telephone, p_statut: m.statut, p_notes: m.notes,
+            p_id: id,
+            p_email: m.email,
+            p_telephone: m.telephone,
+            p_statut: m.statut,
+            p_notes: m.notes,
           });
           if (error && /e-mail invalide/i.test(error.message)) return 'email';
           verifier({ data: null, error });
@@ -375,62 +521,140 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         },
         async ajouter(f) {
           const { error } = await client.rpc('admin_ajouter_prospect', {
-            p_nom: f.nom, p_categorie: f.categorie, p_commune: f.commune, p_telephone: f.telephone, p_email: f.email,
+            p_nom: f.nom,
+            p_categorie: f.categorie,
+            p_commune: f.commune,
+            p_telephone: f.telephone,
+            p_email: f.email,
           });
           if (error && /e-mail invalide/i.test(error.message)) return 'email';
           verifier({ data: null, error });
           return 'ok';
         },
         async lancerCampagne(sujet, message, ids) {
-          return verifier(await client.rpc('admin_lancer_campagne', { p_sujet: sujet, p_message: message, p_prospects: ids })) as number;
+          return verifier(
+            await client.rpc('admin_lancer_campagne', {
+              p_sujet: sujet,
+              p_message: message,
+              p_prospects: ids,
+            }),
+          ) as number;
         },
         async campagnes() {
           const l = verifier(await client.rpc('admin_campagnes')) as {
-            id: string; sujet: string; cree_le: string; total: number; envoyes: number; en_attente: number; echecs: number;
-            clics: number; inscriptions: number;
+            id: string;
+            sujet: string;
+            cree_le: string;
+            total: number;
+            envoyes: number;
+            en_attente: number;
+            echecs: number;
+            clics: number;
+            inscriptions: number;
           }[];
           return l.map((c) => ({
-            id: c.id, sujet: c.sujet, creeLe: c.cree_le, total: c.total, envoyes: c.envoyes, enAttente: c.en_attente, echecs: c.echecs,
-            clics: c.clics, inscriptions: c.inscriptions,
+            id: c.id,
+            sujet: c.sujet,
+            creeLe: c.cree_le,
+            total: c.total,
+            envoyes: c.envoyes,
+            enAttente: c.en_attente,
+            echecs: c.echecs,
+            clics: c.clics,
+            inscriptions: c.inscriptions,
           }));
         },
         async suiviCampagne(id) {
           const l = await toutesLesLignes<{
-            envoi_id: string; nom: string; commune: string | null; email: string; statut: SuiviEnvoi['statut']; envoye_le: string | null;
-            erreur: string | null; premier_clic: string | null; derniere_visite: string | null; pages_vues: number; pages: string[] | null;
+            envoi_id: string;
+            nom: string;
+            commune: string | null;
+            email: string;
+            statut: SuiviEnvoi['statut'];
+            envoye_le: string | null;
+            erreur: string | null;
+            premier_clic: string | null;
+            derniere_visite: string | null;
+            pages_vues: number;
+            pages: string[] | null;
             inscrit_le: string | null;
-          }>((debut, fin) => client.rpc('admin_suivi_campagne', { p_campagne: id }).range(debut, fin));
+          }>((debut, fin) =>
+            client.rpc('admin_suivi_campagne', { p_campagne: id }).range(debut, fin),
+          );
           return l.map((e) => ({
-            envoiId: e.envoi_id, nom: e.nom, commune: e.commune, email: e.email, statut: e.statut, envoyeLe: e.envoye_le, erreur: e.erreur,
-            premierClic: e.premier_clic, derniereVisite: e.derniere_visite, pagesVues: e.pages_vues, pages: e.pages ?? [], inscritLe: e.inscrit_le,
+            envoiId: e.envoi_id,
+            nom: e.nom,
+            commune: e.commune,
+            email: e.email,
+            statut: e.statut,
+            envoyeLe: e.envoye_le,
+            erreur: e.erreur,
+            premierClic: e.premier_clic,
+            derniereVisite: e.derniere_visite,
+            pagesVues: e.pages_vues,
+            pages: e.pages ?? [],
+            inscritLe: e.inscrit_le,
           }));
         },
         async noterVisite(jeton, type, page) {
-          await client.rpc('noter_visite_prospection', { p_jeton: jeton, p_type: type, p_page: page });
+          await client.rpc('noter_visite_prospection', {
+            p_jeton: jeton,
+            p_type: type,
+            p_page: page,
+          });
         },
         async noterInscription(jeton, restaurantId) {
-          await client.rpc('noter_inscription_prospection', { p_jeton: jeton, p_restaurant: restaurantId });
+          await client.rpc('noter_inscription_prospection', {
+            p_jeton: jeton,
+            p_restaurant: restaurantId,
+          });
         },
         async seDesinscrire(jeton) {
-          return verifier(await client.rpc('se_desinscrire_prospection', { p_jeton: jeton })) as boolean;
+          return verifier(
+            await client.rpc('se_desinscrire_prospection', { p_jeton: jeton }),
+          ) as boolean;
         },
       },
       async demandes(limite = 100) {
         const l = verifier(await client.rpc('admin_demandes', { p_limite: limite })) as {
-          id: string; etablissement: string; commune: string; poste: Poste; jour: string; debut: number; fin: number; nb_extras: number;
-          pourvues: number; statut: StatutDemande; publiee_le: string; delai_minutes: number | null; frais_ht_centimes: number;
+          id: string;
+          etablissement: string;
+          commune: string;
+          poste: Poste;
+          jour: string;
+          debut: number;
+          fin: number;
+          nb_extras: number;
+          pourvues: number;
+          statut: StatutDemande;
+          publiee_le: string;
+          delai_minutes: number | null;
+          frais_ht_centimes: number;
           intitule: string | null;
         }[];
         return l.map((d) => ({
-          id: d.id, etablissement: d.etablissement, commune: d.commune, poste: d.poste, jour: d.jour, debut: d.debut, fin: d.fin,
-          nbExtras: d.nb_extras, pourvues: d.pourvues, statut: d.statut, publieeLe: d.publiee_le, delaiMinutes: d.delai_minutes,
+          id: d.id,
+          etablissement: d.etablissement,
+          commune: d.commune,
+          poste: d.poste,
+          jour: d.jour,
+          debut: d.debut,
+          fin: d.fin,
+          nbExtras: d.nb_extras,
+          pourvues: d.pourvues,
+          statut: d.statut,
+          publieeLe: d.publiee_le,
+          delaiMinutes: d.delai_minutes,
           fraisHTCentimes: d.frais_ht_centimes,
           intitule: d.intitule,
         }));
       },
     },
     async statistiques() {
-      const [ex, et] = await Promise.all([client.rpc('statistiques_extras'), client.rpc('statistiques_etablissements')]);
+      const [ex, et] = await Promise.all([
+        client.rpc('statistiques_extras'),
+        client.rpc('statistiques_etablissements'),
+      ]);
       if (refus(ex.error, /administrateurs Kivien/)) return null;
       const extras = verifier(ex) as {
         commune: string;
@@ -441,7 +665,14 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         dispo_week_end: boolean;
         dispo_7_jours: boolean;
       }[];
-      const etablissements = verifier(et) as { commune: string | null; lat: number | null; lng: number | null; secteur: string; inscrit_le: string; demandes: number }[];
+      const etablissements = verifier(et) as {
+        commune: string | null;
+        lat: number | null;
+        lng: number | null;
+        secteur: string;
+        inscrit_le: string;
+        demandes: number;
+      }[];
       return {
         extras: extras.map((e) => ({
           commune: e.commune,
@@ -452,23 +683,40 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           dispoWeekEnd: e.dispo_week_end,
           dispo7Jours: e.dispo_7_jours,
         })),
-        etablissements: etablissements.map((r) => ({ commune: r.commune, lat: r.lat, lng: r.lng, secteur: r.secteur, inscritLe: r.inscrit_le, demandes: r.demandes })),
+        etablissements: etablissements.map((r) => ({
+          commune: r.commune,
+          lat: r.lat,
+          lng: r.lng,
+          secteur: r.secteur,
+          inscritLe: r.inscrit_le,
+          demandes: r.demandes,
+        })),
       };
     },
     async equipe(restaurantId) {
-      const lignes = verifier(await client.rpc('equipe_etablissement', { p_restaurant: restaurantId })) as {
+      const lignes = verifier(
+        await client.rpc('equipe_etablissement', { p_restaurant: restaurantId }),
+      ) as {
         utilisateur_id: string | null;
         telephone: string;
         role: Role;
         en_attente: boolean;
         moi: boolean;
       }[];
-      return lignes.map(
-        (l): Membre => ({ utilisateurId: l.utilisateur_id, telephone: l.telephone, role: l.role, enAttente: l.en_attente, moi: l.moi }),
-      );
+      return lignes.map((l): Membre => ({
+        utilisateurId: l.utilisateur_id,
+        telephone: l.telephone,
+        role: l.role,
+        enAttente: l.en_attente,
+        moi: l.moi,
+      }));
     },
     async inviter(restaurantId, telephone, role) {
-      const { error } = await client.rpc('inviter_membre', { p_restaurant: restaurantId, p_telephone: telephone, p_role: role });
+      const { error } = await client.rpc('inviter_membre', {
+        p_restaurant: restaurantId,
+        p_telephone: telephone,
+        p_role: role,
+      });
       if (refus(error, /déjà accès/)) return 'dejaMembre';
       if (refus(error, /compte extra/)) return 'compteExtra';
       if (refus(error, /Réservé au gérant/)) return 'reserve';
@@ -476,16 +724,28 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       return 'ok';
     },
     async annulerInvitation(restaurantId, telephone) {
-      verifier(await client.rpc('annuler_invitation', { p_restaurant: restaurantId, p_telephone: telephone }));
+      verifier(
+        await client.rpc('annuler_invitation', {
+          p_restaurant: restaurantId,
+          p_telephone: telephone,
+        }),
+      );
     },
     async changerRole(restaurantId, utilisateurId, role) {
-      const { error } = await client.rpc('changer_role', { p_restaurant: restaurantId, p_utilisateur: utilisateurId, p_role: role });
+      const { error } = await client.rpc('changer_role', {
+        p_restaurant: restaurantId,
+        p_utilisateur: utilisateurId,
+        p_role: role,
+      });
       if (refus(error, /gérant requis/)) return 'dernierGerant';
       verifier({ data: null, error });
       return 'ok';
     },
     async retirerMembre(restaurantId, utilisateurId) {
-      const { error } = await client.rpc('retirer_membre', { p_restaurant: restaurantId, p_utilisateur: utilisateurId });
+      const { error } = await client.rpc('retirer_membre', {
+        p_restaurant: restaurantId,
+        p_utilisateur: utilisateurId,
+      });
       if (refus(error, /gérant requis/)) return 'dernierGerant';
       verifier({ data: null, error });
       return 'ok';
@@ -494,7 +754,9 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       const p = verifier(
         await client
           .from('parametres')
-          .select('date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes, tva_pour_mille')
+          .select(
+            'date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes, tva_pour_mille',
+          )
           .lte('date_effet', aujourdhuiReunion())
           .order('date_effet', { ascending: false })
           .limit(1)
@@ -543,24 +805,56 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
     async demandes() {
       const r = await source.restaurant();
       const [lignes, favoris] = await Promise.all([
-        client.from('demandes').select(SELECTION).eq('restaurant_id', r.id).order('jour', { ascending: false }).order('debut'),
+        client
+          .from('demandes')
+          .select(SELECTION)
+          .eq('restaurant_id', r.id)
+          .order('jour', { ascending: false })
+          .order('debut'),
         idsFavoris(r.id),
       ]);
       return (verifier(lignes) as unknown as LigneDemande[]).map((l) => versDemande(l, favoris));
     },
     async demande(id) {
-      const [ligne, favoris] = await Promise.all([
+      const [ligne, favoris, lignesConfiance] = await Promise.all([
         client.from('demandes').select(SELECTION).eq('id', id).maybeSingle(),
         idsFavoris(),
+        client.rpc('confiance_extras', { p_demande: id }),
       ]);
       const l = verifier(ligne) as unknown as LigneDemande | null;
-      return l ? versDemande(l, favoris) : null;
+      const confiance = new Map(
+        (
+          (lignesConfiance.data ?? []) as {
+            extra_id: string;
+            missions: number;
+            notes: number;
+            note_moyenne_dixiemes: number | null;
+            absences: number;
+            dossier_complet: boolean;
+          }[]
+        ).map((c) => [
+          c.extra_id,
+          {
+            missions: c.missions,
+            notes: c.notes,
+            noteMoyenneDixiemes: c.note_moyenne_dixiemes,
+            absences: c.absences,
+            dossierComplet: c.dossier_complet,
+          },
+        ]),
+      );
+      return l ? versDemande(l, favoris, confiance) : null;
     },
     async annulerDemande(id) {
       verifier(await client.from('demandes').update({ statut: 'annulee' }).eq('id', id));
     },
     async signerContrat(affectationId, signature) {
-      verifier(await client.rpc('signer_contrat', { p_affectation: affectationId, p_signature: signature }));
+      verifier(
+        await client.rpc('signer_contrat', {
+          p_affectation: affectationId,
+          p_signature: signature,
+        }),
+      );
     },
     async signatures(affectationId) {
       const l = verifier(
@@ -569,10 +863,21 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           .select('signe_restaurant_le, signature_restaurant, signe_extra_le, signature_extra')
           .eq('affectation_id', affectationId)
           .maybeSingle(),
-      ) as { signe_restaurant_le: string | null; signature_restaurant: string | null; signe_extra_le: string | null; signature_extra: string | null } | null;
+      ) as {
+        signe_restaurant_le: string | null;
+        signature_restaurant: string | null;
+        signe_extra_le: string | null;
+        signature_extra: string | null;
+      } | null;
       return {
-        restaurant: l?.signature_restaurant && l.signe_restaurant_le ? { image: l.signature_restaurant, le: l.signe_restaurant_le } : null,
-        extra: l?.signature_extra && l.signe_extra_le ? { image: l.signature_extra, le: l.signe_extra_le } : null,
+        restaurant:
+          l?.signature_restaurant && l.signe_restaurant_le
+            ? { image: l.signature_restaurant, le: l.signe_restaurant_le }
+            : null,
+        extra:
+          l?.signature_extra && l.signe_extra_le
+            ? { image: l.signature_extra, le: l.signe_extra_le }
+            : null,
       };
     },
     async infosDPAE(affectationId) {
@@ -586,7 +891,14 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       }[];
       const l = lignes[0];
       return l
-        ? { prenom: l.prenom, nom: l.nom, dateNaissance: l.date_naissance, lieuNaissance: l.lieu_naissance, nir: l.nir, adresse: l.adresse }
+        ? {
+            prenom: l.prenom,
+            nom: l.nom,
+            dateNaissance: l.date_naissance,
+            lieuNaissance: l.lieu_naissance,
+            nir: l.nir,
+            adresse: l.adresse,
+          }
         : null;
     },
     async noter(affectationId, n) {
@@ -605,7 +917,9 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
     },
     async retirerFavori(extraId) {
       const r = await source.restaurant();
-      verifier(await client.from('favoris').delete().eq('restaurant_id', r.id).eq('extra_id', extraId));
+      verifier(
+        await client.from('favoris').delete().eq('restaurant_id', r.id).eq('extra_id', extraId),
+      );
     },
     async factures(): Promise<Facture[]> {
       const r = await source.restaurant();

@@ -1,5 +1,6 @@
 import type {
   CategorieProspect,
+  ConfianceExtra,
   JourISO,
   ParametresTarifaires,
   Poste,
@@ -51,27 +52,96 @@ export type ResultatInvitation = 'ok' | 'dejaMembre' | 'compteExtra' | 'reserve'
 /** Tableau de bord de l'espace administrateur (période en jours, montants en centimes). */
 export interface TableauAdmin {
   periode_jours: number;
-  demande: { demandes: number; places: number; pourvues: number; annulees: number; en_recherche: number; delai_median_minutes: number | null; par_poste: Partial<Record<Poste, number>> };
-  offre: { extras: number; nouveaux: number; actifs: number; dispo_7_jours: number; avec_photo: number };
+  demande: {
+    demandes: number;
+    places: number;
+    pourvues: number;
+    annulees: number;
+    en_recherche: number;
+    delai_median_minutes: number | null;
+    par_poste: Partial<Record<Poste, number>>;
+  };
+  offre: {
+    extras: number;
+    nouveaux: number;
+    actifs: number;
+    dispo_7_jours: number;
+    avec_photo: number;
+  };
   etablissements: { total: number; nouveaux: number; actifs: number; utilisateurs: number };
-  valeur: { frais_ht_centimes: number; tva_centimes: number; salaires_bruts_centimes: number; missions_facturees: number; frais_a_venir_ht_centimes: number };
-  qualite: { note_moyenne: number | null; notations: number; absences: number; desistements: number; contrats_signes: number };
-  par_mois: { mois: string; demandes: number; places: number; pourvues: number; frais_ht_centimes: number; salaires_bruts_centimes: number }[];
+  valeur: {
+    frais_ht_centimes: number;
+    tva_centimes: number;
+    salaires_bruts_centimes: number;
+    missions_facturees: number;
+    frais_a_venir_ht_centimes: number;
+  };
+  qualite: {
+    note_moyenne: number | null;
+    notations: number;
+    absences: number;
+    desistements: number;
+    contrats_signes: number;
+  };
+  par_mois: {
+    mois: string;
+    demandes: number;
+    places: number;
+    pourvues: number;
+    frais_ht_centimes: number;
+    salaires_bruts_centimes: number;
+  }[];
 }
 
 export interface EtablissementAdmin {
-  id: string; nom: string; commune: string | null; lat: number | null; lng: number | null; secteur: string; siret: string | null;
-  telephone: string | null; inscritLe: string; utilisateurs: number; demandes: number; placesPourvues: number; fraisHTCentimes: number; derniereDemande: string | null;
+  id: string;
+  nom: string;
+  commune: string | null;
+  lat: number | null;
+  lng: number | null;
+  secteur: string;
+  siret: string | null;
+  telephone: string | null;
+  inscritLe: string;
+  utilisateurs: number;
+  demandes: number;
+  placesPourvues: number;
+  fraisHTCentimes: number;
+  derniereDemande: string | null;
 }
 
 export interface ExtraAdmin {
-  id: string; prenom: string; nom: string; telephone: string; commune: string; competences: Poste[]; experience: string | null; aVoiture: boolean;
-  inscritLe: string; missions: number; absences: number; desistements: number; noteMoyenne: number | null; dispo7Jours: boolean; avecPhoto: boolean;
+  id: string;
+  prenom: string;
+  nom: string;
+  telephone: string;
+  commune: string;
+  competences: Poste[];
+  experience: string | null;
+  aVoiture: boolean;
+  inscritLe: string;
+  missions: number;
+  absences: number;
+  desistements: number;
+  noteMoyenne: number | null;
+  dispo7Jours: boolean;
+  avecPhoto: boolean;
 }
 
 export interface DemandeAdmin {
-  id: string; etablissement: string; commune: string; poste: Poste; jour: string; debut: number; fin: number; nbExtras: number;
-  pourvues: number; statut: StatutDemande; publieeLe: string; delaiMinutes: number | null; fraisHTCentimes: number;
+  id: string;
+  etablissement: string;
+  commune: string;
+  poste: Poste;
+  jour: string;
+  debut: number;
+  fin: number;
+  nbExtras: number;
+  pourvues: number;
+  statut: StatutDemande;
+  publieeLe: string;
+  delaiMinutes: number | null;
+  fraisHTCentimes: number;
   intitule: string | null;
 }
 
@@ -143,9 +213,23 @@ export interface SourceProspection {
   derniereRecherche(): Promise<RechercheProspects | null>;
   prospects(): Promise<Prospect[]>;
   importer(fiches: ProspectOsm[]): Promise<{ ajoutes: number; misAJour: number }>;
-  modifier(id: string, m: { email: string | null; telephone: string | null; statut: StatutProspect; notes: string | null }): Promise<'ok' | 'email'>;
+  modifier(
+    id: string,
+    m: {
+      email: string | null;
+      telephone: string | null;
+      statut: StatutProspect;
+      notes: string | null;
+    },
+  ): Promise<'ok' | 'email'>;
   /** Établissement ajouté à la main (absent d'OpenStreetMap, ou fiche d'essai). */
-  ajouter(f: { nom: string; categorie: CategorieProspect; commune: string | null; telephone: string | null; email: string | null }): Promise<'ok' | 'email'>;
+  ajouter(f: {
+    nom: string;
+    categorie: CategorieProspect;
+    commune: string | null;
+    telephone: string | null;
+    email: string | null;
+  }): Promise<'ok' | 'email'>;
   lancerCampagne(sujet: string, message: string, ids: string[]): Promise<number>;
   campagnes(): Promise<CampagneProspection[]>;
   suiviCampagne(id: string): Promise<SuiviEnvoi[]>;
@@ -167,8 +251,23 @@ export interface SourceAdmin {
 
 /** Compteur de l'équipe Kivien : extras et établissements inscrits, sans donnée personnelle. */
 export interface Statistiques {
-  extras: { commune: string; competences: Poste[]; experience: string | null; aVoiture: boolean; inscritLe: string; dispoWeekEnd: boolean; dispo7Jours: boolean }[];
-  etablissements: { commune: string | null; lat: number | null; lng: number | null; secteur: string; inscritLe: string; demandes: number }[];
+  extras: {
+    commune: string;
+    competences: Poste[];
+    experience: string | null;
+    aVoiture: boolean;
+    inscritLe: string;
+    dispoWeekEnd: boolean;
+    dispo7Jours: boolean;
+  }[];
+  etablissements: {
+    commune: string | null;
+    lat: number | null;
+    lng: number | null;
+    secteur: string;
+    inscritLe: string;
+    demandes: number;
+  }[];
 }
 
 export interface NouvelleDemande {
@@ -203,6 +302,10 @@ export interface ExtraAffecte extends ProfilPublic {
   /** Notation après mission, null si pas encore notée. */
   notation: { present: boolean; note: number | null } | null;
   favori: boolean;
+  /** Historique sur Kivien (badges de confiance), lu seulement sur la page de la demande. */
+  confiance: ConfianceExtra | null;
+  /** Pointage de l'extra (ISO), null tant qu'il n'a pas pointé. */
+  pointage: { arriveeLe: string | null; departLe: string | null } | null;
 }
 
 export interface DemandeSuivi {
@@ -322,13 +425,22 @@ export interface SourceResto {
   etablissements(): Promise<Restaurant[]>;
   /** Établissement affiché : celui choisi (etablissementCourant), sinon le premier. */
   restaurant(): Promise<Restaurant>;
-  ajouterEtablissement(e: NouvelEtablissement): Promise<{ resultat: ResultatEtablissement; id?: string }>;
-  modifierEtablissement(id: string, m: { nom: string; adresse: AdresseGeo }): Promise<'ok' | 'adresse'>;
+  ajouterEtablissement(
+    e: NouvelEtablissement,
+  ): Promise<{ resultat: ResultatEtablissement; id?: string }>;
+  modifierEtablissement(
+    id: string,
+    m: { nom: string; adresse: AdresseGeo },
+  ): Promise<'ok' | 'adresse'>;
   equipe(restaurantId: string): Promise<Membre[]>;
   /** `telephone` au format +26269XXXXXXX. */
   inviter(restaurantId: string, telephone: string, role: Role): Promise<ResultatInvitation>;
   annulerInvitation(restaurantId: string, telephone: string): Promise<void>;
-  changerRole(restaurantId: string, utilisateurId: string, role: Role): Promise<'ok' | 'dernierGerant'>;
+  changerRole(
+    restaurantId: string,
+    utilisateurId: string,
+    role: Role,
+  ): Promise<'ok' | 'dernierGerant'>;
   retirerMembre(restaurantId: string, utilisateurId: string): Promise<'ok' | 'dernierGerant'>;
   /** null : compte sans accès administrateur. */
   statistiques(): Promise<Statistiques | null>;
