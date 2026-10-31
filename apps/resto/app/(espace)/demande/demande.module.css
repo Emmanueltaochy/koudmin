@@ -116,14 +116,47 @@
 .caseLibreActive {
   flex: 1;
 }
-.dateCachee {
+.caseAutre {
+  position: relative;
+  display: flex;
+}
+.caseAutre > .caseDate {
+  flex: 1;
+  justify-content: center;
+}
+.caseDate[data-actif='true'] {
+  border-color: var(--k-basalte);
+  background: var(--k-basalte);
+  color: var(--k-blanc);
+}
+.caseDate[data-actif='true'] .caseLibelle {
+  color: var(--k-blanc);
+}
+.caseAutre:focus-within > .caseDate {
+  outline: 2px solid var(--k-basalte);
+  outline-offset: 2px;
+}
+/* Champ date natif posé sur la case, invisible mais touchable. */
+.dateSurCase {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 1px;
-  height: 1px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
   opacity: 0;
-  pointer-events: none;
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.dateSurCase::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
 }
 
 /* Début / Fin */

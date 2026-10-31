@@ -354,43 +354,37 @@ export function FormulaireDemande() {
                   </button>
                 );
               })}
-              <button
-                type="button"
-                role="radio"
-                aria-checked={!!dateLibre}
-                aria-label="Choisir une autre date"
-                className={`${s.caseDate} ${dateLibre ? s.caseLibreActive : s.caseCalendrier}`}
-                onClick={() => {
-                  const c = champDate.current;
-                  if (!c) return;
-                  try {
-                    c.showPicker();
-                  } catch {
-                    c.focus();
-                    c.click();
-                  }
-                }}
-              >
-                {dateLibre ? (
-                  <>
-                    <span className={s.caseLibelle}>Autre date</span>
-                    <span className={ui.corpsFort}>{jourMoisCourt(dateLibre)}</span>
-                  </>
-                ) : (
-                  <CalendarDays size={20} strokeWidth={2} aria-hidden />
-                )}
-              </button>
-              <input
-                ref={champDate}
-                type="date"
-                className={s.dateCachee}
-                tabIndex={-1}
-                aria-hidden
-                min={aujourdhui}
-                max={ajouterJours(aujourdhui, HORIZON_JOURS)}
-                value={saisie.jour ?? ''}
-                onChange={(e) => e.target.value && modifier({ jour: e.target.value })}
-              />
+              {/* Autre date : le vrai champ date, transparent, couvre la case. Le toucher ouvre le
+                  calendrier natif partout (iPhone et Android compris) ; sur ordinateur, showPicker. */}
+              <div className={`${s.caseAutre} ${dateLibre ? s.caseLibreActive : s.caseCalendrier}`}>
+                <span className={s.caseDate} data-actif={!!dateLibre} aria-hidden>
+                  {dateLibre ? (
+                    <>
+                      <span className={s.caseLibelle}>Autre date</span>
+                      <span className={ui.corpsFort}>{jourMoisCourt(dateLibre)}</span>
+                    </>
+                  ) : (
+                    <CalendarDays size={20} strokeWidth={2} aria-hidden />
+                  )}
+                </span>
+                <input
+                  ref={champDate}
+                  type="date"
+                  className={s.dateSurCase}
+                  aria-label="Choisir une autre date"
+                  min={aujourdhui}
+                  max={ajouterJours(aujourdhui, HORIZON_JOURS)}
+                  value={saisie.jour ?? ''}
+                  onClick={(e) => {
+                    try {
+                      e.currentTarget.showPicker();
+                    } catch {
+                      // Navigateur sans showPicker : le toucher du champ suffit à ouvrir le calendrier.
+                    }
+                  }}
+                  onChange={(e) => e.target.value && modifier({ jour: e.target.value })}
+                />
+              </div>
             </div>
             {err('jour') && <p className={ui.messageErreur}>{err('jour')}</p>}
           </div>

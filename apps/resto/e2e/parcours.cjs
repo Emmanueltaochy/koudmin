@@ -221,6 +221,16 @@ let pageCourante = null;
   await p.getByText('Indiquez le poste.').waitFor(); ok('poste libre : intitulé obligatoire');
   await p.locator('#intitule').fill('Voiturier');
   await p.locator('#description-poste').fill('Accueil des clients et stationnement des véhicules.');
+  // Calendrier : le vrai champ date couvre la case, un toucher l'ouvre (iPhone, Android, ordinateur).
+  const champDate = p.getByLabel('Choisir une autre date');
+  const dessus = await champDate.evaluate((c) => {
+    const r = c.getBoundingClientRect();
+    return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) === c && r.width >= 40 && r.height >= 40;
+  });
+  if (!dessus) throw new Error('champ date non touchable');
+  await champDate.click();
+  await champDate.fill(await champDate.evaluate((c) => c.max));
+  await p.getByText('Autre date').waitFor(); ok('calendrier : champ date touchable, autre date choisie');
   await p.getByRole('radio', { name: /Demain/ }).click();
   await p.getByText('Je peux raccompagner').click();
   await p.getByRole('button', { name: 'Une semaine de plus' }).click();
