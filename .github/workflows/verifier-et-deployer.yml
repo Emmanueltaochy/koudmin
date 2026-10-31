@@ -49,6 +49,7 @@ jobs:
           [ -x /usr/lib/postgresql/16/bin/initdb ] || { sudo apt-get update -q && sudo apt-get install -y -q postgresql-16; }
           scripts/verifier-sql.sh
           scripts/verifier-recherche.sh
+          scripts/verifier-notifications.sh
 
       - name: Scripts du serveur
         run: |

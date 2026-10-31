@@ -1,4 +1,9 @@
-import { ajouterJours, aujourdhuiReunion, SECTEUR_PAR_DEFAUT, type MissionResume } from '@kivien/core';
+import {
+  ajouterJours,
+  aujourdhuiReunion,
+  SECTEUR_PAR_DEFAUT,
+  type MissionResume,
+} from '@kivien/core';
 import type {
   CleDispo,
   ContratExtra,
@@ -20,24 +25,116 @@ function missionsFictives(): MissionResume[] {
   const demain = ajouterJours(ceSoir, 1);
   const base = { tauxHoraireBrutCentimes: TAUX_FICTIF };
   return [
-    { ...base, id: 'd001', restaurant: 'Le Boucan Grillé', commune: 'Saint-Gilles-les-Bains', distanceMetres: 2100, poste: 'serveur', jour: ceSoir, debut: 1080, fin: 0, retourAssure: true, busRetour: null },
-    { ...base, id: 'd002', restaurant: 'Ti Kaz Bar', commune: 'Saint-Gilles-les-Bains', distanceMetres: 2300, poste: 'barman', jour: demain, debut: 1080, fin: 60, retourAssure: true, busRetour: null },
-    { ...base, id: 'd003', restaurant: 'Chez Tatie Lucette', commune: 'Saint-Paul', distanceMetres: 4800, poste: 'plonge', jour: ceSoir, debut: 1140, fin: 1410, retourAssure: false, busRetour: 1215 },
-    { ...base, id: 'd004', restaurant: 'Hôtel Les Filaos', commune: "L'Hermitage", distanceMetres: 6000, poste: 'commis', jour: demain, debut: 690, fin: 900, retourAssure: false, busRetour: 920 },
+    {
+      ...base,
+      id: 'd001',
+      restaurant: 'Le Boucan Grillé',
+      commune: 'Saint-Gilles-les-Bains',
+      distanceMetres: 2100,
+      poste: 'serveur',
+      jour: ceSoir,
+      debut: 1080,
+      fin: 0,
+      retourAssure: true,
+      busRetour: null,
+    },
+    {
+      ...base,
+      id: 'd002',
+      restaurant: 'Ti Kaz Bar',
+      commune: 'Saint-Gilles-les-Bains',
+      distanceMetres: 2300,
+      poste: 'barman',
+      jour: demain,
+      debut: 1080,
+      fin: 60,
+      retourAssure: true,
+      busRetour: null,
+    },
+    {
+      ...base,
+      id: 'd003',
+      restaurant: 'Chez Tatie Lucette',
+      commune: 'Saint-Paul',
+      distanceMetres: 4800,
+      poste: 'plonge',
+      jour: ceSoir,
+      debut: 1140,
+      fin: 1410,
+      retourAssure: false,
+      busRetour: 1215,
+    },
+    {
+      ...base,
+      id: 'd004',
+      restaurant: 'Hôtel Les Filaos',
+      commune: "L'Hermitage",
+      distanceMetres: 6000,
+      poste: 'commis',
+      jour: demain,
+      debut: 690,
+      fin: 900,
+      retourAssure: false,
+      busRetour: 920,
+    },
   ];
 }
 
 const COMPLEMENTS: Record<string, { tenue: string; lieu: LieuMission }> = {
-  d001: { tenue: 'Tenue noire. Chaussures fermées.', lieu: { adresse: '14 rue du Général de Gaulle', codePostal: '97434', acces: 'entrée du personnel côté cuisine', telephone: '+262262000001', lat: -21.039442, lng: 55.237476 } },
-  d002: { tenue: 'Tenue noire.', lieu: { adresse: '3 rue des Brisants', codePostal: '97434', acces: null, telephone: '+262262000002', lat: -21.044625, lng: 55.239329 } },
-  d003: { tenue: 'Chaussures fermées.', lieu: { adresse: '22 rue Labourdonnais', codePostal: '97460', acces: null, telephone: '+262262000003', lat: -20.989435, lng: 55.270813 } },
-  d004: { tenue: 'Tenue blanche.', lieu: { adresse: '5 avenue de la Mer', codePostal: '97434', acces: null, telephone: '+262262000004', lat: -21.080704, lng: 55.235221 } },
+  d001: {
+    tenue: 'Tenue noire. Chaussures fermées.',
+    lieu: {
+      adresse: '14 rue du Général de Gaulle',
+      codePostal: '97434',
+      acces: 'entrée du personnel côté cuisine',
+      telephone: '+262262000001',
+      lat: -21.039442,
+      lng: 55.237476,
+    },
+  },
+  d002: {
+    tenue: 'Tenue noire.',
+    lieu: {
+      adresse: '3 rue des Brisants',
+      codePostal: '97434',
+      acces: null,
+      telephone: '+262262000002',
+      lat: -21.044625,
+      lng: 55.239329,
+    },
+  },
+  d003: {
+    tenue: 'Chaussures fermées.',
+    lieu: {
+      adresse: '22 rue Labourdonnais',
+      codePostal: '97460',
+      acces: null,
+      telephone: '+262262000003',
+      lat: -20.989435,
+      lng: 55.270813,
+    },
+  },
+  d004: {
+    tenue: 'Tenue blanche.',
+    lieu: {
+      adresse: '5 avenue de la Mer',
+      codePostal: '97434',
+      acces: null,
+      telephone: '+262262000004',
+      lat: -21.080704,
+      lng: 55.235221,
+    },
+  },
 };
 
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Démonstration : adresse e-mail du compte. */
-let emailDemo: { email: string | null; enAttente: string | null } = { email: null, enAttente: null };
+let alertesDemo = true;
+let emailDemo: { email: string | null; enAttente: string | null } = {
+  email: null,
+  enAttente: null,
+};
 
 export function sourceFictive(): SourceDonnees {
   // État de la démo, gardé en mémoire le temps de la session.
@@ -75,7 +172,15 @@ export function sourceFictive(): SourceDonnees {
       const c = COMPLEMENTS[id];
       if (!m || !c) return null;
       const confirmee = confirmees.has(id);
-      return { ...m, tenue: c.tenue, descriptionPoste: null, confirmee, disponible: !confirmee, lieu: confirmee ? c.lieu : null, position: { lat: c.lieu.lat, lng: c.lieu.lng } };
+      return {
+        ...m,
+        tenue: c.tenue,
+        descriptionPoste: null,
+        confirmee,
+        disponible: !confirmee,
+        lieu: confirmee ? c.lieu : null,
+        position: { lat: c.lieu.lat, lng: c.lieu.lng },
+      };
     },
     async accepter(id) {
       // Délai de la maquette : le temps de voir « On prévient le restaurant ».
@@ -104,6 +209,12 @@ export function sourceFictive(): SourceDonnees {
     async emailDuCompte() {
       return emailDemo;
     },
+    async alertesEmail() {
+      return alertesDemo;
+    },
+    async reglerAlertesEmail(actives) {
+      alertesDemo = actives;
+    },
     async changerEmail(email) {
       emailDemo = { ...emailDemo, enAttente: email };
       return 'ok' as const;
@@ -112,14 +223,45 @@ export function sourceFictive(): SourceDonnees {
       // Démonstration : deux missions déjà faites, puis les missions confirmées dans la session.
       const auj = aujourdhuiReunion();
       const passees = [
-        { demandeId: 'g1', restaurant: 'Le Boucan Grillé', commune: 'Saint-Gilles-les-Bains', poste: 'serveur' as const, jour: ajouterJours(auj, -6), debut: 1080, fin: 0 },
-        { demandeId: 'g2', restaurant: 'Chez Tatie Lucette', commune: 'Saint-Paul', poste: 'plonge' as const, jour: ajouterJours(auj, -20), debut: 1140, fin: 1410 },
-      ].map((m) => ({ ...m, tauxHoraireBrutCentimes: 1231, effectuee: true, contratSigneExtra: true, contratSigneRestaurant: true }));
+        {
+          demandeId: 'g1',
+          restaurant: 'Le Boucan Grillé',
+          commune: 'Saint-Gilles-les-Bains',
+          poste: 'serveur' as const,
+          jour: ajouterJours(auj, -6),
+          debut: 1080,
+          fin: 0,
+        },
+        {
+          demandeId: 'g2',
+          restaurant: 'Chez Tatie Lucette',
+          commune: 'Saint-Paul',
+          poste: 'plonge' as const,
+          jour: ajouterJours(auj, -20),
+          debut: 1140,
+          fin: 1410,
+        },
+      ].map((m) => ({
+        ...m,
+        tauxHoraireBrutCentimes: 1231,
+        effectuee: true,
+        contratSigneExtra: true,
+        contratSigneRestaurant: true,
+      }));
       const aVenir = missionsFictives()
         .filter((m) => confirmees.has(m.id))
         .map((m) => ({
-          demandeId: m.id, restaurant: m.restaurant, commune: m.commune, poste: m.poste, jour: m.jour, debut: m.debut, fin: m.fin,
-          tauxHoraireBrutCentimes: m.tauxHoraireBrutCentimes, effectuee: false, contratSigneExtra: signes.has(m.id), contratSigneRestaurant: false,
+          demandeId: m.id,
+          restaurant: m.restaurant,
+          commune: m.commune,
+          poste: m.poste,
+          jour: m.jour,
+          debut: m.debut,
+          fin: m.fin,
+          tauxHoraireBrutCentimes: m.tauxHoraireBrutCentimes,
+          effectuee: false,
+          contratSigneExtra: signes.has(m.id),
+          contratSigneRestaurant: false,
         }));
       return [...aVenir, ...passees];
     },
@@ -190,7 +332,17 @@ export function sourceFictive(): SourceDonnees {
     },
     async accepterCgu() {},
     async inscrire(i) {
-      profil = { prenom: i.prenom, nom: i.nom, telephone: i.telephone, commune: i.commune, aVoiture: i.aVoiture, competences: [], experience: null, langues: [], presentation: '' };
+      profil = {
+        prenom: i.prenom,
+        nom: i.nom,
+        telephone: i.telephone,
+        commune: i.commune,
+        aVoiture: i.aVoiture,
+        competences: [],
+        experience: null,
+        langues: [],
+        presentation: '',
+      };
       photo = null;
     },
     async deconnecter() {},

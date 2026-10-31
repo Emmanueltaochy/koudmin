@@ -350,11 +350,36 @@ AccuracySec=5s
 [Install]
 WantedBy=timers.target
 UNIT
+# E-mails automatiques (alertes de missions, extra trouvé, contrat à signer, rappels de la veille) :
+# file lue chaque minute.
+install -m 0700 "$SOURCE/deploy/vps/notifications.sh" /usr/local/sbin/kivien-notifications
+cat > /etc/systemd/system/kivien-notifications.service <<'UNIT'
+[Unit]
+Description=E-mails automatiques Kivien (missions, contrats, rappels)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kivien-notifications
+TimeoutStartSec=10min
+UNIT
+cat > /etc/systemd/system/kivien-notifications.timer <<'UNIT'
+[Unit]
+Description=E-mails automatiques Kivien, chaque minute
+
+[Timer]
+OnCalendar=*-*-* *:*:30
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target
+UNIT
 systemctl daemon-reload
 systemctl enable --now kivien-sauvegarde.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prelevements.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prospection.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-recherche-prospects.timer >> "$JOURNAL" 2>&1
+systemctl enable --now kivien-notifications.timer >> "$JOURNAL" 2>&1
 info "prochaine sauvegarde : $(systemctl show kivien-sauvegarde.timer -p NextElapseUSecRealtime --value)"
 /usr/local/sbin/kivien-sauvegarde | tee -a "$JOURNAL" || arret "la première sauvegarde a échoué."
 

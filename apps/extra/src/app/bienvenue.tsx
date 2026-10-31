@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -32,10 +39,18 @@ export default function Bienvenue() {
   const { etape: etapeUrl } = useLocalSearchParams<{ etape?: 'profil' }>();
   const insets = useSafeAreaInsets();
   const profilSeul = etapeUrl === 'profil';
-  const [saisie, setSaisie] = useState<SaisieInscription>({ prenom: '', nom: '', telephone: '', commune: '', aVoiture: null });
+  const [saisie, setSaisie] = useState<SaisieInscription>({
+    prenom: '',
+    nom: '',
+    telephone: '',
+    commune: '',
+    aVoiture: null,
+  });
   const [motDePasse, setMotDePasse] = useState('');
   const [cgu, setCgu] = useState(false);
-  const [erreurs, setErreurs] = useState<Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>>>({});
+  const [erreurs, setErreurs] = useState<
+    Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>>
+  >({});
   const [erreurEnvoi, setErreurEnvoi] = useState<string | null>(null);
   // Compte créé mais profil pas encore enregistré (coupure réseau) : on ne recrée pas le compte.
   const [compteCree, setCompteCree] = useState(profilSeul);
@@ -43,7 +58,8 @@ export default function Bienvenue() {
 
   const [tente, setTente] = useState(false);
   const valider = (si: SaisieInscription, mdp: string, accepte = cgu) => {
-    const e: Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>> = validerInscription(si);
+    const e: Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>> =
+      validerInscription(si);
     if (profilSeul) delete e.telephone;
     else {
       const m = validerMotDePasse(mdp);
@@ -87,7 +103,13 @@ export default function Bienvenue() {
         }
         setCompteCree(true);
       }
-      await source.inscrire({ prenom: saisie.prenom, nom: saisie.nom, telephone: e164 ?? '', commune: saisie.commune, aVoiture: !!saisie.aVoiture });
+      await source.inscrire({
+        prenom: saisie.prenom,
+        nom: saisie.nom,
+        telephone: e164 ?? '',
+        commune: saisie.commune,
+        aVoiture: !!saisie.aVoiture,
+      });
       await source.accepterCgu(VERSION_CGU).catch(() => undefined);
       router.replace('/');
       return;
@@ -98,8 +120,17 @@ export default function Bienvenue() {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.ecran} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={[styles.contenu, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      style={styles.ecran}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={[
+          styles.contenu,
+          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 32 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
         <Logo />
         <View style={styles.intro}>
           <Texte variante="titre" accessibilityRole="header">
@@ -108,8 +139,24 @@ export default function Bienvenue() {
           <Texte couleur="galet">{ti.sousTitre}</Texte>
         </View>
 
-        <ChampTexte libelle={ti.prenom} value={saisie.prenom} onChangeText={(v) => maj({ prenom: v })} erreur={erreurs.prenom} autoComplete="given-name" textContentType="givenName" autoCapitalize="words" />
-        <ChampTexte libelle={ti.nom} value={saisie.nom} onChangeText={(v) => maj({ nom: v })} erreur={erreurs.nom} autoComplete="family-name" textContentType="familyName" autoCapitalize="words" />
+        <ChampTexte
+          libelle={ti.prenom}
+          value={saisie.prenom}
+          onChangeText={(v) => maj({ prenom: v })}
+          erreur={erreurs.prenom}
+          autoComplete="given-name"
+          textContentType="givenName"
+          autoCapitalize="words"
+        />
+        <ChampTexte
+          libelle={ti.nom}
+          value={saisie.nom}
+          onChangeText={(v) => maj({ nom: v })}
+          erreur={erreurs.nom}
+          autoComplete="family-name"
+          textContentType="familyName"
+          autoCapitalize="words"
+        />
         {!profilSeul && (
           <>
             <ChampTexte
@@ -139,7 +186,12 @@ export default function Bienvenue() {
             />
           </>
         )}
-        <ChoixCommune libelle={ti.commune} valeur={saisie.commune} erreur={erreurs.commune} onChange={(c) => maj({ commune: c })} />
+        <ChoixCommune
+          libelle={ti.commune}
+          valeur={saisie.commune}
+          erreur={erreurs.commune}
+          onChange={(c) => maj({ commune: c })}
+        />
         <View style={styles.bloc}>
           <Texte variante="corpsFort">{ti.voiture}</Texte>
           <Choix
@@ -151,22 +203,46 @@ export default function Bienvenue() {
             valeur={saisie.aVoiture}
             onChange={(v) => maj({ aVoiture: v })}
           />
-          <Texte variante={erreurs.aVoiture ? 'legendeForte' : 'legende'} couleur={erreurs.aVoiture ? 'braise' : 'galet'}>
+          <Texte
+            variante={erreurs.aVoiture ? 'legendeForte' : 'legende'}
+            couleur={erreurs.aVoiture ? 'braise' : 'galet'}
+          >
             {erreurs.aVoiture ?? ti.voitureAide}
           </Texte>
         </View>
         <View style={styles.bloc}>
-          <CaseACocher cochee={cgu} onChange={cocherCgu} libelle={textesAcceptation.extra} erreur={!!erreurs.cgu} />
-          <Lien libelle={textesAcceptation.lienConditions} onPress={() => void Linking.openURL('https://kivien.re/conditions')} variante="legende" couleur="galet" />
+          <CaseACocher
+            cochee={cgu}
+            onChange={cocherCgu}
+            libelle={textesAcceptation.extra}
+            erreur={!!erreurs.cgu}
+          />
+          <Lien
+            libelle={textesAcceptation.lienConditions}
+            onPress={() => void Linking.openURL('https://kivien.re/conditions')}
+            variante="legende"
+            couleur="galet"
+          />
           {erreurs.cgu ? (
             <Texte variante="legendeForte" couleur="braise">
               {erreurs.cgu}
             </Texte>
           ) : null}
         </View>
-        {erreurEnvoi ? <Texte variante="legendeForte" couleur="braise" accessibilityLiveRegion="polite">{erreurEnvoi}</Texte> : null}
+        {erreurEnvoi ? (
+          <Texte variante="legendeForte" couleur="braise" accessibilityLiveRegion="polite">
+            {erreurEnvoi}
+          </Texte>
+        ) : null}
         <BoutonPrincipal libelle={tc.creerCompte} onPress={continuer} envoi={envoi} />
-        {!profilSeul && <Lien libelle={tc.dejaCompte} onPress={() => router.push('/connexion')} variante="legende" couleur="galet" />}
+        {!profilSeul && (
+          <Lien
+            libelle={tc.dejaCompte}
+            onPress={() => router.push('/connexion')}
+            variante="legende"
+            couleur="galet"
+          />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

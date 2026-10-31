@@ -2,7 +2,13 @@ import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
-import { estSecteur, SECTEUR_PAR_DEFAUT, trouverCommune, type MissionResume, type Poste } from '@kivien/core';
+import {
+  estSecteur,
+  SECTEUR_PAR_DEFAUT,
+  trouverCommune,
+  type MissionResume,
+  type Poste,
+} from '@kivien/core';
 import {
   ErreurReseau,
   type CleDispo,
@@ -65,7 +71,14 @@ const versDetail = (l: LigneDetail): MissionDetail => ({
   descriptionPoste: l.description_poste,
   lieu:
     l.adresse !== null && l.lat !== null && l.lng !== null
-      ? { adresse: l.adresse, codePostal: l.code_postal, acces: l.acces, telephone: l.telephone, lat: l.lat, lng: l.lng }
+      ? {
+          adresse: l.adresse,
+          codePostal: l.code_postal,
+          acces: l.acces,
+          telephone: l.telephone,
+          lat: l.lat,
+          lng: l.lng,
+        }
       : null,
   position: l.lat !== null && l.lng !== null ? { lat: l.lat, lng: l.lng } : null,
 });
@@ -108,7 +121,9 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       const p = verifier(
         await client
           .from('extras')
-          .select('prenom, nom, telephone, commune, a_voiture, competences, experience, langues, presentation')
+          .select(
+            'prenom, nom, telephone, commune, a_voiture, competences, experience, langues, presentation',
+          )
           .eq('id', await moi())
           .single<{
             prenom: string;
@@ -135,14 +150,20 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       };
     },
     async missions() {
-      return (verifier(await client.rpc('missions_disponibles')) as LigneMission[]).map(versMission);
+      return (verifier(await client.rpc('missions_disponibles')) as LigneMission[]).map(
+        versMission,
+      );
     },
     async detail(id) {
-      const lignes = verifier(await client.rpc('detail_mission', { p_demande: id })) as LigneDetail[];
+      const lignes = verifier(
+        await client.rpc('detail_mission', { p_demande: id }),
+      ) as LigneDetail[];
       return lignes[0] ? versDetail(lignes[0]) : null;
     },
     async accepter(id) {
-      return verifier(await client.rpc('accepter_mission', { p_demande: id })) as ReponseAcceptation;
+      return verifier(
+        await client.rpc('accepter_mission', { p_demande: id }),
+      ) as ReponseAcceptation;
     },
     async seDesister(id) {
       verifier(await client.rpc('se_desister', { p_demande: id }));
@@ -150,36 +171,89 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
     ecouterMissions(rappel) {
       const canal = client
         .channel('signaux_missions')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaux_missions' }, rappel)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'signaux_missions' },
+          rappel,
+        )
         .subscribe();
       return () => {
         void client.removeChannel(canal);
       };
     },
     async mesMissions(): Promise<MissionConfirmee[]> {
-      const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & { contrat_signe: boolean; annulee: boolean; passee: boolean })[];
-      return lignes.map((l) => ({ ...versMission(l), contratSigne: l.contrat_signe, annulee: l.annulee, passee: l.passee }));
+      const lignes = verifier(await client.rpc('mes_missions')) as (LigneMission & {
+        contrat_signe: boolean;
+        annulee: boolean;
+        passee: boolean;
+      })[];
+      return lignes.map((l) => ({
+        ...versMission(l),
+        contratSigne: l.contrat_signe,
+        annulee: l.annulee,
+        passee: l.passee,
+      }));
     },
     async emailDuCompte() {
       const { data } = await client.auth.getUser();
       const u = data.user as { email?: string; new_email?: string } | null;
       return { email: u?.email || null, enAttente: u?.new_email || null };
     },
+    async alertesEmail() {
+      const ligne = verifier(
+        await client
+          .from('extras')
+          .select('alertes_email')
+          .eq('id', await moi())
+          .maybeSingle(),
+      ) as { alertes_email: boolean } | null;
+      return ligne?.alertes_email ?? true;
+    },
+    async reglerAlertesEmail(actives) {
+      verifier(
+        await client
+          .from('extras')
+          .update({ alertes_email: actives })
+          .eq('id', await moi()),
+      );
+    },
     async changerEmail(email) {
-      const { error } = await client.auth.updateUser({ email }, { emailRedirectTo: 'https://kivien.re/email-confirme' });
+      const { error } = await client.auth.updateUser(
+        { email },
+        { emailRedirectTo: 'https://kivien.re/email-confirme' },
+      );
       if (!error) return 'ok';
       if (error.code === 'email_exists' || /already/i.test(error.message)) return 'prise';
       throw error;
     },
     async mesGains() {
       const lignes = verifier(await client.rpc('mes_gains')) as {
-        demande_id: string; restaurant: string; commune: string; poste: Poste; intitule: string | null; jour: string; debut: number; fin: number;
-        taux_horaire_brut_centimes: number; effectuee: boolean; contrat_signe_extra: boolean; contrat_signe_restaurant: boolean;
+        demande_id: string;
+        restaurant: string;
+        commune: string;
+        poste: Poste;
+        intitule: string | null;
+        jour: string;
+        debut: number;
+        fin: number;
+        taux_horaire_brut_centimes: number;
+        effectuee: boolean;
+        contrat_signe_extra: boolean;
+        contrat_signe_restaurant: boolean;
       }[];
       return lignes.map((l) => ({
-        demandeId: l.demande_id, restaurant: l.restaurant, commune: l.commune, poste: l.poste, intitule: l.intitule, jour: l.jour, debut: l.debut, fin: l.fin,
-        tauxHoraireBrutCentimes: l.taux_horaire_brut_centimes, effectuee: l.effectuee,
-        contratSigneExtra: l.contrat_signe_extra, contratSigneRestaurant: l.contrat_signe_restaurant,
+        demandeId: l.demande_id,
+        restaurant: l.restaurant,
+        commune: l.commune,
+        poste: l.poste,
+        intitule: l.intitule,
+        jour: l.jour,
+        debut: l.debut,
+        fin: l.fin,
+        tauxHoraireBrutCentimes: l.taux_horaire_brut_centimes,
+        effectuee: l.effectuee,
+        contratSigneExtra: l.contrat_signe_extra,
+        contratSigneRestaurant: l.contrat_signe_restaurant,
       }));
     },
     async contrat(demandeId): Promise<ContratExtra | null> {
@@ -212,22 +286,43 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
           .select('signe_restaurant_le, signature_restaurant, signe_extra_le, signature_extra')
           .eq('affectation_id', affectationId)
           .maybeSingle(),
-      ) as { signe_restaurant_le: string | null; signature_restaurant: string | null; signe_extra_le: string | null; signature_extra: string | null } | null;
+      ) as {
+        signe_restaurant_le: string | null;
+        signature_restaurant: string | null;
+        signe_extra_le: string | null;
+        signature_extra: string | null;
+      } | null;
       return {
-        restaurant: l?.signature_restaurant && l.signe_restaurant_le ? { image: l.signature_restaurant, le: l.signe_restaurant_le } : null,
-        extra: l?.signature_extra && l.signe_extra_le ? { image: l.signature_extra, le: l.signe_extra_le } : null,
+        restaurant:
+          l?.signature_restaurant && l.signe_restaurant_le
+            ? { image: l.signature_restaurant, le: l.signe_restaurant_le }
+            : null,
+        extra:
+          l?.signature_extra && l.signe_extra_le
+            ? { image: l.signature_extra, le: l.signe_extra_le }
+            : null,
       };
     },
     async infosContrat() {
       const l = verifier(
-        await client.from('infos_contrat').select('date_naissance, lieu_naissance, nir, adresse').maybeSingle<{
-          date_naissance: string;
-          lieu_naissance: string;
-          nir: string | null;
-          adresse: string;
-        }>(),
+        await client
+          .from('infos_contrat')
+          .select('date_naissance, lieu_naissance, nir, adresse')
+          .maybeSingle<{
+            date_naissance: string;
+            lieu_naissance: string;
+            nir: string | null;
+            adresse: string;
+          }>(),
       );
-      return l ? { dateNaissance: l.date_naissance, lieuNaissance: l.lieu_naissance, nir: l.nir, adresse: l.adresse } : null;
+      return l
+        ? {
+            dateNaissance: l.date_naissance,
+            lieuNaissance: l.lieu_naissance,
+            nir: l.nir,
+            adresse: l.adresse,
+          }
+        : null;
     },
     async enregistrerInfosContrat(i) {
       verifier(
@@ -242,16 +337,25 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       );
     },
     async signerContrat(affectationId, signature) {
-      verifier(await client.rpc('signer_contrat', { p_affectation: affectationId, p_signature: signature }));
+      verifier(
+        await client.rpc('signer_contrat', {
+          p_affectation: affectationId,
+          p_signature: signature,
+        }),
+      );
     },
     async dispos() {
-      const lignes = verifier(await client.from('disponibilites').select('jour, creneau')) as { jour: string; creneau: 'midi' | 'soir' }[];
+      const lignes = verifier(await client.from('disponibilites').select('jour, creneau')) as {
+        jour: string;
+        creneau: 'midi' | 'soir';
+      }[];
       return lignes.map((l) => `${l.jour}:${l.creneau}` as CleDispo);
     },
     async basculerDispo(jour, creneau, actif) {
       const extra_id = await moi();
       if (actif) verifier(await client.from('disponibilites').upsert({ extra_id, jour, creneau }));
-      else verifier(await client.from('disponibilites').delete().match({ extra_id, jour, creneau }));
+      else
+        verifier(await client.from('disponibilites').delete().match({ extra_id, jour, creneau }));
     },
     async majProfil(p) {
       const maj: Record<string, unknown> = {};
@@ -260,7 +364,13 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       if (p.experience !== undefined) maj.experience = p.experience;
       if (p.langues !== undefined) maj.langues = p.langues;
       if (p.presentation !== undefined) maj.presentation = p.presentation;
-      if (Object.keys(maj).length) verifier(await client.from('extras').update(maj).eq('id', await moi()));
+      if (Object.keys(maj).length)
+        verifier(
+          await client
+            .from('extras')
+            .update(maj)
+            .eq('id', await moi()),
+        );
     },
     async maPhoto() {
       return verifier(await client.rpc('photo_extra', { p_extra: await moi() })) as string | null;
@@ -278,7 +388,10 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       return count ? 'ok' : 'sansProfil';
     },
     async connecter(telephone, motDePasse) {
-      const { error } = await client.auth.signInWithPassword({ phone: telephone, password: motDePasse });
+      const { error } = await client.auth.signInWithPassword({
+        phone: telephone,
+        password: motDePasse,
+      });
       if (!error) return 'ok';
       if (error.status === 400 || error.code === 'invalid_credentials') return 'identifiants';
       if (error.status === 429) return 'attente';
@@ -287,12 +400,14 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
     async creerCompte(telephone, motDePasse) {
       const { data, error } = await client.auth.signUp({ phone: telephone, password: motDePasse });
       if (error) {
-        if (error.code === 'phone_exists' || error.code === 'user_already_exists') return 'dejaInscrit';
+        if (error.code === 'phone_exists' || error.code === 'user_already_exists')
+          return 'dejaInscrit';
         if (error.status === 429) return 'attente';
         throw /network|fetch/i.test(error.message) ? new ErreurReseau(error.message) : error;
       }
       // Sans session, le serveur attend une vérification par SMS (fournisseur configuré) : non géré ici.
-      if (!data.session) throw new Error('Compte créé sans session : vérification du numéro requise');
+      if (!data.session)
+        throw new Error('Compte créé sans session : vérification du numéro requise');
       return 'ok';
     },
     async accepterCgu(version) {

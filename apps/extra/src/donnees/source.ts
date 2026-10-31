@@ -108,6 +108,9 @@ export interface SourceDonnees {
   majProfil(p: Partial<ProfilExtra & ProfilPublic>): Promise<void>;
   /** Adresse e-mail confirmée et celle en attente de confirmation. */
   emailDuCompte(): Promise<{ email: string | null; enAttente: string | null }>;
+  /** Alertes des nouvelles missions par e-mail (activées par défaut). */
+  alertesEmail(): Promise<boolean>;
+  reglerAlertesEmail(actives: boolean): Promise<void>;
   /** Un lien de confirmation part sur la nouvelle adresse. */
   changerEmail(email: string): Promise<'ok' | 'prise'>;
   /** Photo de profil en JPEG base64, null sans photo. */

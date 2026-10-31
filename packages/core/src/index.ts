@@ -26,3 +26,4 @@ export * from './gains';
 export * from './email';
 export * from './prospection';
 export * from './textesLegal';
+export * from './textesNotifications';

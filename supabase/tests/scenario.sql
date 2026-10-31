@@ -455,3 +455,78 @@ select version from acceptations_cgu;
 select accepter_cgu('version-libre');
 \set ON_ERROR_STOP 1
 reset role;
+\echo '--- Notifications : alertes aux extras proches, extra trouvé, contrat à signer, rappels'
+update auth.users set email = 'kevin@exemple.re', email_confirmed_at = now() where id = '00000000-0000-0000-0000-0000000000e1';
+delete from disponibilites where extra_id in ('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2');
+insert into disponibilites values ('00000000-0000-0000-0000-0000000000e1', jour_reunion() + 3, 'soir'),
+                                  ('00000000-0000-0000-0000-0000000000e2', jour_reunion() + 3, 'midi');
+insert into favoris values ('00000000-0000-0000-0000-00000000b001', '00000000-0000-0000-0000-0000000000e1')
+  on conflict do nothing;
+insert into demandes (id, restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000d0a1', '00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 3,
+        1140, 1380, '14 rue du Général de Gaulle', 'Saint-Gilles-les-Bains', -21.039442, 55.237476);
+do $$
+declare d uuid := '00000000-0000-0000-0000-00000000d0a1';
+begin
+  -- Kévin (2 km, disponible le soir, favori) : prévenu tout de suite.
+  assert (select envoyer_apres <= now() from notifications_email
+          where demande_id = d and destinataire = '00000000-0000-0000-0000-0000000000e1'), 'Kévin non alerté';
+  -- Maëlle n'est disponible que le midi ce jour-là : pas d'alerte.
+  assert not exists (select 1 from notifications_email
+          where demande_id = d and destinataire = '00000000-0000-0000-0000-0000000000e2'), 'Maëlle alertée à tort';
+end $$;
+select count(*) as alertes_mission from notifications_email where demande_id = '00000000-0000-0000-0000-00000000d0a1';
+-- Maëlle retire sa disponibilité du midi : sans aucune disponibilité, elle est prévenue de tout (après les favoris).
+delete from disponibilites where extra_id = '00000000-0000-0000-0000-0000000000e2';
+insert into demandes (id, restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000d0a2', '00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 4,
+        1140, 1380, '14 rue du Général de Gaulle', 'Saint-Gilles-les-Bains', -21.039442, 55.237476);
+do $$ begin
+  assert (select envoyer_apres > now() + interval '4 minutes' from notifications_email
+          where demande_id = '00000000-0000-0000-0000-00000000d0a2' and destinataire = '00000000-0000-0000-0000-0000000000e2'),
+    'Maëlle (non favorite) doit être prévenue 5 minutes après';
+end $$;
+-- Kévin n'a déclaré que le soir du jour J+3 : pas d'alerte pour J+4.
+update notifications_email set statut = 'envoye'
+ where demande_id not in ('00000000-0000-0000-0000-00000000d0a1', '00000000-0000-0000-0000-00000000d0a2');
+update notifications_email set envoyer_apres = now() - interval '1 second';
+do $$
+declare kevin int;
+begin
+  select count(*) into kevin from prendre_notifications(50) where email = 'kevin@exemple.re';
+  assert kevin = 1, 'Kévin : une alerte à envoyer';
+  assert (select statut from notifications_email where destinataire = '00000000-0000-0000-0000-0000000000e2'
+          and demande_id = '00000000-0000-0000-0000-00000000d0a2') = 'ignore', 'Maëlle sans adresse confirmée';
+  perform noter_notification(id) from notifications_email where statut = 'en_attente';
+  assert not exists (select 1 from notifications_email where statut = 'en_attente');
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select accepter_mission('00000000-0000-0000-0000-00000000d0a1');
+update extras set alertes_email = false where id = auth.uid();
+reset role;
+do $$ begin
+  assert exists (select 1 from notifications_email where type = 'extra_trouve'
+                 and destinataire = '00000000-0000-0000-0000-0000000000a1'), 'établissement non prévenu';
+  assert not (select alertes_email from extras where id = '00000000-0000-0000-0000-0000000000e1');
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select signer_contrat((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d0a1'),
+  'data:image/svg+xml,%3Csvg%3E%3Cpath d=%22M0 0L10 10%22/%3E%3C/svg%3E' || repeat('x', 200));
+\set ON_ERROR_STOP 0
+select prendre_notifications(10);
+\set ON_ERROR_STOP 1
+reset role;
+do $$
+declare attendus int;
+begin
+  assert exists (select 1 from notifications_email where type = 'contrat_a_signer'
+                 and destinataire = '00000000-0000-0000-0000-0000000000e1'), 'extra non prévenu du contrat';
+  update demandes set jour = jour_reunion() + 1 where id = '00000000-0000-0000-0000-00000000d0a1';
+  attendus := case when extract(hour from now() at time zone 'Indian/Reunion') >= 17
+                   then 1 + (select count(*) from membres where restaurant_id = '00000000-0000-0000-0000-00000000b001') else 0 end;
+  assert programmer_rappels() = attendus, 'rappels de la veille';
+  assert programmer_rappels() = 0, 'rappels programmés une seule fois';
+end $$;
+select type, count(*) from notifications_email group by type order by type;
