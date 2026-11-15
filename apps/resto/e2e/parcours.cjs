@@ -80,6 +80,16 @@ let pageCourante = null;
   await p.goto(URL_SITE + '/extras');
   await p.getByRole('heading', { name: 'Des missions près de chez toi. Tu choisis tes soirées.' }).waitFor();
   if (!(await p.getByRole('link', { name: "Je m'inscris" }).first().getAttribute('href')).endsWith('/bienvenue')) throw new Error('lien inscription extra');
+  // Première visite gardée dans le navigateur, puis transmise à l'app au clic sur « Je m'inscris ».
+  if (!(await p.evaluate(() => JSON.parse(localStorage.getItem('kivien_origine') ?? 'null')?.page))) throw new Error('origine non mémorisée');
+  const lienApp = await p.evaluate(() => {
+    const a = [...document.querySelectorAll('a')].find((x) => x.textContent.includes("Je m'inscris"));
+    a.addEventListener('click', (e) => e.preventDefault(), { once: true });
+    a.click();
+    return a.href;
+  });
+  if (!new URL(lienApp).searchParams.get('origine')) throw new Error('origine non transmise à l’app');
+  ok('origine : première visite mémorisée et transmise au lien vers l’app');
   await p.getByText('Animation', { exact: true }).waitFor();
   await p.getByText('Un vrai contrat, une fiche de paie et tes congés payés en plus, à chaque mission.').waitFor();
   if (await p.getByText(/€\snet/).count()) throw new Error('montant affiché sur la page extras');
@@ -96,6 +106,9 @@ let pageCourante = null;
   await p.getByText('Mois par mois').waitFor(); ok('admin : période de 12 mois, évolution mensuelle');
   await p.getByRole('button', { name: 'Extras', exact: true }).click();
   await p.getByRole('row', { name: /Kévin Hoarau/ }).waitFor();
+  await p.getByText('Origine des inscrits').waitFor();
+  await p.getByText(/Recherche Google : 1 · Un ami, un proche : 1 · Sans réponse : \d+/).waitFor();
+  await p.getByRole('row', { name: /Kévin Hoarau/ }).getByText('Google · /extras').waitFor(); ok('admin : origine des extras (réponse, site d’origine, page d’arrivée) et bilan');
   await p.getByRole('searchbox').fill('maelle');
   if (await p.getByRole('row', { name: /Kévin Hoarau/ }).count()) throw new Error('recherche des extras');
   await p.getByRole('row', { name: /Maëlle Payet/ }).waitFor(); ok('admin : liste des extras, recherche sans accents');

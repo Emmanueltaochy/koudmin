@@ -11,7 +11,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   normaliserMobileReunion,
+  CANAUX_CONNU,
   textesAcceptation,
+  textesOrigine,
+  type CanalConnu,
   textesEcrans,
   VERSION_CGU,
   validerInscription,
@@ -19,6 +22,7 @@ import {
   type SaisieInscription,
 } from '@kivien/core';
 import { ErreurReseau, source } from '../donnees';
+import { origineMemorisee } from '../donnees/origine';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
 import { CaseACocher } from '../ui/CaseACocher';
 import { ChampTexte } from '../ui/ChampTexte';
@@ -48,6 +52,7 @@ export default function Bienvenue() {
   });
   const [motDePasse, setMotDePasse] = useState('');
   const [cgu, setCgu] = useState(false);
+  const [commentConnu, setCommentConnu] = useState<CanalConnu | null>(null);
   const [erreurs, setErreurs] = useState<
     Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>>
   >({});
@@ -111,6 +116,7 @@ export default function Bienvenue() {
         aVoiture: !!saisie.aVoiture,
       });
       await source.accepterCgu(VERSION_CGU).catch(() => undefined);
+      await source.noterOrigine(commentConnu, origineMemorisee()).catch(() => undefined);
       router.replace('/');
       return;
     } catch (err) {
@@ -208,6 +214,18 @@ export default function Bienvenue() {
             couleur={erreurs.aVoiture ? 'braise' : 'galet'}
           >
             {erreurs.aVoiture ?? ti.voitureAide}
+          </Texte>
+        </View>
+        <View style={styles.bloc}>
+          <Texte variante="corpsFort">{textesOrigine.question}</Texte>
+          <Choix
+            libelle={textesOrigine.question}
+            options={CANAUX_CONNU.map((k) => ({ valeur: k, libelle: textesOrigine.canaux[k] }))}
+            valeur={commentConnu}
+            onChange={(v) => setCommentConnu(v === commentConnu ? null : v)}
+          />
+          <Texte variante="legende" couleur="galet">
+            {textesOrigine.aide}
           </Texte>
         </View>
         <View style={styles.bloc}>

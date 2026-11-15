@@ -10,6 +10,7 @@ import {
   textesAlertes,
   textesNotifications,
   textesPointage,
+  textesOrigine,
   badgesConfiance,
   lignePointage,
   champsACompleter,
@@ -70,7 +71,7 @@ const corpus = [
     aPropos,
     textesAcceptation,
   ]),
-  ...tousLesTextes([textesNotifications, textesAlertes, textesPointage]),
+  ...tousLesTextes([textesNotifications, textesAlertes, textesPointage, textesOrigine]),
   ...badgesConfiance({
     missions: 5,
     notes: 4,

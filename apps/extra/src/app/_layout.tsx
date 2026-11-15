@@ -6,9 +6,12 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { memoriserOrigine } from '../donnees/origine';
 import { couleurs } from '../ui/theme';
 
 void SplashScreen.preventAutoHideAsync();
+// Origine de la première visite (app web), notée à l'inscription.
+memoriserOrigine();
 
 // En build natif, les polices sont intégrées par le plugin expo-font (app.json) : rien à charger.
 // Sur le web et dans Expo Go, on les charge à l'exécution.

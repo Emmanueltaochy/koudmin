@@ -559,3 +559,23 @@ do $$ begin
   assert (select depart_le >= arrivee_le from pointages p join affectations a on a.id = p.affectation_id
           where a.demande_id = '00000000-0000-0000-0000-00000000d0a1');
 end $$;
+\echo '--- Origine des inscrits : notée une fois, réponse ajoutée plus tard, lue par l''admin seulement'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select noter_origine(null, 'google.com', '/extras', null, now() - interval '2 days');
+select noter_origine('ami', 'facebook.com', '/', 'pub', now());
+\set ON_ERROR_STOP 0
+select noter_origine('tiktok', null, null, null, null);
+\set ON_ERROR_STOP 1
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select noter_origine(null, null, '/pro', 'facebook / pub', now());
+\set ON_ERROR_STOP 0
+select * from admin_origines();
+\set ON_ERROR_STOP 1
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select type, comment_connu, referent, page_arrivee, utm from admin_origines() order by type, id;
+reset role;
+do $$ begin
+  assert (select comment_connu = 'ami' and referent = 'google.com' and page_arrivee = '/extras'
+          from origines_comptes where utilisateur_id = '00000000-0000-0000-0000-0000000000e1'), 'première visite gardée';
+end $$;

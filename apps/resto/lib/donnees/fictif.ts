@@ -802,6 +802,38 @@ export function sourceFictive(): SourceResto {
           },
         ];
       },
+      async origines() {
+        const il = (j: number) => new Date(Date.now() - j * 86400e3).toISOString();
+        return [
+          {
+            type: 'extra' as const,
+            id: 'e1',
+            commentConnu: 'google' as const,
+            referent: 'google.com',
+            page: '/extras',
+            utm: null,
+            premiereVisite: il(12),
+          },
+          {
+            type: 'extra' as const,
+            id: 'e2',
+            commentConnu: 'ami' as const,
+            referent: null,
+            page: '/',
+            utm: null,
+            premiereVisite: il(5),
+          },
+          {
+            type: 'etablissement' as const,
+            id: 'r001',
+            commentConnu: null,
+            referent: 'l.facebook.com',
+            page: '/pro',
+            utm: null,
+            premiereVisite: il(20),
+          },
+        ];
+      },
       async extras() {
         const il = (j: number) => new Date(Date.now() - j * 86400e3).toISOString();
         return [

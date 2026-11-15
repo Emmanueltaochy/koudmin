@@ -1,6 +1,7 @@
 import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js';
 import {
   aujourdhuiReunion,
+  estCanalConnu,
   estSecteur,
   SECTEUR_PAR_DEFAUT,
   type StatutRecherche,
@@ -390,6 +391,28 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           placesPourvues: r.places_pourvues,
           fraisHTCentimes: r.frais_ht_centimes,
           derniereDemande: r.derniere_demande,
+        }));
+      },
+      async origines() {
+        const l = (await toutesLesLignes((debut, fin) =>
+          client.rpc('admin_origines').range(debut, fin),
+        )) as {
+          type: 'extra' | 'etablissement';
+          id: string;
+          comment_connu: string | null;
+          referent: string | null;
+          page_arrivee: string | null;
+          utm: string | null;
+          premiere_visite: string | null;
+        }[];
+        return l.map((o) => ({
+          type: o.type,
+          id: o.id,
+          commentConnu: estCanalConnu(o.comment_connu) ? o.comment_connu : null,
+          referent: o.referent,
+          page: o.page_arrivee,
+          utm: o.utm,
+          premiereVisite: o.premiere_visite,
         }));
       },
       async extras() {

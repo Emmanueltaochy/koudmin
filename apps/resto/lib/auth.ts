@@ -20,7 +20,10 @@ export async function connecte(): Promise<boolean> {
 }
 
 /** Connexion par mobile et mot de passe. Lève une erreur en cas de coupure réseau. */
-export async function connecter(telephone: string, motDePasse: string): Promise<'ok' | 'numero' | 'identifiants' | 'attente'> {
+export async function connecter(
+  telephone: string,
+  motDePasse: string,
+): Promise<'ok' | 'numero' | 'identifiants' | 'attente'> {
   const e164 = normaliserMobileReunion(telephone);
   if (!e164) return 'numero';
   if (donneesFictives) return motDePasse === MOT_DE_PASSE_DEMO ? 'ok' : 'identifiants';
@@ -35,7 +38,8 @@ export async function deconnecter(): Promise<void> {
   if (!donneesFictives) await client()!.auth.signOut();
 }
 
-export type ResultatInscription = 'ok' | 'numero' | 'attente' | 'siret' | 'siretInvalide' | 'extra' | 'adresse';
+export type ResultatInscription =
+  'ok' | 'numero' | 'attente' | 'siret' | 'siretInvalide' | 'extra' | 'adresse';
 
 /**
  * Inscription d'un restaurateur : compte (mobile + mot de passe), puis établissement.
@@ -43,7 +47,14 @@ export type ResultatInscription = 'ok' | 'numero' | 'attente' | 'siret' | 'siret
  * Lève une erreur en cas de coupure réseau ou de refus inattendu du serveur.
  */
 export async function inscrireRestaurateur(
-  i: { telephone: string; motDePasse: string; etablissement: string; secteur: Secteur; siret: string; adresse: AdresseGeo },
+  i: {
+    telephone: string;
+    motDePasse: string;
+    etablissement: string;
+    secteur: Secteur;
+    siret: string;
+    adresse: AdresseGeo;
+  },
   compteOuvert: boolean,
 ): Promise<ResultatInscription> {
   if (donneesFictives) {
@@ -62,7 +73,12 @@ export async function inscrireRestaurateur(
     }
     if (!data.session) throw new Error('Compte créé sans session : vérification du numéro requise');
   }
-  const { resultat } = await source().ajouterEtablissement({ nom: i.etablissement, siret: i.siret, secteur: i.secteur, adresse: i.adresse });
+  const { resultat } = await source().ajouterEtablissement({
+    nom: i.etablissement,
+    siret: i.siret,
+    secteur: i.secteur,
+    adresse: i.adresse,
+  });
   return resultat;
 }
 
@@ -70,6 +86,21 @@ export async function inscrireRestaurateur(
 export async function accepterCgu(): Promise<void> {
   if (donneesFictives) return;
   const { error } = await client()!.rpc('accepter_cgu', { p_version: VERSION_CGU });
+  if (error) throw error;
+}
+
+/** Origine du compte (première visite du navigateur), pour l'espace admin. */
+export async function noterOrigineInscription(): Promise<void> {
+  if (donneesFictives) return;
+  const { origineMemorisee } = await import('./origine');
+  const o = origineMemorisee();
+  const { error } = await client()!.rpc('noter_origine', {
+    p_comment_connu: null,
+    p_referent: o?.referent ?? null,
+    p_page: o?.page ?? null,
+    p_utm: o?.utm ?? null,
+    p_premiere_visite: o?.le ?? null,
+  });
   if (error) throw error;
 }
 
@@ -115,9 +146,15 @@ export async function rejoindreEtablissement(
 }
 
 /** Connexion d'un administrateur de la plateforme (e-mail et mot de passe). */
-export async function connecterAdmin(email: string, motDePasse: string): Promise<'ok' | 'identifiants' | 'attente'> {
+export async function connecterAdmin(
+  email: string,
+  motDePasse: string,
+): Promise<'ok' | 'identifiants' | 'attente'> {
   if (donneesFictives) return motDePasse === MOT_DE_PASSE_DEMO ? 'ok' : 'identifiants';
-  const { error } = await client()!.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: motDePasse });
+  const { error } = await client()!.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password: motDePasse,
+  });
   if (!error) return 'ok';
   if (error.status === 429) return 'attente';
   if (error.status === 400 || error.code === 'invalid_credentials') return 'identifiants';
@@ -125,7 +162,10 @@ export async function connecterAdmin(email: string, motDePasse: string): Promise
 }
 
 /** Démonstration : adresse e-mail du compte, gardée pour la page. */
-let emailDemo: { email: string | null; enAttente: string | null } = { email: null, enAttente: null };
+let emailDemo: { email: string | null; enAttente: string | null } = {
+  email: null,
+  enAttente: null,
+};
 
 /** Adresse e-mail confirmée du compte, et celle en attente de confirmation. */
 export async function emailDuCompte(): Promise<{ email: string | null; enAttente: string | null }> {
@@ -141,7 +181,10 @@ export async function changerEmail(email: string): Promise<'ok' | 'pris'> {
     emailDemo = { ...emailDemo, enAttente: email };
     return 'ok';
   }
-  const { error } = await client()!.auth.updateUser({ email }, { emailRedirectTo: `${window.location.origin}/email-confirme` });
+  const { error } = await client()!.auth.updateUser(
+    { email },
+    { emailRedirectTo: `${window.location.origin}/email-confirme` },
+  );
   if (!error) return 'ok';
   if (error.code === 'email_exists' || /already/i.test(error.message)) return 'pris';
   throw error;
@@ -156,6 +199,8 @@ export async function changerMotDePasse(motDePasse: string): Promise<void> {
 /** Mot de passe oublié : lien envoyé à l'adresse du compte (sans dire si elle existe). */
 export async function demanderNouveauMotDePasse(email: string): Promise<void> {
   if (donneesFictives) return;
-  const { error } = await client()!.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/nouveau-mot-de-passe` });
+  const { error } = await client()!.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/nouveau-mot-de-passe`,
+  });
   if (error && error.status !== 429) throw error;
 }

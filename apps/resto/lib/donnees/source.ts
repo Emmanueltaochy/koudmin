@@ -1,4 +1,5 @@
 import type {
+  CanalConnu,
   CategorieProspect,
   ConfianceExtra,
   JourISO,
@@ -241,10 +242,22 @@ export interface SourceProspection {
   noterInscription(jeton: string, restaurantId: string): Promise<void>;
 }
 
+/** Origine d'un extra ou d'un établissement (espace admin). */
+export interface OrigineAdmin {
+  type: 'extra' | 'etablissement';
+  id: string;
+  commentConnu: CanalConnu | null;
+  referent: string | null;
+  page: string | null;
+  utm: string | null;
+  premiereVisite: string | null;
+}
+
 export interface SourceAdmin {
   tableau(jours: number): Promise<TableauAdmin | null>;
   etablissements(): Promise<EtablissementAdmin[]>;
   extras(): Promise<ExtraAdmin[]>;
+  origines(): Promise<OrigineAdmin[]>;
   demandes(limite?: number): Promise<DemandeAdmin[]>;
   prospection: SourceProspection;
 }

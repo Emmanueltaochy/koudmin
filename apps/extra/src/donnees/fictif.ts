@@ -210,6 +210,7 @@ export function sourceFictive(): SourceDonnees {
     async emailDuCompte() {
       return emailDemo;
     },
+    async noterOrigine() {},
     async monPointage(id) {
       return pointagesDemo.get(id) ?? null;
     },

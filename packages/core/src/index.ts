@@ -28,3 +28,4 @@ export * from './prospection';
 export * from './textesLegal';
 export * from './textesNotifications';
 export * from './confiance';
+export * from './origine';

@@ -20,7 +20,7 @@ import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import type { AdresseGeo } from '@/lib/adresse';
-import { accepterCgu, aUnEtablissement, changerEmail, connecte, inscrireRestaurateur } from '@/lib/auth';
+import { accepterCgu, aUnEtablissement, noterOrigineInscription, changerEmail, connecte, inscrireRestaurateur } from '@/lib/auth';
 import { donneesFictives, source } from '@/lib/donnees';
 import { noterInscription } from '@/lib/suivi';
 import s from '../inscription.module.css';
@@ -94,6 +94,7 @@ export default function InscriptionRestaurant() {
       );
       if (r === 'ok') {
         await accepterCgu().catch(() => undefined);
+        await noterOrigineInscription().catch(() => undefined);
         // Lien de confirmation envoyé sur l'adresse ; l'inscription ne dépend pas de son envoi.
         if (!compteOuvert) await changerEmail(normaliserEmail(saisie.email)).catch(() => undefined);
         // Venu d'un e-mail de prospection : le compte est rattaché à la campagne.

@@ -199,6 +199,17 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       const u = data.user as { email?: string; new_email?: string } | null;
       return { email: u?.email || null, enAttente: u?.new_email || null };
     },
+    async noterOrigine(commentConnu, origine) {
+      verifier(
+        await client.rpc('noter_origine', {
+          p_comment_connu: commentConnu,
+          p_referent: origine?.referent ?? null,
+          p_page: origine?.page ?? null,
+          p_utm: origine?.utm ?? null,
+          p_premiere_visite: origine?.le ?? null,
+        }),
+      );
+    },
     async monPointage(demandeId) {
       const [l] = verifier(await client.rpc('mon_pointage', { p_demande: demandeId })) as {
         arrivee_le: string | null;
