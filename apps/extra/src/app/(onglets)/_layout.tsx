@@ -58,7 +58,7 @@ export default function Onglets() {
   const [pret, setPret] = useState(false);
   useEffect(() => {
     void source.session().then((s) => {
-      if (s === 'aucune') router.replace('/bienvenue');
+      if (s === 'aucune') router.replace('/accueil' as never);
       else if (s === 'sansProfil') router.replace('/bienvenue?etape=profil');
       else {
         setPret(true);

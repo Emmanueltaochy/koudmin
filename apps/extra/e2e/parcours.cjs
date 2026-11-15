@@ -174,11 +174,12 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   // En CI, l'ouverture directe de /connexion a trois fois abouti sur la liste des missions (adresse « / »,
   // page rechargée), sans reproduction possible en local. Le parcours le note puis réessaie une fois.
   for (let essai = 1; ; essai++) {
-    await p.goto(URL_APP + '/connexion');
-    const ok = await p.getByLabel('Numéro de téléphone').waitFor({ timeout: 10000 }).then(() => true, () => false);
+    // Le chargement peut aussi être interrompu (ERR_ABORTED) : même traitement, noté puis réessayé.
+    const charge = await p.goto(URL_APP + '/connexion').then(() => true, (e) => (console.log(`NOTE ${e.message.split('\n')[0]}`), false));
+    const ok = charge && (await p.getByLabel('Numéro de téléphone').waitFor({ timeout: 10000 }).then(() => true, () => false));
     if (ok) break;
     console.log(`NOTE /connexion a abouti sur ${p.url()} (essai ${essai})`);
-    if (essai === 2) throw new Error('/connexion inaccessible deux fois de suite');
+    if (essai === 3) throw new Error('/connexion inaccessible trois fois de suite');
   }
   await p.getByLabel('Numéro de téléphone').fill('0692 00 00 01');
   await p.getByText('Se connecter').click();
@@ -190,6 +191,17 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByLabel('Mot de passe').fill('kivien974');
   await p.getByText('Se connecter').click();
   await p.getByText('missions près de toi', { exact: false }).waitFor({ timeout: 8000 }); await etape('connexion réussie');
+
+  // Accueil sans compte : photos qui défilent, puis le choix.
+  await p.goto(URL_APP + '/accueil');
+  await p.getByText('Les extras péi, près de chez toi.').waitFor();
+  await p.getByText('Je recrute des extras').waitFor();
+  await p.getByText("J'ai déjà un compte : me connecter").waitFor();
+  // Horloge figée pour tout le parcours : l'animation ne tourne pas ici, on vérifie les deux colonnes
+  // (trois photos, doublées pour boucler sans saut).
+  if ((await p.locator('img').count()) < 12) throw new Error('colonnes de photos incomplètes');
+  await p.getByText('Je cherche des missions').click();
+  await p.getByText('Bienvenue sur Kivien').waitFor(); await etape('accueil : photos qui défilent, choix extra ou établissement, vers l’inscription');
 
   // Inscription
   await p.goto(URL_APP + '/bienvenue');

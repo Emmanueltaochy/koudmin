@@ -455,6 +455,14 @@ export const textesEcrans = {
       desistee: 'Désistement',
     },
   },
+  accueilApp: {
+    titre: 'Les extras péi, près de chez toi.',
+    texte: 'Salle, cuisine, bar, événements : des missions près de chez toi, avec un vrai contrat à chaque fois.',
+    extra: 'Je cherche des missions',
+    pro: 'Je recrute des extras',
+    connexion: "J'ai déjà un compte : me connecter",
+    photos: { cuisine: 'Cuisine', salle: 'Service en salle', extra: 'Un extra souriant' },
+  },
   connexion: {
     titreResto: 'Votre espace restaurateur',
     titreExtra: 'Connexion',
