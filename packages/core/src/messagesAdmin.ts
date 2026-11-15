@@ -60,3 +60,28 @@ export const modeleBienvenueExtras = {
     'À très vite,\nL’équipe Kivien',
   ].join('\n\n'),
 } as const;
+
+/** {prenom} remplacé par le prénom (retiré proprement sans prénom), comme le script du VPS. */
+export function personnaliserMessage(texte: string, prenom: string | null): string {
+  const p = (prenom ?? '').trim();
+  return p
+    ? texte.replaceAll('{prenom}', p)
+    : texte.replaceAll(' {prenom}', '').replaceAll('{prenom}', '');
+}
+
+/** Lien WhatsApp vers un mobile (« +262692… »), avec le message déjà écrit. */
+export function lienWhatsApp(telephone: string, texte = ''): string {
+  const numero = telephone.replace(/\D/g, '');
+  return `https://wa.me/${numero}${texte ? `?text=${encodeURIComponent(texte)}` : ''}`;
+}
+
+/** Lien SMS (iPhone et Android) avec le message déjà écrit. */
+export function lienSms(telephone: string, texte = ''): string {
+  return `sms:${telephone.replace(/[^\d+]/g, '')}${texte ? `?&body=${encodeURIComponent(texte)}` : ''}`;
+}
+
+export const textesMessagesMobile = {
+  whatsapp: 'WhatsApp',
+  sms: 'SMS',
+  aide: 'Sans adresse e-mail : envoyez le message depuis votre téléphone, par WhatsApp ou SMS, déjà écrit avec le prénom.',
+} as const;

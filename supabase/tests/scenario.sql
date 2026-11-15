@@ -582,7 +582,7 @@ end $$;
 \echo '--- Messages de l''admin : destinataires avec adresse confirmée seulement'
 set role authenticated;
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
-select nom, email is not null as a_une_adresse from admin_destinataires('extras') order by nom;
+select nom, email is not null as a_une_adresse, telephone from admin_destinataires('extras') order by nom;
 select admin_envoyer_message('extras', 'Bienvenue', 'Bonjour {prenom}, merci pour ta confiance. À très vite.',
   array(select utilisateur_id from admin_destinataires('extras'))) as programmes;
 \set ON_ERROR_STOP 0

@@ -12,6 +12,7 @@ import {
   textesPointage,
   textesOrigine,
   textesMessages,
+  textesMessagesMobile,
   textesFicheExtra,
   LIBELLES_ETAT_MISSION,
   PIEDS_MESSAGE,

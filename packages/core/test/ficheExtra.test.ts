@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { etatMissionFiche, resumeFicheExtra, type MissionFicheExtra } from '../src';
+import {
+  etatMissionFiche,
+  lienSms,
+  lienWhatsApp,
+  personnaliserMessage,
+  resumeFicheExtra,
+  type MissionFicheExtra,
+} from '../src';
 
 const base: MissionFicheExtra = {
   affectationId: 'a',
@@ -66,5 +73,19 @@ describe('fiche d’un extra', () => {
     expect(r.brutFaitCentimes).toBe(2 * 8125);
     expect(r.brutAVenirCentimes).toBe(8125);
     expect(r.netFaitEuros).toBeGreaterThan(0);
+  });
+});
+
+describe('message par WhatsApp ou SMS', () => {
+  it('remplace le prénom et prépare les liens', () => {
+    expect(personnaliserMessage('Bonjour {prenom},', 'Kévin')).toBe('Bonjour Kévin,');
+    expect(personnaliserMessage('Bonjour {prenom},', null)).toBe('Bonjour,');
+    expect(lienWhatsApp('+262 692 00 00 01', 'Bonjour Kévin')).toBe(
+      'https://wa.me/262692000001?text=Bonjour%20K%C3%A9vin',
+    );
+    expect(lienWhatsApp('+262692000001')).toBe('https://wa.me/262692000001');
+    expect(lienSms('+262692000001', 'À bientôt')).toBe(
+      'sms:+262692000001?&body=%C3%80%20bient%C3%B4t',
+    );
   });
 });

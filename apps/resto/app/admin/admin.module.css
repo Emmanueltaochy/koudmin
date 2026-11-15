@@ -457,3 +457,8 @@
   text-underline-offset: 3px;
   cursor: pointer;
 }
+.liensMobile {
+  display: flex;
+  gap: 16px;
+  padding: 0 12px 10px 44px;
+}

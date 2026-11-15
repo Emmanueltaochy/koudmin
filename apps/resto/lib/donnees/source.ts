@@ -288,6 +288,9 @@ export interface DestinataireMessage {
   nom: string;
   detail: string | null;
   email: string | null;
+  /** Prénom (extras), pour personnaliser un message par WhatsApp ou SMS. */
+  prenom: string | null;
+  telephone: string | null;
 }
 
 export interface MessageAdmin {

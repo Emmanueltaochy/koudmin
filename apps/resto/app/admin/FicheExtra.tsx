@@ -7,6 +7,9 @@ import {
   formatEuros,
   formatHeure,
   formatMobileReunion,
+  lienSms,
+  lienWhatsApp,
+  textesMessagesMobile,
   formatPlage,
   jourCourt,
   LIBELLES_ETAT_MISSION,
@@ -140,6 +143,19 @@ export function FicheExtra({ id, onRetour }: { id: string; onRetour: () => void 
             <Ligne libelle={c.mobile}>
               <a href={`tel:${f.telephone}`} className={ui.lienDiscret}>
                 {formatMobileReunion(f.telephone)}
+              </a>
+              {' · '}
+              <a
+                href={lienWhatsApp(f.telephone)}
+                target="_blank"
+                rel="noopener"
+                className={ui.lien}
+              >
+                {textesMessagesMobile.whatsapp}
+              </a>
+              {' · '}
+              <a href={lienSms(f.telephone)} className={ui.lien}>
+                {textesMessagesMobile.sms}
               </a>
             </Ligne>
             <Ligne libelle={c.email}>

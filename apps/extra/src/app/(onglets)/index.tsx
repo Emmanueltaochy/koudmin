@@ -16,6 +16,7 @@ import {
   type MissionResume,
 } from '@kivien/core';
 import { Bandeau } from '../../missions/Bandeau';
+import { BandeauEmail } from '../../missions/BandeauEmail';
 import { CarteConfirmee } from '../../missions/CarteConfirmee';
 import { CarteMission } from '../../missions/CarteMission';
 import { CarteSquelette } from '../../missions/CarteSquelette';
@@ -47,7 +48,10 @@ export default function Missions() {
   // En haut ce qui reste à faire ; en bas les missions terminées ou annulées par l'entreprise.
   const actives = useMemo(() => confirmees.filter((m) => !m.annulee && !m.passee), [confirmees]);
   const anciennes = useMemo(
-    () => confirmees.filter((m) => m.annulee || m.passee).sort((a, b) => b.jour.localeCompare(a.jour) || b.debut - a.debut),
+    () =>
+      confirmees
+        .filter((m) => m.annulee || m.passee)
+        .sort((a, b) => b.jour.localeCompare(a.jour) || b.debut - a.debut),
     [confirmees],
   );
 
@@ -85,6 +89,8 @@ export default function Missions() {
           ))}
         </View>
       </View>
+
+      <BandeauEmail />
 
       {etat.statut === 'chargement' && (
         <View style={styles.contenu}>
@@ -131,12 +137,19 @@ export default function Missions() {
                 <View style={styles.confirmees}>
                   <Texte variante="legendeForte">{textesEcrans.extra.missionsConfirmees}</Texte>
                   {actives.map((m) => (
-                    <CarteConfirmee key={m.id} mission={m} aujourdhui={aujourdhui} onPress={ouvrir} />
+                    <CarteConfirmee
+                      key={m.id}
+                      mission={m}
+                      aujourdhui={aujourdhui}
+                      onPress={ouvrir}
+                    />
                   ))}
                 </View>
               )}
               <Texte variante="legende" couleur="galet" style={styles.legende}>
-                {missions.length > 0 ? legendeListe(missions.length, !profil.aVoiture) : tm.videTitre}
+                {missions.length > 0
+                  ? legendeListe(missions.length, !profil.aVoiture)
+                  : tm.videTitre}
               </Texte>
             </>
           }
@@ -169,7 +182,13 @@ const styles = StyleSheet.create({
   ecran: { flex: 1, backgroundColor: couleurs.creme },
   entete: { paddingHorizontal: 16, paddingBottom: 16, gap: 16 },
   // Une commune longue fait passer la pilule sous le titre au lieu de déborder.
-  titre: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  titre: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+  },
   filtres: { flexDirection: 'row', gap: 8 },
   contenu: { flex: 1, paddingHorizontal: 16, gap: 16 },
   liste: { paddingHorizontal: 16, paddingBottom: 16 },

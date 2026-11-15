@@ -97,6 +97,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Missions', { exact: true }).filter({ visible: true }).first().waitFor();
   await p.getByText('Contrat signé', { exact: true }).filter({ visible: true }).first().waitFor(); await etape('liste : contrat signé sur la mission confirmée');
   // Mes gains : missions avec contrat, au mois, à l'année, à venir.
+  await p.getByText('Ajoute ton adresse e-mail pour recevoir les nouvelles missions près de chez toi.').waitFor(); await etape('missions : bandeau pour ajouter une adresse e-mail');
   await p.getByRole('tab', { name: /Profil/ }).click();
   await p.getByLabel('Ton adresse e-mail').fill('kevin@exemple.re');
   await p.getByText('Enregistrer mon adresse').click();
@@ -192,6 +193,8 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Indique ton prénom.').waitFor(); await etape('inscription : champs obligatoires');
   await p.getByText('Choisis un mot de passe de 8 caractères minimum.').waitFor(); await etape('inscription : mot de passe obligatoire');
   await p.getByText('Coche la case pour accepter les conditions générales.').waitFor(); await etape('inscription : conditions générales à accepter');
+  await p.getByText('Vérifie ton adresse e-mail.').waitFor();
+  await p.getByLabel('Ton adresse e-mail').fill('johan@exemple.re'); await etape('inscription : adresse e-mail obligatoire');
   await p.getByRole('checkbox').click();
   await p.getByText('Comment as-tu connu Kivien ?').waitFor();
   await p.getByRole('radio', { name: 'Recherche Google' }).click(); await etape('inscription : comment as-tu connu Kivien (facultatif)');
@@ -210,6 +213,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByLabel('Téléphone').fill('0693 00 00 02');
   await p.getByText('Créer mon compte').click();
   await p.getByText('Le Port · sans voiture').waitFor({ timeout: 8000 }); await etape('inscription terminée : profil Le Port, sans voiture');
+  await p.getByText('Confirme ton adresse : ouvre le lien envoyé à johan@exemple.re.').waitFor(); await etape('missions : bandeau pour confirmer l’adresse e-mail');
 
   if (logs.length) {
     console.log(logs.join('\n'));

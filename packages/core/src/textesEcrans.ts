@@ -568,6 +568,10 @@ export const textesEcrans = {
       erreur: 'Vérifie ton adresse e-mail.',
       prise: 'Cette adresse est déjà utilisée par un autre compte.',
       oublie: 'Mot de passe oublié ?',
+      aideInscription: 'Pour recevoir les missions près de chez toi et récupérer ton mot de passe. Un lien de confirmation t’est envoyé.',
+      bandeauAjouter: 'Ajoute ton adresse e-mail pour recevoir les nouvelles missions près de chez toi.',
+      bandeauConfirmer: (adresse: string) => `Confirme ton adresse : ouvre le lien envoyé à ${adresse}.`,
+      bandeauAction: 'Ajouter mon e-mail',
     },
     gains: {
       titre: 'Mes gains',

@@ -10,6 +10,8 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  emailValide,
+  normaliserEmail,
   normaliserMobileReunion,
   CANAUX_CONNU,
   textesAcceptation,
@@ -51,10 +53,11 @@ export default function Bienvenue() {
     aVoiture: null,
   });
   const [motDePasse, setMotDePasse] = useState('');
+  const [email, setEmail] = useState('');
   const [cgu, setCgu] = useState(false);
   const [commentConnu, setCommentConnu] = useState<CanalConnu | null>(null);
   const [erreurs, setErreurs] = useState<
-    Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>>
+    Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu' | 'email', string>>
   >({});
   const [erreurEnvoi, setErreurEnvoi] = useState<string | null>(null);
   // Compte créé mais profil pas encore enregistré (coupure réseau) : on ne recrée pas le compte.
@@ -62,14 +65,15 @@ export default function Bienvenue() {
   const [envoi, setEnvoi] = useState(false);
 
   const [tente, setTente] = useState(false);
-  const valider = (si: SaisieInscription, mdp: string, accepte = cgu) => {
-    const e: Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu', string>> =
+  const valider = (si: SaisieInscription, mdp: string, accepte = cgu, adresse = email) => {
+    const e: Partial<Record<keyof SaisieInscription | 'motDePasse' | 'cgu' | 'email', string>> =
       validerInscription(si);
     if (profilSeul) delete e.telephone;
     else {
       const m = validerMotDePasse(mdp);
       if (m) e.motDePasse = m;
     }
+    if (!emailValide(adresse)) e.email = textesEcrans.extra.email.erreur;
     if (!accepte) e.cgu = textesAcceptation.erreurExtra;
     return e;
   };
@@ -84,6 +88,10 @@ export default function Bienvenue() {
     if (tente) setErreurs(valider(saisie, v));
   };
 
+  const majEmail = (v: string) => {
+    setEmail(v);
+    if (tente) setErreurs(valider(saisie, motDePasse, cgu, v));
+  };
   const cocherCgu = (v: boolean) => {
     setCgu(v);
     if (tente) setErreurs(valider(saisie, motDePasse, v));
@@ -115,6 +123,12 @@ export default function Bienvenue() {
         commune: saisie.commune,
         aVoiture: !!saisie.aVoiture,
       });
+      // Adresse e-mail confirmée par un lien ; déjà prise par un autre compte, on le dit tout de suite.
+      if ((await source.changerEmail(normaliserEmail(email))) === 'prise') {
+        setErreurs({ email: textesEcrans.extra.email.prise });
+        setEnvoi(false);
+        return;
+      }
       await source.accepterCgu(VERSION_CGU).catch(() => undefined);
       await source.noterOrigine(commentConnu, origineMemorisee()).catch(() => undefined);
       router.replace('/');
@@ -192,6 +206,19 @@ export default function Bienvenue() {
             />
           </>
         )}
+        <ChampTexte
+          libelle={textesEcrans.extra.email.titre}
+          value={email}
+          onChangeText={majEmail}
+          erreur={erreurs.email}
+          aide={textesEcrans.extra.email.aideInscription}
+          placeholder="prenom@exemple.re"
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
         <ChoixCommune
           libelle={ti.commune}
           valeur={saisie.commune}

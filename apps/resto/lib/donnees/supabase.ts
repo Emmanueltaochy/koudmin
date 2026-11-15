@@ -505,12 +505,16 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           nom: string;
           detail: string | null;
           email: string | null;
+          prenom: string | null;
+          telephone: string | null;
         }[];
         return l.map((d) => ({
           id: d.utilisateur_id,
           nom: d.nom,
           detail: d.detail,
           email: d.email,
+          prenom: d.prenom,
+          telephone: d.telephone,
         }));
       },
       async envoyerMessage(pub, sujet, message, ids) {

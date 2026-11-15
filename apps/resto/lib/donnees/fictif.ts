@@ -897,9 +897,30 @@ export function sourceFictive(): SourceResto {
       async destinataires(pub) {
         return pub === 'extras'
           ? [
-              { id: 'e1', nom: 'Kévin Hoarau', detail: 'Saint-Paul', email: 'kevin@exemple.re' },
-              { id: 'e2', nom: 'Maëlle Payet', detail: 'Le Port', email: 'maelle@exemple.re' },
-              { id: 'e3', nom: 'Johan Grondin', detail: 'Saint-Pierre', email: null },
+              {
+                id: 'e1',
+                nom: 'Kévin Hoarau',
+                detail: 'Saint-Paul',
+                email: 'kevin@exemple.re',
+                prenom: 'Kévin',
+                telephone: '+262692000001',
+              },
+              {
+                id: 'e2',
+                nom: 'Maëlle Payet',
+                detail: 'Le Port',
+                email: 'maelle@exemple.re',
+                prenom: 'Maëlle',
+                telephone: '+262693000002',
+              },
+              {
+                id: 'e3',
+                nom: 'Johan Grondin',
+                detail: 'Saint-Pierre',
+                email: null,
+                prenom: 'Johan',
+                telephone: '+262692000003',
+              },
             ]
           : [
               {
@@ -907,8 +928,17 @@ export function sourceFictive(): SourceResto {
                 nom: 'Le Boucan Grillé',
                 detail: 'Saint-Gilles-les-Bains',
                 email: 'contact@boucan.re',
+                prenom: null,
+                telephone: '+262692000010',
               },
-              { id: 'u2', nom: 'Ti Kaz Bar', detail: 'Saint-Denis', email: null },
+              {
+                id: 'u2',
+                nom: 'Ti Kaz Bar',
+                detail: 'Saint-Denis',
+                email: null,
+                prenom: null,
+                telephone: '+262692000011',
+              },
             ];
       },
       async envoyerMessage(pub, sujet, message, ids) {

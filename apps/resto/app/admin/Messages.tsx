@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Send } from 'lucide-react';
-import { modeleBienvenueExtras, textesMessages as tm, type PublicMessage } from '@kivien/core';
+import {
+  lienSms,
+  lienWhatsApp,
+  modeleBienvenueExtras,
+  personnaliserMessage,
+  textesMessages as tm,
+  textesMessagesMobile as tmm,
+  type PublicMessage,
+} from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
@@ -54,6 +62,10 @@ export function Messages() {
     [liste],
   );
   const choisis = avecAdresse.filter((d) => coches.has(d.id));
+
+  /** Message pour WhatsApp ou SMS : sujet en tête, prénom remplacé. */
+  const texteMobile = (prenom: string | null) =>
+    personnaliserMessage(`${sujet.trim()}\n\n${message.trim()}`, prenom);
 
   function basculer(id: string) {
     setCoches((c) => {
@@ -121,6 +133,9 @@ export function Messages() {
                 {tm.toutDecocher}
               </button>
             </div>
+            {liste.some((d) => !d.email && d.telephone) && (
+              <p className={`${ui.legende} ${ui.galet}`}>{tmm.aide}</p>
+            )}
             <ul className={s.destinataires}>
               {liste.map((d) => (
                 <li key={d.id}>
@@ -138,6 +153,21 @@ export function Messages() {
                       </span>
                     </span>
                   </label>
+                  {!d.email && d.telephone && (
+                    <span className={s.liensMobile}>
+                      <a
+                        href={lienWhatsApp(d.telephone, texteMobile(d.prenom))}
+                        target="_blank"
+                        rel="noopener"
+                        className={ui.lien}
+                      >
+                        {tmm.whatsapp}
+                      </a>
+                      <a href={lienSms(d.telephone, texteMobile(d.prenom))} className={ui.lien}>
+                        {tmm.sms}
+                      </a>
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
