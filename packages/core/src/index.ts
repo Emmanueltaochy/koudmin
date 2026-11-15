@@ -29,3 +29,5 @@ export * from './textesLegal';
 export * from './textesNotifications';
 export * from './confiance';
 export * from './origine';
+export * from './messagesAdmin';
+export * from './ficheExtra';

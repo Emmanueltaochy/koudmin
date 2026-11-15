@@ -57,6 +57,9 @@ new row for relation "acceptations_cgu" violates check constraint "acceptations_
 permission denied for function prendre_notifications
 Pointage possible 1 h avant le début
 Réponse inconnue
+Réservé aux administrateurs Kivien
+Aucun destinataire avec une adresse confirmée
+Réservé aux administrateurs Kivien
 Réservé aux administrateurs Kivien'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
@@ -64,4 +67,4 @@ if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (35 refus attendus)."
+echo "Scénario SQL conforme (38 refus attendus)."

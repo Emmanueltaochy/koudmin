@@ -1,5 +1,7 @@
 import type {
   CanalConnu,
+  MissionFicheExtra,
+  PublicMessage,
   CategorieProspect,
   ConfianceExtra,
   JourISO,
@@ -253,11 +255,67 @@ export interface OrigineAdmin {
   premiereVisite: string | null;
 }
 
+/** Fiche d'un extra (espace admin). */
+export interface FicheExtraAdmin {
+  id: string;
+  prenom: string;
+  nom: string;
+  telephone: string;
+  email: string | null;
+  commune: string;
+  aVoiture: boolean;
+  competences: Poste[];
+  experience: string | null;
+  langues: string[];
+  presentation: string;
+  inscritLe: string;
+  alertesEmail: boolean;
+  dossierComplet: boolean;
+  cguVersion: string | null;
+  avecPhoto: boolean;
+  dispos14Jours: number;
+  origine: {
+    commentConnu: CanalConnu | null;
+    referent: string | null;
+    page: string | null;
+    utm: string | null;
+  } | null;
+  missions: MissionFicheExtra[];
+}
+
+export interface DestinataireMessage {
+  id: string;
+  nom: string;
+  detail: string | null;
+  email: string | null;
+}
+
+export interface MessageAdmin {
+  id: string;
+  public: PublicMessage;
+  sujet: string;
+  creeLe: string;
+  total: number;
+  envoyes: number;
+  enAttente: number;
+  echecs: number;
+}
+
 export interface SourceAdmin {
   tableau(jours: number): Promise<TableauAdmin | null>;
   etablissements(): Promise<EtablissementAdmin[]>;
   extras(): Promise<ExtraAdmin[]>;
   origines(): Promise<OrigineAdmin[]>;
+  ficheExtra(id: string): Promise<FicheExtraAdmin | null>;
+  destinataires(pub: PublicMessage): Promise<DestinataireMessage[]>;
+  /** Programme le message ; renvoie le nombre d'e-mails programmés. */
+  envoyerMessage(
+    pub: PublicMessage,
+    sujet: string,
+    message: string,
+    ids: string[],
+  ): Promise<number>;
+  messages(): Promise<MessageAdmin[]>;
   demandes(limite?: number): Promise<DemandeAdmin[]>;
   prospection: SourceProspection;
 }

@@ -15,6 +15,7 @@ import {
   textes as t,
   textesEcrans,
   textesOrigine,
+  textesFicheExtra as tf,
   CANAUX_CONNU,
   type Experience,
 } from '@kivien/core';
@@ -28,6 +29,7 @@ import {
   type OrigineAdmin,
 } from '@/lib/donnees';
 import s from './admin.module.css';
+import { FicheExtra } from './FicheExtra';
 
 const ta = textesEcrans.resto.admin;
 const c = ta.colonnes;
@@ -203,6 +205,8 @@ export function ListeExtras() {
       `${e.prenom} ${e.nom} ${e.commune} ${e.telephone} ${e.competences.map((x) => LIBELLES_POSTE[x].court).join(' ')}`,
   );
   const origines = useOrigines('extra');
+  const [fiche, setFiche] = useState<string | null>(null);
+  if (fiche) return <FicheExtra id={fiche} onRetour={() => setFiche(null)} />;
   if (!Array.isArray(lignes)) return <Etat lignes={lignes} />;
   return (
     <>
@@ -227,7 +231,14 @@ export function ListeExtras() {
             {filtrees.map((e) => (
               <tr key={e.id}>
                 <th scope="row">
-                  {e.prenom} {e.nom}
+                  <button
+                    type="button"
+                    className={s.nomExtra}
+                    onClick={() => setFiche(e.id)}
+                    title={tf.voirFiche}
+                  >
+                    {e.prenom} {e.nom}
+                  </button>
                   <span className={s.sousLigne}>
                     {e.commune}
                     {e.experience

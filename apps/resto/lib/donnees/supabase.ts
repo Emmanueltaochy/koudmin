@@ -10,6 +10,8 @@ import {
   type StatutAffectation,
   type StatutDemande,
   type ConfianceExtra,
+  type MissionFicheExtra,
+  type PublicMessage,
 } from '@kivien/core';
 import { resoudreEtablissement } from './etablissementCourant';
 import {
@@ -391,6 +393,156 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           placesPourvues: r.places_pourvues,
           fraisHTCentimes: r.frais_ht_centimes,
           derniereDemande: r.derniere_demande,
+        }));
+      },
+      async ficheExtra(id) {
+        const [fiche, missions] = await Promise.all([
+          client.rpc('admin_fiche_extra', { p_extra: id }),
+          client.rpc('admin_missions_extra', { p_extra: id }),
+        ]);
+        const [f] = verifier(fiche) as {
+          id: string;
+          prenom: string;
+          nom: string;
+          telephone: string;
+          email: string | null;
+          commune: string;
+          a_voiture: boolean;
+          competences: Poste[] | null;
+          experience: string | null;
+          langues: string[] | null;
+          presentation: string | null;
+          inscrit_le: string;
+          alertes_email: boolean;
+          dossier_complet: boolean;
+          cgu_version: string | null;
+          avec_photo: boolean;
+          dispos_14_jours: number;
+          comment_connu: string | null;
+          referent: string | null;
+          page_arrivee: string | null;
+          utm: string | null;
+        }[];
+        if (!f) return null;
+        const lignes = verifier(missions) as {
+          affectation_id: string;
+          demande_id: string;
+          etablissement: string;
+          commune: string;
+          poste: Poste;
+          intitule: string | null;
+          jour: string;
+          debut: number;
+          fin: number;
+          taux_horaire_brut_centimes: number;
+          statut: MissionFicheExtra['statut'];
+          statut_demande: MissionFicheExtra['statutDemande'];
+          desistement_tardif: boolean;
+          contrat_signe_extra: boolean;
+          contrat_signe_restaurant: boolean;
+          arrivee_le: string | null;
+          depart_le: string | null;
+          present: boolean | null;
+          note: number | null;
+          favori: boolean;
+        }[];
+        return {
+          id: f.id,
+          prenom: f.prenom,
+          nom: f.nom,
+          telephone: f.telephone,
+          email: f.email,
+          commune: f.commune,
+          aVoiture: f.a_voiture,
+          competences: f.competences ?? [],
+          experience: f.experience,
+          langues: f.langues ?? [],
+          presentation: f.presentation ?? '',
+          inscritLe: f.inscrit_le,
+          alertesEmail: f.alertes_email,
+          dossierComplet: f.dossier_complet,
+          cguVersion: f.cgu_version,
+          avecPhoto: f.avec_photo,
+          dispos14Jours: f.dispos_14_jours,
+          origine:
+            f.comment_connu || f.page_arrivee
+              ? {
+                  commentConnu: estCanalConnu(f.comment_connu) ? f.comment_connu : null,
+                  referent: f.referent,
+                  page: f.page_arrivee,
+                  utm: f.utm,
+                }
+              : null,
+          missions: lignes.map((m) => ({
+            affectationId: m.affectation_id,
+            demandeId: m.demande_id,
+            etablissement: m.etablissement,
+            commune: m.commune,
+            poste: m.poste,
+            intitule: m.intitule,
+            jour: m.jour,
+            debut: m.debut,
+            fin: m.fin,
+            tauxHoraireBrutCentimes: m.taux_horaire_brut_centimes,
+            statut: m.statut,
+            statutDemande: m.statut_demande,
+            desistementTardif: m.desistement_tardif,
+            contratSigneExtra: m.contrat_signe_extra,
+            contratSigneRestaurant: m.contrat_signe_restaurant,
+            arriveeLe: m.arrivee_le,
+            departLe: m.depart_le,
+            present: m.present,
+            note: m.note,
+            favori: m.favori,
+          })),
+        };
+      },
+      async destinataires(pub) {
+        const l = (await toutesLesLignes((debut, fin) =>
+          client.rpc('admin_destinataires', { p_public: pub }).range(debut, fin),
+        )) as {
+          utilisateur_id: string;
+          nom: string;
+          detail: string | null;
+          email: string | null;
+        }[];
+        return l.map((d) => ({
+          id: d.utilisateur_id,
+          nom: d.nom,
+          detail: d.detail,
+          email: d.email,
+        }));
+      },
+      async envoyerMessage(pub, sujet, message, ids) {
+        return verifier(
+          await client.rpc('admin_envoyer_message', {
+            p_public: pub,
+            p_sujet: sujet,
+            p_message: message,
+            p_utilisateurs: ids,
+          }),
+        ) as number;
+      },
+      async messages() {
+        const l = verifier(await client.rpc('admin_messages')) as {
+          id: string;
+          public: PublicMessage;
+          sujet: string;
+          cree_le: string;
+          total: number;
+          envoyes: number;
+          en_attente: number;
+          echecs: number;
+        }[];
+        return l.map((m) => ({
+          id: m.id,
+          public: m.public,
+          sujet: m.sujet,
+          creeLe: m.cree_le,
+          total: m.total,
+          envoyes: m.envoyes,
+          enAttente: m.en_attente,
+          echecs: m.echecs,
         }));
       },
       async origines() {

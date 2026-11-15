@@ -86,4 +86,24 @@ bash "$RACINE/deploy/vps/notifications.sh"
 [ "$(ls "$DIR"/mails | wc -l)" = "$avant" ] || { echo "ÉCHEC : message en trop" >&2; ls "$DIR"/mails >&2; exit 1; }
 [ "$($P -At -c "select count(*) from notifications_email where statut = 'en_attente' and envoyer_apres <= now()")" = 0 ] \
   || { echo "ÉCHEC : file non vidée" >&2; exit 1; }
+echo "--- 4. Message écrit depuis l'admin : prénom remplacé, liste mise en forme"
+$P <<'SQL'
+with m as (insert into messages_admin (public, sujet, message)
+           values ('extras', 'Bienvenue {prenom}', E'Bonjour {prenom},\n\nDeux choses :\n- tes dispos ;\n- ton profil.\n\nL''équipe Kivien') returning id)
+insert into envois_admin (message_id, utilisateur_id, email, prenom)
+select m.id, '00000000-0000-0000-0000-0000000000e1', 'kevin@exemple.re', 'Kévin' from m;
+SQL
+bash "$RACINE/deploy/vps/notifications.sh"
+python3 -I - "$DIR"/mails/admin-*.eml <<'PY'
+import sys
+from email import policy
+from email.parser import BytesParser
+m = BytesParser(policy=policy.default).parse(open(sys.argv[1], "rb"))
+assert m["To"] == "kevin@exemple.re" and m["Subject"] == "Bienvenue Kévin", m["Subject"]
+texte = m.get_body(("plain",)).get_content()
+assert texte.startswith("Bonjour Kévin,") and "compte extra sur Kivien" in texte, texte
+assert "<li" in m.get_body(("html",)).get_content()
+print("OK  message de l'admin")
+PY
+[ "$($P -At -c "select statut from envois_admin")" = envoye ] || { echo "ÉCHEC : envoi admin non noté" >&2; exit 1; }
 echo "Notifications conformes."

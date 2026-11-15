@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { LIBELLES_POSTE, textesNotifications } from '../src';
+import { LIBELLES_POSTE, PIEDS_MESSAGE, textesNotifications } from '../src';
 
 // Le script du VPS envoie ces e-mails : il doit reprendre les textes de core mot pour mot.
 const script = readFileSync(join(__dirname, '../../../deploy/vps/notifications.sh'), 'utf8');
@@ -34,5 +34,11 @@ describe('e-mails automatiques', () => {
       for (const [, champ] of [m.sujet, ...m.paragraphes].join(' ').matchAll(/\{(\w+)\}/g))
         expect(connus).toContain(champ);
     }
+  });
+});
+
+describe('messages de l’admin', () => {
+  it('le script du VPS reprend les pieds de message de core', () => {
+    for (const pied of Object.values(PIEDS_MESSAGE)) expect(script).toContain(JSON.stringify(pied));
   });
 });

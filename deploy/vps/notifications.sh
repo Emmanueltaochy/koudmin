@@ -23,7 +23,7 @@ SMTP_HOST=$(lire SMTP_HOST || true) SMTP_PORT=$(lire SMTP_PORT || true) SMTP_USE
 SMTP_PASS=$(lire SMTP_PASS || true) SITE=$(lire SITE_URL || true) \
 KIVIEN_PSQL=${KIVIEN_PSQL:-} KIVIEN_NOTIF_DOSSIER=${KIVIEN_NOTIF_DOSSIER:-} \
 python3 -I - <<'PY'
-import datetime, html, json, os, smtplib, ssl, subprocess
+import datetime, html, json, os, re, smtplib, ssl, subprocess
 from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 
@@ -199,40 +199,96 @@ def message(n):
     return msg
 
 
+# Messages écrits depuis l'espace admin (onglet Messages) : textes du pied repris de
+# packages/core/src/messagesAdmin.ts (vérifié par test).
+PIEDS_MESSAGE = {
+    "extras": "Tu reçois ce message car tu as un compte extra sur Kivien. Une question ? Réponds simplement à cet e-mail.",
+    "etablissements": "Vous recevez ce message car votre établissement a un compte sur Kivien. Une question ? Répondez simplement à cet e-mail.",
+}
+
+
+def en_html(texte):
+    """Texte libre → HTML simple : paragraphes séparés par une ligne vide, listes « - », liens."""
+    blocs = []
+    lien = lambda s: re.sub(r"(https?://[^\s<]+)", r'<a href="\1" style="color:#9E3215;">\1</a>', html.escape(s))
+    for bloc in re.split(r"\n\s*\n", texte.strip()):
+        lignes = [l.strip() for l in bloc.splitlines() if l.strip()]
+        puces = [l for l in lignes if l.startswith("- ")]
+        avant = [l for l in lignes if not l.startswith("- ")]
+        if avant and (not puces or lignes.index(puces[0]) > 0):
+            blocs.append(f'<p style="margin:0 0 16px;">{"<br>".join(lien(l) for l in avant)}</p>')
+        if puces:
+            items = "".join(f'<li style="margin:0 0 6px;">{lien(l[2:])}</li>' for l in puces)
+            blocs.append(f'<ul style="margin:0 0 16px;padding-left:20px;">{items}</ul>')
+    return "".join(blocs)
+
+
+def message_admin(e):
+    prenom = (e.get("prenom") or "").strip()
+    remplir = lambda s: (s.replace("{prenom}", prenom) if prenom else s.replace(" {prenom}", "").replace("{prenom}", ""))
+    sujet = remplir(e["sujet"])
+    corps = remplir(e["message"])
+    pied = PIEDS_MESSAGE.get(e["public"], PIEDS_MESSAGE["extras"])
+    msg = EmailMessage()
+    msg["From"] = formataddr(("Kivien", boite))
+    msg["To"] = e["email"]
+    msg["Reply-To"] = boite
+    msg["Subject"] = sujet
+    msg["Message-ID"] = make_msgid(domain=boite.split("@")[1])
+    msg.set_content(f"{corps}\n\n--\n{pied}\n{EDITEUR}\n")
+    msg.add_alternative(f"""<!doctype html><html lang="fr"><body style="margin:0;padding:0;background:#FBF6EE;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF6EE;padding:24px 12px;font-family:Helvetica,Arial,sans-serif;color:#211C18;">
+<tr><td align="center"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:16px;padding:28px 24px;">
+<tr><td style="padding-bottom:20px;"><img src="{site}/email/kivien-logo-email.png" alt="kivien" height="24" width="58" style="display:block;height:24px;width:58px;border:0;"></td></tr>
+<tr><td style="font-size:16px;line-height:1.55;color:#211C18;">{en_html(corps)}</td></tr>
+</table>
+<p style="max-width:560px;font-size:12px;line-height:1.5;color:#7A726B;margin:16px 0 0;">{html.escape(pied)}<br>{html.escape(EDITEUR)}</p>
+</td></tr></table></body></html>""", subtype="html")
+    return msg
+
+
 rappels = sql("select programmer_rappels();")
 lot = json.loads(sql("select coalesce(json_agg(x), '[]') from prendre_notifications(:n) x;", n=PAR_PASSAGE))
-if not lot:
+lot_admin = json.loads(sql("select coalesce(json_agg(x), '[]') from prendre_envois_admin(:n) x;", n=PAR_PASSAGE))
+if not lot and not lot_admin:
     if rappels not in ("", "0"):
         print(f"Notifications : {rappels} rappel(s) programmé(s).")
     raise SystemExit(0)
 
 envoyes = echecs = 0
+# (lot, fonction qui construit le message, fonction de la base qui note le résultat, nom du fichier d'essai)
+FILES = [
+    (lot, message, "noter_notification", lambda n: f"{n['id']}-{n['type']}.eml"),
+    (lot_admin, message_admin, "noter_envoi_admin", lambda n: f"admin-{n['id']}.eml"),
+]
 
 
-def noter(n, erreur=None):
+def noter(fonction, n, erreur=None):
     if erreur is None:
-        sql("select noter_notification(:id);", id=n["id"])
+        sql(f"select {fonction}(:id);", id=n["id"])
     else:
-        sql("select noter_notification(:id, :'erreur');", id=n["id"], erreur=erreur)
+        sql(f"select {fonction}(:id, :'erreur');", id=n["id"], erreur=erreur)
 
 
 if dossier:
-    for n in lot:
-        with open(os.path.join(dossier, f"{n['id']}-{n['type']}.eml"), "wb") as f:
-            f.write(bytes(message(n)))
-        noter(n)
-        envoyes += 1
+    for elements, construire, fonction, fichier in FILES:
+        for n in elements:
+            with open(os.path.join(dossier, fichier(n)), "wb") as f:
+                f.write(bytes(construire(n)))
+            noter(fonction, n)
+            envoyes += 1
 else:
     with smtplib.SMTP_SSL(os.environ["SMTP_HOST"], int(os.environ.get("SMTP_PORT") or 465),
                           context=ssl.create_default_context(), timeout=30) as smtp:
         smtp.login(boite, os.environ["SMTP_PASS"])
-        for n in lot:
-            try:
-                smtp.send_message(message(n))
-                noter(n)
-                envoyes += 1
-            except smtplib.SMTPRecipientsRefused:
-                noter(n, "Adresse refusée par le serveur de destination")
-                echecs += 1
+        for elements, construire, fonction, _ in FILES:
+            for n in elements:
+                try:
+                    smtp.send_message(construire(n))
+                    noter(fonction, n)
+                    envoyes += 1
+                except smtplib.SMTPRecipientsRefused:
+                    noter(fonction, n, "Adresse refusée par le serveur de destination")
+                    echecs += 1
 print(f"Notifications : {envoyes} envoyée(s), {echecs} échec(s), {rappels or 0} rappel(s) programmé(s).")
 PY

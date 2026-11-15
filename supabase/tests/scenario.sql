@@ -579,3 +579,32 @@ do $$ begin
   assert (select comment_connu = 'ami' and referent = 'google.com' and page_arrivee = '/extras'
           from origines_comptes where utilisateur_id = '00000000-0000-0000-0000-0000000000e1'), 'première visite gardée';
 end $$;
+\echo '--- Messages de l''admin : destinataires avec adresse confirmée seulement'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select nom, email is not null as a_une_adresse from admin_destinataires('extras') order by nom;
+select admin_envoyer_message('extras', 'Bienvenue', 'Bonjour {prenom}, merci pour ta confiance. À très vite.',
+  array(select utilisateur_id from admin_destinataires('extras'))) as programmes;
+\set ON_ERROR_STOP 0
+select admin_envoyer_message('extras', 'Bienvenue', 'Un message assez long pour passer.', array['00000000-0000-0000-0000-0000000000e2'::uuid]);
+\set ON_ERROR_STOP 1
+select sujet, total, en_attente from admin_messages();
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+\set ON_ERROR_STOP 0
+select * from admin_destinataires('extras');
+\set ON_ERROR_STOP 1
+reset role;
+do $$ begin
+  assert (select count(*) from prendre_envois_admin(10) where email = 'kevin@exemple.re' and prenom = 'Kévin') = 1;
+end $$;
+\echo '--- Fiche d''un extra (admin) : profil, dossier, origine et missions'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select prenom, email, dossier_complet, cgu_version, comment_connu, referent from admin_fiche_extra('00000000-0000-0000-0000-0000000000e1');
+select etablissement, statut, contrat_signe_restaurant, arrivee_le is not null as pointe, favori
+from admin_missions_extra('00000000-0000-0000-0000-0000000000e1') order by jour, debut;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+\set ON_ERROR_STOP 0
+select * from admin_missions_extra('00000000-0000-0000-0000-0000000000e1');
+\set ON_ERROR_STOP 1
+reset role;

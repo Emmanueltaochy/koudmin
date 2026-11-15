@@ -166,7 +166,7 @@ export const textesEcrans = {
       erreurIdentifiants: 'E-mail ou mot de passe incorrect.',
       deconnexion: 'Se déconnecter',
       groupes: { pilotage: 'Pilotage', activite: 'Activité', reseau: 'Réseau' },
-      onglets: { vue: "Vue d'ensemble", demandes: 'Demandes', extras: 'Extras', etablissements: 'Établissements', recrutement: 'Recrutement', prospection: 'Prospection' },
+      onglets: { vue: "Vue d'ensemble", demandes: 'Demandes', extras: 'Extras', etablissements: 'Établissements', recrutement: 'Recrutement', prospection: 'Prospection', messages: 'Messages' },
       prospection: {
         intro: "Établissements de l'île trouvés dans OpenStreetMap ou ajoutés à la main, pour les prévenir du lancement.",
         importer: 'Chercher les établissements sur OpenStreetMap',

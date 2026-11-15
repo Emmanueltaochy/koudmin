@@ -388,3 +388,72 @@
   background: var(--k-blanc);
   margin-bottom: 12px;
 }
+.destinataires {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--k-galet);
+  border-radius: 12px;
+}
+.destinataires li + li {
+  border-top: 1px solid rgba(33, 28, 24, 0.08);
+}
+.destinataire {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.destinataire input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--k-basalte);
+}
+.destinataire > span {
+  display: flex;
+  flex-direction: column;
+}
+.destinataire[data-sans-adresse='true'] {
+  opacity: 0.55;
+  cursor: default;
+}
+.fiche {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.ficheColonnes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+}
+.ficheColonnes dl {
+  margin: 8px 0 16px;
+}
+.ficheLigne {
+  display: grid;
+  grid-template-columns: minmax(120px, 40%) 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(33, 28, 24, 0.06);
+}
+.ficheLigne dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.nomExtra {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}

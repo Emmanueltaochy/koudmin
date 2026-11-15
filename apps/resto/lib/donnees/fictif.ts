@@ -1,3 +1,4 @@
+import type { MissionFicheExtra } from '@kivien/core';
 import {
   ajouterJours,
   aujourdhuiReunion,
@@ -8,6 +9,7 @@ import {
 } from '@kivien/core';
 import type {
   CampagneProspection,
+  MessageAdmin,
   RechercheProspects,
   MoyenPaiement,
   Prospect,
@@ -105,6 +107,8 @@ const CONFIANCE: Record<string, ExtraAffecte['confiance']> = {
   e2: { missions: 0, notes: 0, noteMoyenneDixiemes: null, absences: 0, dossierComplet: true },
   e3: { missions: 3, notes: 3, noteMoyenneDixiemes: 43, absences: 0, dossierComplet: false },
 };
+
+const messagesDemo: MessageAdmin[] = [];
 
 function extra(
   id: string,
@@ -801,6 +805,118 @@ export function sourceFictive(): SourceResto {
             derniereDemande: null,
           },
         ];
+      },
+      async ficheExtra(id) {
+        const extras = await this.extras();
+        const e = extras.find((x) => x.id === id);
+        if (!e) return null;
+        const auj = aujourdhuiReunion();
+        const m = (
+          j: number,
+          etablissement: string,
+          o: Partial<MissionFicheExtra> = {},
+        ): MissionFicheExtra => ({
+          affectationId: `a-${id}-${j}`,
+          demandeId: `d-${j}`,
+          etablissement,
+          commune: 'Saint-Gilles-les-Bains',
+          poste: 'serveur',
+          intitule: null,
+          jour: ajouterJours(auj, j),
+          debut: 1080,
+          fin: 0,
+          tauxHoraireBrutCentimes: PARAMETRES.tauxHoraireBrutCentimes,
+          statut: 'confirmee',
+          statutDemande: j < 0 ? 'terminee' : 'pourvue',
+          desistementTardif: false,
+          contratSigneExtra: true,
+          contratSigneRestaurant: true,
+          arriveeLe: j < 0 ? `${ajouterJours(auj, j)}T17:55:00+04:00` : null,
+          departLe: j < 0 ? `${ajouterJours(auj, j)}T23:59:00+04:00` : null,
+          present: j < 0 ? true : null,
+          note: j < 0 ? 5 : null,
+          favori: false,
+          ...o,
+        });
+        return {
+          id: e.id,
+          prenom: e.prenom,
+          nom: e.nom,
+          telephone: e.telephone,
+          email: id === 'e1' ? 'kevin@exemple.re' : null,
+          commune: e.commune,
+          aVoiture: e.aVoiture,
+          competences: e.competences,
+          experience: e.experience,
+          langues: ['francais', 'creole'],
+          presentation: 'Service en salle depuis trois saisons.',
+          inscritLe: e.inscritLe,
+          alertesEmail: true,
+          dossierComplet: id === 'e1',
+          cguVersion: '2026-11-01',
+          avecPhoto: id === 'e1',
+          dispos14Jours: 4,
+          origine:
+            id === 'e1'
+              ? { commentConnu: 'google', referent: 'google.com', page: '/extras', utm: null }
+              : null,
+          missions:
+            id === 'e1'
+              ? [
+                  m(3, 'Le Boucan Grillé', {
+                    contratSigneRestaurant: false,
+                    contratSigneExtra: false,
+                  }),
+                  m(-2, 'Le Boucan Grillé', { favori: true }),
+                  m(-9, 'Ti Kaz Bar', { note: 4, poste: 'barman' }),
+                  m(-15, 'Chez Tatie Lucette', {
+                    statut: 'desistee',
+                    desistementTardif: true,
+                    present: null,
+                    note: null,
+                    arriveeLe: null,
+                    departLe: null,
+                  }),
+                ]
+              : [],
+        };
+      },
+      async destinataires(pub) {
+        return pub === 'extras'
+          ? [
+              { id: 'e1', nom: 'Kévin Hoarau', detail: 'Saint-Paul', email: 'kevin@exemple.re' },
+              { id: 'e2', nom: 'Maëlle Payet', detail: 'Le Port', email: 'maelle@exemple.re' },
+              { id: 'e3', nom: 'Johan Grondin', detail: 'Saint-Pierre', email: null },
+            ]
+          : [
+              {
+                id: 'u1',
+                nom: 'Le Boucan Grillé',
+                detail: 'Saint-Gilles-les-Bains',
+                email: 'contact@boucan.re',
+              },
+              { id: 'u2', nom: 'Ti Kaz Bar', detail: 'Saint-Denis', email: null },
+            ];
+      },
+      async envoyerMessage(pub, sujet, message, ids) {
+        await attendre(600);
+        const avecAdresse = (await this.destinataires(pub)).filter(
+          (d) => d.email && ids.includes(d.id),
+        );
+        messagesDemo.unshift({
+          id: `m${Date.now()}`,
+          public: pub,
+          sujet,
+          creeLe: new Date().toISOString(),
+          total: avecAdresse.length,
+          envoyes: 0,
+          enAttente: avecAdresse.length,
+          echecs: 0,
+        });
+        return avecAdresse.length;
+      },
+      async messages() {
+        return messagesDemo;
       },
       async origines() {
         const il = (j: number) => new Date(Date.now() - j * 86400e3).toISOString();
