@@ -1,0 +1,98 @@
+# Compilation et envoi de l'app Kivien (extras, apps/extra) sur l'App Store et Google Play.
+# Lancement à la main depuis Codemagic (aucun déclenchement automatique) : voir deploy/stores/README.md.
+#
+# À régler une fois dans Codemagic (Team settings) :
+# - intégration App Store Connect (clé API) : son nom remplace « Kivien App Store Connect » ;
+# - clé de signature Android (Code signing identities → Android keystores) : référence « kivien_keystore » ;
+# - groupe de variables « kivien » : EXPO_PROJECT_ID, APP_STORE_APPLE_ID, et pour Android
+#   GOOGLE_SERVICES_JSON (google-services.json encodé en base64) et GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+#   (compte de service Google Play, en secret).
+
+definitions:
+  dependances: &dependances
+    name: Dépendances (pnpm)
+    script: |
+      corepack enable
+      pnpm install --frozen-lockfile
+  supabase: &supabase
+    # Adresse et clé publique (anon) de l'API : les mêmes que l'app web, sans secret.
+    EXPO_PUBLIC_SUPABASE_URL: https://api.kivien.re
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzkzMjc1Njc4LCJleHAiOjE5NTA5NTU2Nzh9.6t01A3WPCqB-BK93cmvaJEi-SScL6diTsEknAcxkrX4
+
+workflows:
+  kivien-ios:
+    name: Kivien · iPhone
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Kivien App Store Connect
+    environment:
+      groups:
+        - kivien
+      vars:
+        <<: *supabase
+        BUNDLE_ID: re.kivien.extra
+      node: 22
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: re.kivien.extra
+    scripts:
+      - *dependances
+      - name: Projet iOS (numéro de build suivant celui de l'App Store)
+        working_directory: apps/extra
+        script: |
+          DERNIER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          export BUILD_NUMBER=$((DERNIER + 1))
+          echo "Numéro de build : $BUILD_NUMBER"
+          npx expo prebuild -p ios --clean
+      - name: Signature
+        script: xcode-project use-profiles
+      - name: Compilation
+        script: xcode-project build-ipa --workspace apps/extra/ios/Kivien.xcworkspace --scheme Kivien
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        # TestFlight seulement : la mise en vente reste manuelle dans App Store Connect.
+        submit_to_testflight: true
+        submit_to_app_store: false
+
+  kivien-android:
+    name: Kivien · Android
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      groups:
+        - kivien
+      android_signing:
+        - kivien_keystore
+      vars:
+        <<: *supabase
+        PACKAGE_NAME: re.kivien.extra
+      node: 22
+      java: 17
+    scripts:
+      - *dependances
+      - name: Projet Android (numéro de version suivant celui de Google Play)
+        working_directory: apps/extra
+        script: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then echo "$GOOGLE_SERVICES_JSON" | base64 --decode > google-services.json; fi
+          DERNIER=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" || echo 0)
+          export BUILD_NUMBER=$((DERNIER + 1))
+          echo "Numéro de version : $BUILD_NUMBER"
+          npx expo prebuild -p android --clean
+          node scripts/signature-android.cjs
+      - name: Compilation
+        working_directory: apps/extra/android
+        script: ./gradlew bundleRelease
+    artifacts:
+      - apps/extra/android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        # Test interne, en brouillon : la publication reste manuelle dans la Play Console.
+        track: internal
+        submit_as_draft: true

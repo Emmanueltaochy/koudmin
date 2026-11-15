@@ -2,98 +2,70 @@
 
 L'app est prête côté code : version 1.0.0, identifiant `re.kivien.extra`, notifications sur le
 téléphone (alertes de missions, contrat à signer, rappel de la veille) envoyées par le VPS.
-Il reste les comptes et les envois, qui se font depuis ton ordinateur, avec ton identité.
+Compilation et envoi par **Codemagic** (`codemagic.yaml` à la racine du dépôt).
 
 Sortie **discrète** conseillée : publication manuelle côté Apple, test fermé côté Google, et
 aucune annonce tant que le vivier d'extras n'est pas prêt.
 
 ---
 
-## 1. Les comptes (une seule fois)
+## 1. Ce qu'il faut (tu as déjà les comptes Apple et Google, et Codemagic)
 
-| Compte | Prix | Où |
+| Où | Quoi |
+|---|---|
+| App Store Connect | Créer l'app : Mes apps → + → identifiant de lot `re.kivien.extra` (à créer dans Certificats, identifiants et profils, avec la capacité **Push Notifications** cochée). Noter son **Apple ID** (un nombre). |
+| Google Play Console | Créer l'app « Kivien ». Le **premier** fichier `.aab` se dépose à la main (test interne) ; Codemagic envoie les suivants. |
+| expo.dev (gratuit) | Créer un projet « kivien-extra » : son **ID de projet** sert aux notifications sur le téléphone. Aucune compilation ne passe par Expo. |
+| Firebase (gratuit) | Projet « Kivien » → app Android `re.kivien.extra` → télécharger `google-services.json`. |
+
+---
+
+## 2. Notifications sur le téléphone (une seule fois)
+
+Les notifications partent du VPS par le service gratuit d'Expo, qui les remet à Apple et Google.
+Expo a besoin des deux clés suivantes, à déposer sur **expo.dev → projet kivien-extra →
+Credentials** (jamais dans le dépôt, jamais par message) :
+
+- **iPhone :** une clé APNs (.p8). Apple Developer → Keys → + → coche *Apple Push Notifications
+  service (APNs)* → télécharge le fichier, note le Key ID et ton Team ID.
+- **Android :** Firebase → Paramètres du projet → Comptes de service → *Générer une nouvelle clé
+  privée* → dépose le fichier dans *FCM V1 service account key*.
+
+---
+
+## 3. Réglages Codemagic (une seule fois)
+
+Le dépôt contient `codemagic.yaml`, avec deux compilations lancées à la main : **Kivien · iPhone**
+et **Kivien · Android**.
+
+1. Ajoute le dépôt Emmanueltaochy/koudmin dans Codemagic (il lira `codemagic.yaml`).
+2. **Team settings → Integrations → Developer Portal** : ta clé API App Store Connect. Si elle ne
+   s'appelle pas « Kivien App Store Connect », remplace ce nom dans `codemagic.yaml` (ligne
+   `app_store_connect:`) ou dis-moi son nom.
+3. **Code signing identities → Android keystores** : ta clé de signature Android (ou une nouvelle),
+   avec la référence `kivien_keystore`. Garde une copie de cette clé : sans elle, impossible de
+   mettre l'app à jour sur Google Play.
+4. **Environment variables**, groupe `kivien` :
+
+| Variable | Valeur | Secret |
 |---|---|---|
-| Apple Developer Program | 99 USD par an | developer.apple.com/programs/enroll |
-| Google Play Console | 25 USD, une fois | play.google.com/console/signup |
-| Expo (outil de compilation EAS) | gratuit pour démarrer | expo.dev/signup |
-| Firebase (notifications Android) | gratuit | console.firebase.google.com |
-
-**Personne ou entreprise ?** En EI, Apple et Google t'inscrivent en général comme **particulier** :
-c'est ton nom (Emmanuel TAOCHY) qui s'affiche comme vendeur. Pour afficher « Kivien » ou une
-société, il faut un compte **organisation**, qui demande un numéro D-U-N-S (gratuit, quelques
-jours à obtenir) et une structure juridique reconnue.
-
-**Google, compte particulier récent :** Google demande un **test fermé avec au moins 12 testeurs
-pendant 14 jours** avant de pouvoir publier en production. C'est l'occasion de faire tester l'app
-par tes premiers extras. Vérifie la règle en vigueur dans la Play Console au moment de t'inscrire.
-
----
-
-## 2. Relier l'app à Expo (sur ton ordinateur)
-
-```bash
-npm install -g eas-cli
-```
-
-```bash
-cd apps/extra && eas login
-```
-
-```bash
-eas init
-```
-
-`eas init` ajoute `extra.eas.projectId` dans `apps/extra/app.json`. Ce numéro n'est pas secret :
-envoie-le-moi ou pousse le fichier, je l'intègre. **Sans lui, les notifications ne marchent pas.**
-
----
-
-## 3. Notifications Android (Firebase)
-
-1. Console Firebase → **Ajouter un projet** « Kivien » (sans Google Analytics).
-2. **Ajouter une app Android**, nom du package : `re.kivien.extra`.
-3. Télécharge `google-services.json` et envoie-le-moi (ou place-le dans `apps/extra/`) : je
-   l'ajoute à la configuration (`android.googleServicesFile`).
-4. Firebase → Paramètres du projet → **Comptes de service** → **Générer une nouvelle clé privée**.
-   Ce fichier-là est **secret** : ne l'envoie à personne. Donne-le directement à Expo :
-
-```bash
-eas credentials -p android
-```
-
-Choisis *production* → *Google Service Account* → *Push Notifications (FCM V1)* → envoie le fichier.
-
-Côté iPhone, rien à faire : à la première compilation iOS, EAS propose de créer la clé de
-notifications Apple. Réponds **oui**.
+| `EXPO_PROJECT_ID` | l'ID du projet expo.dev | non |
+| `APP_STORE_APPLE_ID` | l'Apple ID de l'app (un nombre) | non |
+| `GOOGLE_SERVICES_JSON` | `google-services.json` encodé en base64 (`base64 -i google-services.json`) | oui |
+| `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS` | le compte de service Google Play (le même que pour ton autre app convient s'il a accès à la nouvelle) | oui |
 
 ---
 
 ## 4. Compiler et envoyer
 
-```bash
-eas build -p ios --profile production
-```
+Dans Codemagic : **Start new build** → branche `main` → workflow **Kivien · iPhone** ou
+**Kivien · Android**.
 
-```bash
-eas build -p android --profile production
-```
+- **iPhone :** l'app part sur **TestFlight**. La mise en vente reste manuelle dans App Store Connect.
+- **Android :** l'app part en **test interne**, en brouillon. La publication reste manuelle dans
+  la Play Console.
 
-- **iPhone :** crée d'abord l'app dans App Store Connect (Mes apps → +), identifiant de lot
-  `re.kivien.extra`, puis reporte son numéro (Apple ID de l'app) dans `apps/extra/eas.json`
-  à la place de `A_RENSEIGNER`. Ensuite :
-
-```bash
-eas submit -p ios --latest
-```
-
-- **Android :** crée l'app dans la Play Console. Le **premier** fichier `.aab` se dépose à la
-  main dans un test fermé (le lien de téléchargement est donné par `eas build`). Les suivants :
-
-```bash
-eas submit -p android --latest
-```
-
----
+Le numéro de build se calcule tout seul (le dernier envoyé + 1).
 
 ## 5. Fiche de l'app (textes prêts à copier)
 
@@ -182,6 +154,5 @@ publient. »
 - **Google :** reste en **test fermé** (liste d'adresses e-mail de testeurs) tant que tu ne
   veux pas de public.
 
-Une mise à jour du code sans nouvelle compilation (textes, écrans) arrive aussi sur
-app.kivien.re à chaque mise en ligne. L'app des stores, elle, a besoin d'une nouvelle compilation
-(`eas build`, puis `eas submit`).
+Une mise à jour du code arrive sur app.kivien.re à chaque mise en ligne. L'app des stores, elle, a
+besoin d'une nouvelle compilation dans Codemagic, puis d'une nouvelle version dans chaque store.
