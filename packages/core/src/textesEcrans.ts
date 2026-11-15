@@ -491,6 +491,12 @@ export const textesEcrans = {
       midi: 'Midi',
       soir: 'Soir',
       enregistre: 'Enregistré.',
+      legendeDispo: 'Disponible',
+      legendePasDispo: 'Pas disponible',
+      aucun: 'Aucun créneau coché : tu reçois toutes les missions proches.',
+      resume: (n: number) => `${n} créneau${n > 1 ? 'x' : ''} disponible${n > 1 ? 's' : ''} sur les deux semaines.`,
+      etatDispo: 'disponible',
+      etatPasDispo: 'pas disponible',
     },
     profil: {
       titre: 'Profil',

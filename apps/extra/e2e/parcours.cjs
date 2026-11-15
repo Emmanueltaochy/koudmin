@@ -118,10 +118,15 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   // Dispos
   await p.getByText('Dispos', { exact: true }).click();
   await p.getByText('Mes dispos').waitFor();
-  const soirDemain = p.getByRole('checkbox', { name: 'Demain, Soir' });
+  const soirDemain = p.getByRole('checkbox', { name: 'Demain, Soir, disponible' });
   if ((await soirDemain.getAttribute('aria-checked')) !== 'true') throw new Error('dispo de démo absente');
-  await p.getByRole('checkbox', { name: "Aujourd'hui, Soir" }).click();
-  await p.getByText('Enregistré.').waitFor(); await etape('dispos : créneau enregistré à l’appui');
+  await p.getByText('Pas disponible', { exact: true }).waitFor();
+  const resumeAvant = await p.getByText(/sur les deux semaines\./).textContent();
+  await p.getByRole('checkbox', { name: "Aujourd'hui, Soir, pas disponible" }).click();
+  await p.getByText('Enregistré.').waitFor();
+  await p.getByRole('checkbox', { name: "Aujourd'hui, Soir, disponible" }).waitFor();
+  if ((await p.getByText(/sur les deux semaines\./).textContent()) === resumeAvant) throw new Error('résumé des dispos non mis à jour');
+  await etape('dispos : créneau enregistré à l’appui, état lisible (vert et coche, légende, résumé)');
   if (process.env.CAPTURES) await p.screenshot({ path: `${process.env.CAPTURES}/dispos.png` });
 
   // Profil : voiture

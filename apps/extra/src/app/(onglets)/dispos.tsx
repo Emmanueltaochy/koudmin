@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import Check from 'lucide-react-native/icons/check';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ajouterJours, aujourdhuiReunion, jourCourt, textesEcrans } from '@kivien/core';
 import { source, type CleDispo, type Creneau } from '../../donnees';
@@ -31,7 +32,10 @@ export default function Dispos() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    void source.dispos().then((d) => setActives(new Set(d))).catch(() => undefined);
+    void source
+      .dispos()
+      .then((d) => setActives(new Set(d)))
+      .catch(() => undefined);
   }, []);
 
   const basculer = useCallback(async (jour: string, creneau: Creneau) => {
@@ -60,7 +64,25 @@ export default function Dispos() {
           {td.titre}
         </Texte>
         <Texte couleur="galet">{td.sousTitre}</Texte>
-        <Texte variante="legendeForte" couleur={message === td.enregistre ? 'vacoa' : 'braise'} accessibilityLiveRegion="polite" style={styles.message}>
+        <View style={styles.legende}>
+          <View style={styles.legendeElement}>
+            <View style={[styles.pastille, styles.actif]}>
+              <Check size={12} color={couleurs.blanc} strokeWidth={3} />
+            </View>
+            <Texte variante="legende">{td.legendeDispo}</Texte>
+          </View>
+          <View style={styles.legendeElement}>
+            <View style={[styles.pastille, styles.inactif]} />
+            <Texte variante="legende">{td.legendePasDispo}</Texte>
+          </View>
+        </View>
+        <Texte variante="legendeForte">{actives.size ? td.resume(actives.size) : td.aucun}</Texte>
+        <Texte
+          variante="legendeForte"
+          couleur={message === td.enregistre ? 'vacoa' : 'braise'}
+          accessibilityLiveRegion="polite"
+          style={styles.message}
+        >
           {message ?? ' '}
         </Texte>
       </View>
@@ -81,12 +103,16 @@ export default function Dispos() {
                     key={c}
                     accessibilityRole="checkbox"
                     aria-checked={actif}
-                    accessibilityLabel={`${libelleJour(jour, aujourdhui)}, ${td[c]}`}
+                    accessibilityLabel={`${libelleJour(jour, aujourdhui)}, ${td[c]}, ${actif ? td.etatDispo : td.etatPasDispo}`}
                     onPress={() => void basculer(jour, c)}
                     hitSlop={4}
                     style={[styles.pilule, actif ? styles.actif : styles.inactif]}
                   >
-                    <Texte variante={actif ? 'corpsFort' : 'corps'} couleur={actif ? 'blanc' : 'basalte'}>
+                    {actif && <Check size={16} color={couleurs.blanc} strokeWidth={3} />}
+                    <Texte
+                      variante={actif ? 'corpsFort' : 'corps'}
+                      couleur={actif ? 'blanc' : 'galet'}
+                    >
                       {td[c]}
                     </Texte>
                   </Pressable>
@@ -115,7 +141,27 @@ const styles = StyleSheet.create({
   },
   jour: { flexShrink: 1 },
   creneaux: { flexDirection: 'row', gap: 8 },
-  pilule: { minWidth: 76, alignItems: 'center', paddingVertical: 8, paddingHorizontal: 16, borderRadius: rayons.pilule, borderWidth: 1 },
-  actif: { backgroundColor: couleurs.basalte, borderColor: couleurs.basalte },
-  inactif: { backgroundColor: couleurs.blanc, borderColor: couleurs.galet },
+  pilule: {
+    minWidth: 88,
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: rayons.pilule,
+    borderWidth: 1,
+  },
+  actif: { backgroundColor: couleurs.vacoa, borderColor: couleurs.vacoa },
+  inactif: { backgroundColor: couleurs.blanc, borderColor: couleurs.galet, borderStyle: 'dashed' },
+  legende: { flexDirection: 'row', gap: 16, marginTop: 4 },
+  legendeElement: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  pastille: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
