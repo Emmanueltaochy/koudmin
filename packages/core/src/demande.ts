@@ -3,7 +3,7 @@ import { ajouterJours, dateLongue, type JourISO } from './dates';
 import { formatEuros } from './montants';
 import { DESCRIPTION_POSTE_MAX, INTITULE_MAX, POSTE_LIBRE, type Poste } from './postes';
 import { tauxAutorise } from './salaire';
-import { dureeMinutes, lireHeure } from './temps';
+import { dureeMinutes, formatDuree, lireHeure } from './temps';
 
 /** « Une seule mission. » ou « 4 missions, chaque mardi jusqu'au mardi 24 novembre. » */
 export function legendeRepetition(jour: JourISO | null, semaines: number): string {
@@ -110,6 +110,7 @@ export function validerDemande(
   s: SaisieDemande,
   smicCentimes: number,
   maintenant: { jour: JourISO; minute: number },
+  dureeMinimumMinutes = 0,
 ): ErreursDemande {
   const e: ErreursDemande = {};
   if (!s.poste) e.poste = 'Choisissez un poste.';
@@ -129,6 +130,8 @@ export function validerDemande(
   if (debut === null || fin === null) e.horaires = "Indiquez l'heure de début et de fin.";
   else if (dureeMinutes(debut, fin) === null)
     e.horaires = "L'heure de fin doit être différente du début.";
+  else if ((dureeMinutes(debut, fin) ?? 0) < dureeMinimumMinutes)
+    e.horaires = `Une mission dure au moins ${formatDuree(dureeMinimumMinutes)}.`;
   else if (s.jour === maintenant.jour && debut <= maintenant.minute)
     e.horaires = 'Cet horaire est déjà passé.';
 

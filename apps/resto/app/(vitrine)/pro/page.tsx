@@ -4,7 +4,12 @@ import { BandeauLancement, EnteteVitrine } from '@/components/vitrine/EnteteVitr
 import { PhotosDefilantes } from '@/components/vitrine/Photos';
 import { PiedVitrine } from '@/components/vitrine/PiedVitrine';
 import { QuestionsFrequentes } from '@/components/vitrine/QuestionsFrequentes';
-import { LIENS_VITRINE, PARTENAIRES, PHOTOS_TEMOIGNAGES, TEMOIGNAGES_VISIBLES } from '@/lib/vitrine/liens';
+import {
+  LIENS_VITRINE,
+  PARTENAIRES,
+  PHOTOS_TEMOIGNAGES,
+  TEMOIGNAGES_VISIBLES,
+} from '@/lib/vitrine/liens';
 import { parametresPublics } from '@/lib/vitrine/parametres';
 import { Lettre } from '../Lettre';
 import { Temoignages } from '../Temoignages';
@@ -14,14 +19,26 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: { absolute: "Kivien pour les établissements · Un extra pour aujourd'hui" },
-  description: "Restaurants, hôtels, bars, événementiel à La Réunion : un extra pour aujourd'hui, environ 20 % moins cher que l'intérim. Contrat d'extra rédigé et signé en ligne.",
+  description:
+    "Restaurants, hôtels, bars, événementiel à La Réunion : un extra pour aujourd'hui, environ 20 % moins cher que l'intérim. Contrat d'extra rédigé et signé en ligne.",
 };
 
 const BASALTE = '#211C18';
 
 function Coche() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2C7350" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={s.coche} aria-hidden="true">
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#2C7350"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={s.coche}
+      aria-hidden="true"
+    >
       <path d="M20 6 9 17l-5-5" />
     </svg>
   );
@@ -30,7 +47,11 @@ function Coche() {
 /** Page des établissements : trouver un extra, le contrat, les garanties, le tarif. */
 export default async function PourLesEtablissements() {
   const p = await parametresPublics();
-  const m = montantsVitrine(p.tauxHoraireBrutCentimes, p.fraisMiseEnRelationHTCentimes);
+  const m = montantsVitrine(
+    p.tauxHoraireBrutCentimes,
+    p.fraisHoraireHTCentimes,
+    p.dureeMinimumMinutes,
+  );
   const partenaires = PARTENAIRES;
 
   return (
@@ -78,16 +99,16 @@ export default async function PourLesEtablissements() {
         </section>
 
         {PARTENAIRES.length > 0 && (
-        <section className={s.confiance} aria-label={t.confiance.titre}>
-          <span className={s.confianceTitre}>{t.confiance.titre}</span>
-          <div className={s.logos}>
-            {partenaires.map((l, i) => (
-              <div key={i} className={s.logoPartenaire}>
-                {l ? <img src={l.src} alt={l.nom} /> : <span>{t.confiance.logo}</span>}
-              </div>
-            ))}
-          </div>
-        </section>
+          <section className={s.confiance} aria-label={t.confiance.titre}>
+            <span className={s.confianceTitre}>{t.confiance.titre}</span>
+            <div className={s.logos}>
+              {partenaires.map((l, i) => (
+                <div key={i} className={s.logoPartenaire}>
+                  {l ? <img src={l.src} alt={l.nom} /> : <span>{t.confiance.logo}</span>}
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
         <section id="etapes" className={s.etapes}>
@@ -148,7 +169,17 @@ export default async function PourLesEtablissements() {
               ))}
             </div>
             <div className={s.signature}>
-              <svg width="160" height="56" viewBox="0 0 160 56" fill="none" stroke={BASALTE} strokeWidth="2" strokeLinecap="round" className={s.trace} aria-hidden="true">
+              <svg
+                width="160"
+                height="56"
+                viewBox="0 0 160 56"
+                fill="none"
+                stroke={BASALTE}
+                strokeWidth="2"
+                strokeLinecap="round"
+                className={s.trace}
+                aria-hidden="true"
+              >
                 <path d="M4 40c10-22 18-30 22-24s-8 26 0 24 14-28 22-26-4 22 4 22 10-16 18-16 6 12 14 12 16-10 26-14 20-4 30-6" />
               </svg>
               <span className={`${s.legende} ${s.galet}`}>{t.contrat.signature}</span>
@@ -157,14 +188,14 @@ export default async function PourLesEtablissements() {
         </section>
 
         {TEMOIGNAGES_VISIBLES && (
-        <section className={s.temoignages}>
-          <div className={s.introCentree}>
-            <span className={`${s.surtitre} ${s.piment}`}>{t.temoignages.surtitre}</span>
-            <h2 className={s.titreFort}>{t.temoignages.titre}</h2>
-            <p className={`${s.legende} ${s.galet}`}>{t.temoignages.avertissement}</p>
-          </div>
-          <Temoignages photos={PHOTOS_TEMOIGNAGES} />
-        </section>
+          <section className={s.temoignages}>
+            <div className={s.introCentree}>
+              <span className={`${s.surtitre} ${s.piment}`}>{t.temoignages.surtitre}</span>
+              <h2 className={s.titreFort}>{t.temoignages.titre}</h2>
+              <p className={`${s.legende} ${s.galet}`}>{t.temoignages.avertissement}</p>
+            </div>
+            <Temoignages photos={PHOTOS_TEMOIGNAGES} />
+          </section>
         )}
 
         <section id="garanties" className={s.garanties}>
@@ -188,8 +219,9 @@ export default async function PourLesEtablissements() {
             <span className={`${s.surtitre} ${s.galet}`}>{t.tarif.surtitre}</span>
             <div className={s.prix}>
               <span className={s.prixGrand}>{m.fraisCourt}</span>
-              <span className={s.corpsFort}>{t.tarif.parMiseEnRelation}</span>
+              <span className={s.corpsFort}>{t.tarif.parHeure}</span>
             </div>
+            {m.minimum && <span className={s.corpsFort}>{m.minimum}</span>}
             <span className={s.texte}>{t.tarif.nonFacture}</span>
             <span className={`${s.texte} ${s.galet}`}>{t.tarif.sansEngagement}</span>
             <span className={s.corpsFort}>{t.tarif.comparaison}</span>
@@ -206,7 +238,7 @@ export default async function PourLesEtablissements() {
             <div className={s.ligneTarif}>
               <div className={s.gap4}>
                 <span className={s.corpsFort}>{t.tarif.frais}</span>
-                <span className={`${s.legende} ${s.galet}`}>{t.tarif.fraisDetail}</span>
+                <span className={`${s.legende} ${s.galet}`}>{m.fraisCalcul}</span>
               </div>
               <span className={s.montant}>{m.fraisDetail}</span>
             </div>

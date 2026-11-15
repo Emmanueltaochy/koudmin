@@ -96,7 +96,7 @@ export const conditionsGenerales: PageLegale = {
       titre: '5. Prix et paiement',
       paragraphes: [
         'L’inscription et l’utilisation sont gratuites pour les extras : un extra ne paie jamais rien à Kivien.',
-        'L’établissement paie des frais de mise en relation par extra et par mission, au tarif en vigueur affiché sur kivien.re/pro au moment de la publication de la demande, plus la TVA applicable à La Réunion. Aucun frais n’est dû en cas d’absence de l’extra signalée par l’établissement.',
+        'L’établissement paie des frais Kivien par extra et par mission, calculés selon la durée de la mission au tarif horaire en vigueur affiché sur kivien.re/pro au moment de la publication de la demande, plus la TVA applicable à La Réunion. Une mission dure au moins la durée minimum indiquée sur cette même page. Aucun frais n’est dû en cas d’absence de l’extra signalée par l’établissement.',
         'Les frais sont réglés par carte bancaire ou par prélèvement SEPA, après chaque mission ou par facture mensuelle, selon le mode choisi par l’établissement dans son espace. Un paiement refusé peut être relancé ; en cas d’impayé, l’accès aux nouvelles demandes peut être suspendu. Tout retard de paiement entraîne des pénalités au taux légal et une indemnité forfaitaire de 40 € pour frais de recouvrement.',
         'Le salaire de l’extra est versé directement par l’établissement et ne transite pas par Kivien.',
       ],
@@ -233,7 +233,7 @@ export const questionsFrequentes: { titre: string; surtitre: string; questions: 
     {
       question: 'Combien ça coûte ?',
       reponse:
-        'Pour l’établissement, des frais fixes par mise en relation, affichés sur la page Tarif, environ 20 % moins cher que l’intérim sur une soirée. Pour l’extra, rien : Kivien est gratuit.',
+        'Pour l’établissement, des frais à l’heure d’extra, affichés sur la page Tarif : environ 20 % moins cher que l’intérim, quelle que soit la durée de la mission. Pour l’extra, rien : Kivien est gratuit.',
     },
     {
       question: 'Et la DPAE ?',

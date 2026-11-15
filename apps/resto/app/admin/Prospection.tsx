@@ -206,7 +206,7 @@ export function Prospection() {
     void source()
       .parametres()
       .then((pa) => {
-        const m = modeleCampagne(formatEuros(pa.fraisMiseEnRelationHTCentimes));
+        const m = modeleCampagne(formatEuros(pa.fraisHoraireHTCentimes));
         setSujet(m.sujet);
         setMessage(m.message);
       });

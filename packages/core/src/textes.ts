@@ -19,7 +19,8 @@ export const textes = {
       intitulePlaceholder: 'Par exemple : vestiaire, inventaire, mise en rayon',
       descriptionPoste: 'Description du poste',
       descriptionPostePlaceholder: 'Tâches confiées, savoir-faire attendu',
-      posteLibreAide: "Le poste doit relever de votre secteur d'activité : c'est la condition du contrat d'extra.",
+      posteLibreAide:
+        "Le poste doit relever de votre secteur d'activité : c'est la condition du contrat d'extra.",
       date: 'Date',
       horaires: 'Horaires',
       horaireAutre: 'Autre',
@@ -72,8 +73,7 @@ export const textes = {
       miLeLa: 'Mi lé la',
       envoi: 'On prévient le restaurant',
       signer: 'Signer mon contrat',
-      regleAbsence:
-        `Un empêchement${NBSP}? Préviens au moins 4${NBSP}h avant. Une absence sans prévenir = exclusion.`,
+      regleAbsence: `Un empêchement${NBSP}? Préviens au moins 4${NBSP}h avant. Une absence sans prévenir = exclusion.`,
       nePlusVenir: 'Je ne peux plus venir',
       priseTitre: 'Mission déjà prise.',
       voirMissions: 'Voir les missions',
@@ -111,10 +111,20 @@ export function legendeSalaires(nbExtras: number, minutes: number, tauxCentimes:
   return `${n}${formatDuree(minutes)}${fois}${formatEuros(tauxCentimes)}, + 10${NBSP}% de congés payés. ${verses}, hors charges patronales.`;
 }
 
-/** « 2 × 25 € HT. Extra absent et non remplacé : non facturé. » */
-export function legendeFrais(nbExtras: number, fraisCentimes: number): string {
+/** « 2 × 21 € HT (6 h × 3,50 € HT). Extra absent et non remplacé : non facturé. » */
+export function legendeFrais(nbExtras: number, fraisCentimes: number, calcul?: string): string {
   const n = nbExtras > 1 ? `${nbExtras}${fois}` : '';
-  return `${n}${formatHT(fraisCentimes)}. Extra absent et non remplacé${NBSP}: non facturé.`;
+  return `${n}${formatHT(fraisCentimes)}${calcul ? ` (${calcul})` : ''}. Extra absent et non remplacé${NBSP}: non facturé.`;
+}
+
+/** « 6 h × 3,50 € HT » : détail des frais d'un extra. */
+export function calculFrais(minutes: number, fraisHoraireCentimes: number): string {
+  return `${formatDuree(minutes)}${fois}${formatHT(fraisHoraireCentimes)}`;
+}
+
+/** « 3,50 € HT par heure d'extra » */
+export function fraisParHeure(fraisHoraireCentimes: number): string {
+  return `${formatHT(fraisHoraireCentimes)} par heure d'extra`;
 }
 
 /** « 25 € HT par extra » */

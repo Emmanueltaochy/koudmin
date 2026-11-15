@@ -75,7 +75,7 @@ export const textesEcrans = {
     paiement: {
       titre: 'Paiement',
       sousTitre: (frais: string) =>
-        `Frais Kivien : ${frais} HT par mise en relation, débités après la mission. En cas d'absence de l'extra, rien n'est facturé.`,
+        `Frais Kivien : ${frais} HT par heure d'extra, débités après la mission. En cas d'absence de l'extra, rien n'est facturé.`,
       reserve: "Le paiement est géré par le gérant de l'établissement.",
       choisirMode: 'Mode de paiement',
       modes: {

@@ -37,7 +37,7 @@ export interface ProspectOsm {
 export type StatutRecherche = 'demandee' | 'en_cours' | 'terminee' | 'echouee';
 
 /** Message de lancement proposé dans l'espace admin. {nom} et {commune} sont remplacés à l'envoi. */
-export function modeleCampagne(fraisHT: string): { sujet: string; message: string } {
+export function modeleCampagne(fraisHoraireHT: string): { sujet: string; message: string } {
   return {
     sujet: "Kivien : vos extras à La Réunion, sans passer par l'intérim",
     message: [
@@ -46,7 +46,7 @@ export function modeleCampagne(fraisHT: string): { sujet: string; message: strin
       "Un service chargé, une absence de dernière minute : vous publiez votre besoin et les extras disponibles près de {commune} sont prévenus tout de suite. Notre objectif : un extra trouvé en 2 heures.",
       [
         "- Contrat d'extra (CDD d'usage) rédigé pour vous, signé en ligne",
-        `- ${fraisHT} HT par mise en relation, environ 20 % moins cher que l'intérim`,
+        `- ${fraisHoraireHT} HT par heure d'extra, environ 20 % moins cher que l'intérim`,
         "- Rien à payer en cas d'absence de l'extra",
       ].join('\n'),
       'Créez votre compte dès maintenant sur https://kivien.re : il sera prêt le jour du lancement.',

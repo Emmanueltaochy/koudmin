@@ -9,8 +9,12 @@ export interface ParametresTarifaires {
   dateEffet: JourISO;
   /** SMIC horaire brut, en centimes. */
   tauxHoraireBrutCentimes: number;
-  /** Frais Kivien par extra, en centimes HT. */
+  /** Part fixe des frais Kivien par extra, en centimes HT (0 depuis le 15 novembre 2026). */
   fraisMiseEnRelationHTCentimes: number;
+  /** Frais Kivien par heure d'extra, en centimes HT (350 depuis le 15 novembre 2026). */
+  fraisHoraireHTCentimes: number;
+  /** Durée minimum d'une mission, en minutes (120 depuis le 15 novembre 2026). */
+  dureeMinimumMinutes: number;
   /** TVA sur les frais Kivien, en pour mille (La Réunion : 85, soit 8,5 %). */
   tvaPourMille: number;
 }
@@ -26,4 +30,18 @@ export function parametresEnVigueur(
   }
   if (!retenu) throw new Error(`Aucun paramètre tarifaire en vigueur au ${jour}`);
   return retenu;
+}
+
+/**
+ * Frais Kivien d'un extra pour une mission : part fixe + durée × frais horaire, arrondi au centime
+ * (même calcul que la base, fonction frais_par_extra_centimes, figé à la publication).
+ */
+export function fraisParExtraCentimes(
+  p: Pick<ParametresTarifaires, 'fraisMiseEnRelationHTCentimes' | 'fraisHoraireHTCentimes'>,
+  minutes: number,
+): number {
+  return (
+    p.fraisMiseEnRelationHTCentimes +
+    Math.floor((2 * minutes * p.fraisHoraireHTCentimes + 60) / 120)
+  );
 }

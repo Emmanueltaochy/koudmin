@@ -3,6 +3,9 @@
 
 insert into parametres (date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes)
 values ('2026-01-01', 1231, 1900);
+-- Depuis le 15 novembre 2026 : 3,50 € HT par heure d'extra, missions de 2 h minimum.
+insert into parametres (date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes, frais_horaire_ht_centimes, duree_minimum_minutes)
+values ('2026-11-15', 1231, 0, 350, 120);
 
 -- Comptes de test : mobile et mot de passe kivien974 (comme les données fictives des apps).
 -- Les jetons vides (et non nuls) sont attendus par le service d'authentification.

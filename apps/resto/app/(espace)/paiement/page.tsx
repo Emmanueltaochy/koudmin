@@ -45,7 +45,7 @@ export default function Paiement() {
       src.paiement.historique(restaurant.id),
       src.paiement.aRegler(restaurant.id),
     ]);
-    setEtat({ restaurant, fraisHT: parametres.fraisMiseEnRelationHTCentimes, moyen, historique, aRegler });
+    setEtat({ restaurant, fraisHT: parametres.fraisHoraireHTCentimes, moyen, historique, aRegler });
   }, []);
 
   // Retour de Stripe (?retour=carte&session=…) ou de GoCardless (?retour=sepa) : confirmation.

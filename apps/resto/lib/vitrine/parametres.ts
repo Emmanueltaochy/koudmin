@@ -6,6 +6,8 @@ type Ligne = {
   taux_horaire_brut_centimes: number;
   frais_mise_en_relation_ht_centimes: number;
   tva_pour_mille: number;
+  frais_horaire_ht_centimes: number;
+  duree_minimum_minutes: number;
 };
 
 /**
@@ -20,7 +22,7 @@ export async function parametresPublics(): Promise<ParametresTarifaires> {
   if (!url || !cle) return PARAMETRES_FICTIFS;
 
   const reponse = await fetch(
-    `${url}/rest/v1/parametres?select=date_effet,taux_horaire_brut_centimes,frais_mise_en_relation_ht_centimes,tva_pour_mille`,
+    `${url}/rest/v1/parametres?select=date_effet,taux_horaire_brut_centimes,frais_mise_en_relation_ht_centimes,tva_pour_mille,frais_horaire_ht_centimes,duree_minimum_minutes`,
     { headers: { apikey: cle, Authorization: `Bearer ${cle}` }, next: { revalidate: 3600 } },
   );
   if (!reponse.ok) throw new Error(`Paramètres tarifaires illisibles (HTTP ${reponse.status})`);
@@ -31,6 +33,8 @@ export async function parametresPublics(): Promise<ParametresTarifaires> {
       tauxHoraireBrutCentimes: l.taux_horaire_brut_centimes,
       fraisMiseEnRelationHTCentimes: l.frais_mise_en_relation_ht_centimes,
       tvaPourMille: l.tva_pour_mille,
+      fraisHoraireHTCentimes: l.frais_horaire_ht_centimes,
+      dureeMinimumMinutes: l.duree_minimum_minutes,
     })),
     aujourdhuiReunion(),
   );

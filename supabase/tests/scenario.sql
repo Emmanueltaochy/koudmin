@@ -327,7 +327,7 @@ reset role;
 update reglages_paiement set debut = jour_reunion() - 90;
 insert into demandes (id, restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng, nb_extras)
 values ('00000000-0000-0000-0000-00000000d900', '00000000-0000-0000-0000-00000000b001', 'serveur', jour_reunion() - 3, 1080, 1320, 'x', 'Saint-Paul', -21.0, 55.27, 2),
-       ('00000000-0000-0000-0000-00000000d901', '00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion(), 0, 1, 'x', 'Saint-Paul', -21.0, 55.27, 1),
+       ('00000000-0000-0000-0000-00000000d901', '00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion(), 0, 120, 'x', 'Saint-Paul', -21.0, 55.27, 1),
        ('00000000-0000-0000-0000-00000000d902', '00000000-0000-0000-0000-00000000b001', 'serveur', date_trunc('month', jour_reunion())::date - 20, 1080, 1320, 'x', 'Saint-Paul', -21.0, 55.27, 1);
 insert into affectations (demande_id, extra_id, statut) values
   ('00000000-0000-0000-0000-00000000d900', '00000000-0000-0000-0000-0000000000e1', 'terminee'),
@@ -608,3 +608,21 @@ set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
 select * from admin_missions_extra('00000000-0000-0000-0000-0000000000e1');
 \set ON_ERROR_STOP 1
 reset role;
+\echo '--- Frais à l''heure : 3,50 € HT par heure d''extra, missions de 2 h minimum'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+\set ON_ERROR_STOP 0
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 6, 1140, 1200, 'x', 'Saint-Paul', -21.04, 55.24);
+\set ON_ERROR_STOP 1
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 6, 1080, 0, 'x', 'Saint-Paul', -21.04, 55.24)
+returning frais_horaire_ht_centimes, frais_mise_en_relation_ht_centimes as frais_6h;
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 6, 1140, 1290, 'x', 'Saint-Paul', -21.04, 55.24)
+returning frais_mise_en_relation_ht_centimes as frais_2h30;
+reset role;
+do $$ begin
+  assert (select frais_mise_en_relation_ht_centimes from demandes where debut = 1080 and fin = 0 and jour = jour_reunion() + 6) = 2100;
+  assert (select frais_mise_en_relation_ht_centimes from demandes where debut = 1140 and fin = 1290 and jour = jour_reunion() + 6) = 875;
+end $$;

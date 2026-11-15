@@ -23,6 +23,8 @@ import {
   detailCalculExtra,
   legendeBrut,
   legendeFrais,
+  calculFrais,
+  fraisParHeure,
   legendeListe,
   legendeSalaires,
   notificationConfirmation,
@@ -76,7 +78,17 @@ const corpus = [
     aPropos,
     textesAcceptation,
   ]),
-  ...tousLesTextes([textesNotifications, textesAlertes, textesPointage, textesOrigine, textesMessages, PIEDS_MESSAGE, modeleBienvenueExtras, textesFicheExtra, LIBELLES_ETAT_MISSION]),
+  ...tousLesTextes([
+    textesNotifications,
+    textesAlertes,
+    textesPointage,
+    textesOrigine,
+    textesMessages,
+    PIEDS_MESSAGE,
+    modeleBienvenueExtras,
+    textesFicheExtra,
+    LIBELLES_ETAT_MISSION,
+  ]),
   ...badgesConfiance({
     missions: 5,
     notes: 4,
@@ -92,7 +104,9 @@ const corpus = [
     dossierComplet: false,
   }),
   lignePointage(1082, 1390)!,
-  ...tousLesTextes(montantsVitrine(1231, 2500)),
+  ...tousLesTextes(montantsVitrine(1231, 350, 120)),
+  calculFrais(360, 350),
+  fraisParHeure(350),
   ...tousLesTextes(LIBELLES_POSTE),
   ...tousLesTextes(LIBELLES_EXPERIENCE),
   ...tousLesTextes(LIBELLES_LANGUE),
@@ -141,6 +155,10 @@ describe('textes calculés (README)', () => {
     expect(l(legendeFrais(2, FRAIS))).toBe(
       '2 × 25 € HT. Extra absent et non remplacé : non facturé.',
     );
+    expect(l(legendeFrais(2, 2100, calculFrais(360, 350)))).toBe(
+      '2 × 21 € HT (6 h × 3,50 € HT). Extra absent et non remplacé : non facturé.',
+    );
+    expect(l(fraisParHeure(350))).toBe("3,50 € HT par heure d'extra");
     expect(champsACompleter(2)).toBe('2 champs à compléter.');
     expect(champsACompleter(1)).toBe('1 champ à compléter.');
     expect(l(confirmationExtra(1080))).toBe("C'est confirmé. On t'attend à 18 h.");
@@ -193,18 +211,22 @@ describe('textes selon le jour de la mission', () => {
 
 describe('page d’accueil', () => {
   it('calcule les montants depuis les paramètres (6 h au SMIC 2026)', () => {
-    const m = montantsVitrine(SMIC, FRAIS);
+    const m = montantsVitrine(SMIC, 350, 120);
     expect(l(m.taux)).toBe('12,31 €');
     expect(l(m.brut)).toBe('81,25 €');
     expect(l(m.net)).toBe('63 €');
-    expect(l(m.fraisCourt)).toBe('25 € HT');
-    expect(l(m.fraisDetail)).toBe('25,00 € HT');
+    expect(l(m.fraisCourt)).toBe('3,50 € HT');
+    expect(l(m.fraisDetail)).toBe('21,00 € HT');
+    expect(l(m.fraisCalcul)).toBe(
+      "6 h × 3,50 € HT. Facturés seulement si l'extra a fait la mission.",
+    );
+    expect(l(m.minimum)).toBe('Missions de 2 h minimum.');
     expect(l(m.detailSalaire)).toBe(
       '6 h × 12,31 € + 10 % de congés payés. Versé par vous, hors charges patronales.',
     );
   });
   it('suit le taux en vigueur', () => {
-    expect(l(montantsVitrine(1300, 2500).brut)).toBe('85,80 €');
+    expect(l(montantsVitrine(1300, 350).brut)).toBe('85,80 €');
   });
   it('reprend les textes de la maquette', () => {
     expect(l(textesVitrine.promesse.titre)).toBe(

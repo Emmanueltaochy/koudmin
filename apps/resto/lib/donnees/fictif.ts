@@ -3,6 +3,8 @@ import {
   ajouterJours,
   aujourdhuiReunion,
   bornesMission,
+  dureeMinutes,
+  fraisParExtraCentimes,
   miseEnRelationFacturee,
   type ProfilPublic,
   type ProspectOsm,
@@ -138,6 +140,17 @@ function extra(
   };
 }
 
+/** Frais d'une demande de démonstration : durée × tarif horaire en vigueur (comme la base). */
+function avecFrais(liste: DemandeDemo[]): DemandeDemo[] {
+  return liste.map((d) => ({
+    ...d,
+    fraisMiseEnRelationHTCentimes: fraisParExtraCentimes(
+      PARAMETRES,
+      dureeMinutes(d.debut, d.fin) ?? 0,
+    ),
+  }));
+}
+
 function demandesInitiales(): DemandeDemo[] {
   const auj = aujourdhuiReunion();
   const base = {
@@ -164,7 +177,7 @@ function demandesInitiales(): DemandeDemo[] {
     contratSigneRestaurant: true,
     contratSigneExtra: true,
   };
-  return [
+  return avecFrais([
     {
       ...base,
       id: 'd001',
@@ -252,7 +265,7 @@ function demandesInitiales(): DemandeDemo[] {
       statut: 'publiee',
       extras: [],
     },
-  ];
+  ]);
 }
 
 function etatInitial(): EtatDemo {
@@ -1139,7 +1152,10 @@ export function sourceFictive(): SourceResto {
         debut: n.debut,
         fin: n.fin,
         tauxHoraireBrutCentimes: n.tauxHoraireBrutCentimes,
-        fraisMiseEnRelationHTCentimes: PARAMETRES.fraisMiseEnRelationHTCentimes,
+        fraisMiseEnRelationHTCentimes: fraisParExtraCentimes(
+          PARAMETRES,
+          dureeMinutes(n.debut, n.fin) ?? 0,
+        ),
         adresse: n.adresse.voie,
         codePostal: n.adresse.codePostal,
         commune: n.adresse.commune,
@@ -1243,12 +1259,15 @@ export function sourceFictive(): SourceResto {
     async factures(): Promise<Facture[]> {
       const maintenant = Date.now();
       const parMois = new Map<string, number>();
+      const montants = new Map<string, number>();
       const id = courant().id;
       if (courant().role !== 'gerant') return [];
       for (const d of lire().filter((x) => x.restaurantId === id)) {
         if (bornesMission(d.jour, d.debut, d.fin).fin > maintenant) continue;
         const n = d.extras.filter((e) => miseEnRelationFacturee(e.statut)).length;
-        if (n) parMois.set(d.jour.slice(0, 7), (parMois.get(d.jour.slice(0, 7)) ?? 0) + n);
+        const mois = d.jour.slice(0, 7);
+        if (n) parMois.set(mois, (parMois.get(mois) ?? 0) + n);
+        if (n) montants.set(mois, (montants.get(mois) ?? 0) + n * d.fraisMiseEnRelationHTCentimes);
       }
       return [...parMois.entries()]
         .sort(([a], [b]) => b.localeCompare(a))
@@ -1256,7 +1275,7 @@ export function sourceFictive(): SourceResto {
           mois,
           numero: `KVN-${mois.replace('-', '')}-0001`,
           misesEnRelation: n,
-          montantHTCentimes: n * PARAMETRES.fraisMiseEnRelationHTCentimes,
+          montantHTCentimes: montants.get(mois) ?? 0,
           tauxTVA: PARAMETRES.tvaPourMille,
         }));
     },

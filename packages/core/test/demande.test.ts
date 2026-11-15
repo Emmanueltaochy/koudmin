@@ -117,3 +117,20 @@ describe('mission répétée chaque semaine', () => {
     );
   });
 });
+
+describe('durée minimum d’une mission', () => {
+  it('refuse une mission plus courte que le minimum des paramètres', () => {
+    const maintenant = { jour: '2026-11-01' as const, minute: 600 };
+    const s = {
+      ...saisieParDefaut('2026-11-02', SMIC),
+      adresse: '14 rue du Général de Gaulle',
+      debut: '18:00',
+      fin: '19:00',
+    };
+    expect(l(validerDemande(s, SMIC, maintenant, 120).horaires!)).toBe(
+      'Une mission dure au moins 2 h.',
+    );
+    expect(validerDemande({ ...s, fin: '20:00' }, SMIC, maintenant, 120).horaires).toBeUndefined();
+    expect(validerDemande(s, SMIC, maintenant).horaires).toBeUndefined();
+  });
+});

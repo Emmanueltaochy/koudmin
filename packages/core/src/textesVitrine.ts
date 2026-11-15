@@ -1,6 +1,8 @@
 import { NBSP } from './espaces';
 import { formatEuros, formatHT } from './montants';
 import { brutParExtraCentimes, CONGES_PAYES_POURCENT, netEstimeEuros } from './salaire';
+import { fraisParExtraCentimes } from './parametres';
+import { formatDuree } from './temps';
 
 /**
  * Textes de la page d'accueil publique (kivien.re), repris de la maquette « Landing page v3 ».
@@ -10,11 +12,13 @@ import { brutParExtraCentimes, CONGES_PAYES_POURCENT, netEstimeEuros } from './s
  *  - « si l'extra est venu » → « si l'extra a fait la mission » ; « pas de remplaçant » → « pas de remplacement ».
  * Les montants viennent des paramètres en vigueur (table `parametres`), jamais de valeurs en dur.
  */
-const h = (s: string) => s.replace(/ (h|€|HT)(?=\s|$|[.,:])/g, `${NBSP}$1`).replace(/(\d\u00a0h) (\d)/g, `$1${NBSP}$2`);
+const h = (s: string) =>
+  s.replace(/ (h|€|HT)(?=\s|$|[.,:])/g, `${NBSP}$1`).replace(/(\d\u00a0h) (\d)/g, `$1${NBSP}$2`);
 
 export const textesVitrine = {
   lancement: 'Lancement officiel très bientôt',
-  lancementTexte: 'Inscriptions ouvertes dès maintenant, pour les établissements comme pour les extras.',
+  lancementTexte:
+    'Inscriptions ouvertes dès maintenant, pour les établissements comme pour les extras.',
   nav: {
     etablissements: 'Trouver du renfort',
     extras: 'Trouver du travail',
@@ -33,12 +37,14 @@ export const textesVitrine = {
       "Kivien met en relation les établissements qui ont besoin de renfort et les extras disponibles près de chez eux. Le contrat d'extra est rédigé et signé en ligne.",
     pro: {
       titre: 'Je recrute des extras',
-      texte: "Restaurant, hôtel, bar, traiteur, événementiel : un renfort pour aujourd'hui, environ 20 % moins cher que l'intérim.",
+      texte:
+        "Restaurant, hôtel, bar, traiteur, événementiel : un renfort pour aujourd'hui, environ 20 % moins cher que l'intérim.",
       bouton: 'Trouver un extra',
     },
     extra: {
       titre: 'Je cherche des missions',
-      texte: "Des missions près de chez toi, aux horaires qui t'arrangent, avec un vrai contrat et une fiche de paie.",
+      texte:
+        "Des missions près de chez toi, aux horaires qui t'arrangent, avec un vrai contrat et une fiche de paie.",
       bouton: 'Devenir extra',
     },
     commentSurtitre: 'COMMENT ÇA MARCHE',
@@ -66,15 +72,18 @@ export const textesVitrine = {
     valeurs: [
       {
         titre: 'Un vrai contrat',
-        texte: "CDD d'usage rédigé automatiquement et signé par les deux parties. Fiche de paie et congés payés pour l'extra.",
+        texte:
+          "CDD d'usage rédigé automatiquement et signé par les deux parties. Fiche de paie et congés payés pour l'extra.",
       },
       {
         titre: 'Tout près',
-        texte: "Nord, Ouest, Sud, Est : les missions et les extras les plus proches d'abord. Le retour assuré passe en tête pour qui n'a pas de voiture.",
+        texte:
+          "Nord, Ouest, Sud, Est : les missions et les extras les plus proches d'abord. Le retour assuré passe en tête pour qui n'a pas de voiture.",
       },
       {
         titre: 'Juste pour tout le monde',
-        texte: "L'établissement ne paie que la mise en relation, et rien en cas d'absence. L'extra ne paie jamais rien.",
+        texte:
+          "L'établissement paie des frais Kivien à l'heure, et rien en cas d'absence. L'extra ne paie jamais rien.",
       },
     ],
     finTitre: 'Par où commencer ?',
@@ -87,7 +96,7 @@ export const textesVitrine = {
     sousBouton: "Contrat d'extra rédigé pour vous, signé en ligne. Rien à payer en cas d'absence.",
     chiffreDelai: h('2 h'),
     legendeDelai: 'notre objectif pour trouver',
-    legendeFrais: 'la mise en relation',
+    legendeFrais: "de l'heure d'extra",
     chiffreAbsence: h('0 €'),
     legendeAbsence: "en cas d'absence",
     confirmationHeure: h('Confirmé · 15 h 47'),
@@ -102,9 +111,24 @@ export const textesVitrine = {
     titre: 'Trois étapes, un après-midi.',
     texte: 'Un samedi au Boucan Grillé, de la demande au contrat signé.',
     liste: [
-      { n: '1', heure: h('15 h 02'), titre: 'Vous publiez le besoin.', texte: 'Poste, date, horaires, adresse, consignes. Un seul formulaire, une minute.' },
-      { n: '2', heure: h('15 h 47'), titre: 'Un extra dit mi lé la.', texte: "Vous voyez son prénom, sa photo, sa note et ses missions. Vous pouvez l'appeler." },
-      { n: '3', heure: h('16 h 05'), titre: 'Vous signez le contrat.', texte: "Contrat d'extra pré-rempli, signé au doigt sur votre téléphone." },
+      {
+        n: '1',
+        heure: h('15 h 02'),
+        titre: 'Vous publiez le besoin.',
+        texte: 'Poste, date, horaires, adresse, consignes. Un seul formulaire, une minute.',
+      },
+      {
+        n: '2',
+        heure: h('15 h 47'),
+        titre: 'Un extra dit mi lé la.',
+        texte: "Vous voyez son prénom, sa photo, sa note et ses missions. Vous pouvez l'appeler.",
+      },
+      {
+        n: '3',
+        heure: h('16 h 05'),
+        titre: 'Vous signez le contrat.',
+        texte: "Contrat d'extra pré-rempli, signé au doigt sur votre téléphone.",
+      },
     ],
   },
   app: {
@@ -112,9 +136,18 @@ export const textesVitrine = {
     titre: 'Dispo le soir ? Dis mi lé la.',
     texte: 'Des soirées payées près de chez toi, quand tu veux. Inscription gratuite.',
     arguments: [
-      { titre: 'Tu choisis tes soirées.', texte: 'Coche tes créneaux libres. Tu reçois les missions près de chez toi.' },
-      { titre: 'Pas besoin de SIRET.', texte: "Tu signes un contrat d'extra. Tu ne paies jamais rien." },
-      { titre: 'Pas de voiture ?', texte: 'Les missions avec retour assuré par le restaurant passent en premier.' },
+      {
+        titre: 'Tu choisis tes soirées.',
+        texte: 'Coche tes créneaux libres. Tu reçois les missions près de chez toi.',
+      },
+      {
+        titre: 'Pas besoin de SIRET.',
+        texte: "Tu signes un contrat d'extra. Tu ne paies jamais rien.",
+      },
+      {
+        titre: 'Pas de voiture ?',
+        texte: 'Les missions avec retour assuré par le restaurant passent en premier.',
+      },
     ],
     bouton: "Télécharger l'app",
     bientot: 'Arrive bientôt sur iPhone et Android',
@@ -134,8 +167,14 @@ export const textesVitrine = {
     titre: 'Le contrat est rédigé pour vous.',
     texte: "Vous embauchez l'extra vous-même, en contrat d'extra. On s'occupe du reste.",
     liste: [
-      { titre: "Contrat d'extra pré-rempli", texte: 'Poste, horaires, taux et adresse sont déjà remplis.' },
-      { titre: 'Signature au doigt', texte: "Vous et l'extra signez sur téléphone, en une minute." },
+      {
+        titre: "Contrat d'extra pré-rempli",
+        texte: 'Poste, horaires, taux et adresse sont déjà remplis.',
+      },
+      {
+        titre: 'Signature au doigt',
+        texte: "Vous et l'extra signez sur téléphone, en une minute.",
+      },
       {
         titre: 'DPAE : bientôt automatique',
         texte:
@@ -157,31 +196,73 @@ export const textesVitrine = {
   temoignages: {
     surtitre: 'TÉMOIGNAGES',
     titre: "Ils l'ont dit mieux que nous.",
-    avertissement: "Citations d'exemple : à remplacer par de vrais témoignages, avec l'accord écrit des personnes.",
+    avertissement:
+      "Citations d'exemple : à remplacer par de vrais témoignages, avec l'accord écrit des personnes.",
     precedent: 'Témoignage précédent',
     suivant: 'Témoignage suivant',
     liste: [
-      { prenom: 'Johan', texte: h('Un samedi à 15 h, il me manquait un commis. À 17 h 30, la cuisine était au complet.'), nom: 'Johan', role: 'Chef · restaurant à Saint-Gilles', photo: 'Photo : gérant au travail' },
-      { prenom: 'Kévin', texte: 'Je coche mes soirées libres le dimanche. Le reste de la semaine, je fais ce que je veux.', nom: 'Kévin', role: 'Extra · Saint-Paul', photo: 'Photo : extra en salle' },
-      { prenom: 'Sandrine', texte: "Le contrat est prêt quand l'extra arrive. Je signe sur mon téléphone, c'est fini.", nom: 'Sandrine', role: 'Responsable · Saint-Pierre', photo: 'Photo : responsable au travail' },
-      { prenom: 'Willy', texte: "Deux personnes pour l'animation du week-end, trouvées le vendredi soir.", nom: 'Willy', role: 'Responsable · village vacances, Saint-Gilles', photo: 'Photo : responsable au travail' },
+      {
+        prenom: 'Johan',
+        texte: h(
+          'Un samedi à 15 h, il me manquait un commis. À 17 h 30, la cuisine était au complet.',
+        ),
+        nom: 'Johan',
+        role: 'Chef · restaurant à Saint-Gilles',
+        photo: 'Photo : gérant au travail',
+      },
+      {
+        prenom: 'Kévin',
+        texte:
+          'Je coche mes soirées libres le dimanche. Le reste de la semaine, je fais ce que je veux.',
+        nom: 'Kévin',
+        role: 'Extra · Saint-Paul',
+        photo: 'Photo : extra en salle',
+      },
+      {
+        prenom: 'Sandrine',
+        texte: "Le contrat est prêt quand l'extra arrive. Je signe sur mon téléphone, c'est fini.",
+        nom: 'Sandrine',
+        role: 'Responsable · Saint-Pierre',
+        photo: 'Photo : responsable au travail',
+      },
+      {
+        prenom: 'Willy',
+        texte: "Deux personnes pour l'animation du week-end, trouvées le vendredi soir.",
+        nom: 'Willy',
+        role: 'Responsable · village vacances, Saint-Gilles',
+        photo: 'Photo : responsable au travail',
+      },
     ],
   },
   garanties: {
     surtitre: 'GARANTIES',
     titre: 'Si ça coince, on gère.',
     liste: [
-      { grand: h('2 h'), titre: 'Objectif : un extra trouvé vite', texte: h("Les extras proches sont prévenus dès la publication. Notre objectif : 2 heures entre votre demande et l'extra confirmé.") },
-      { grand: 'Remplacé', titre: 'Garantie de remplacement', texte: "Si l'extra se désiste, on cherche tout de suite quelqu'un d'autre." },
-      { grand: h('0 €'), titre: 'Non facturé en cas d’absence', texte: "Pas d'extra, pas de remplacement : vous ne payez rien." },
+      {
+        grand: h('2 h'),
+        titre: 'Objectif : un extra trouvé vite',
+        texte: h(
+          "Les extras proches sont prévenus dès la publication. Notre objectif : 2 heures entre votre demande et l'extra confirmé.",
+        ),
+      },
+      {
+        grand: 'Remplacé',
+        titre: 'Garantie de remplacement',
+        texte: "Si l'extra se désiste, on cherche tout de suite quelqu'un d'autre.",
+      },
+      {
+        grand: h('0 €'),
+        titre: 'Non facturé en cas d’absence',
+        texte: "Pas d'extra, pas de remplacement : vous ne payez rien.",
+      },
     ],
   },
   tarif: {
     surtitre: 'TARIF',
-    parMiseEnRelation: 'par mise en relation',
+    parHeure: "de l'heure d'extra",
     nonFacture: "Non facturé si l'extra ne vient pas et n'est pas remplacé.",
     sansEngagement: 'Sans abonnement. Sans engagement.',
-    comparaison: 'Environ 20 % moins cher que l’intérim sur une soirée de 6 h.',
+    comparaison: 'Environ 20 % moins cher que l’intérim, quelle que soit la durée.',
     exemple: h('Exemple · 1 extra en salle, samedi 18 h – minuit'),
     salaire: "Salaire de l'extra",
     frais: 'Frais Kivien',
@@ -191,30 +272,48 @@ export const textesVitrine = {
     titreOnglet: 'Devenir extra',
     surtitre: 'MISSIONS D’EXTRA À LA RÉUNION',
     titre: 'Des missions près de chez toi. Tu choisis tes soirées.',
-    texte: 'Salle, cuisine, plonge, bar, réception, animation, événements, déménagement. Un vrai contrat à chaque mission, pas besoin de SIRET.',
+    texte:
+      'Salle, cuisine, plonge, bar, réception, animation, événements, déménagement. Un vrai contrat à chaque mission, pas besoin de SIRET.',
     bouton: "Je m'inscris",
     sousBouton: 'Gratuit. Une minute pour créer ton profil.',
-    lancement: 'Les premiers établissements arrivent bientôt : inscris-toi, on te prévient en priorité.',
+    lancement:
+      'Les premiers établissements arrivent bientôt : inscris-toi, on te prévient en priorité.',
     gainTitre: 'Ce que tu y gagnes',
     gainTexte: 'Un vrai contrat, une fiche de paie et tes congés payés en plus, à chaque mission.',
-    gainNote: "Le taux horaire est affiché sur chaque mission avant que tu acceptes, jamais sous le minimum légal. C'est l'établissement qui t'embauche qui te paie, avec un bulletin de paie.",
+    gainNote:
+      "Le taux horaire est affiché sur chaque mission avant que tu acceptes, jamais sous le minimum légal. C'est l'établissement qui t'embauche qui te paie, avec un bulletin de paie.",
     metiersTitre: 'Les métiers',
     metiersTexte: "Uniquement des secteurs où le contrat d'extra est permis par la loi.",
     etapesTitre: 'Comment ça marche',
     etapes: [
-      { n: '1', titre: 'Tu crées ton profil.', texte: 'Ta commune, tes métiers, ton expérience. Tu coches tes soirées libres.' },
-      { n: '2', titre: 'Tu dis mi lé la.', texte: 'Une mission près de chez toi te plaît : un appui et elle est à toi.' },
-      { n: '3', titre: 'Tu signes et tu y vas.', texte: 'Le contrat arrive dans l’app, tu signes au doigt. Le jour J, l’établissement t’attend.' },
+      {
+        n: '1',
+        titre: 'Tu crées ton profil.',
+        texte: 'Ta commune, tes métiers, ton expérience. Tu coches tes soirées libres.',
+      },
+      {
+        n: '2',
+        titre: 'Tu dis mi lé la.',
+        texte: 'Une mission près de chez toi te plaît : un appui et elle est à toi.',
+      },
+      {
+        n: '3',
+        titre: 'Tu signes et tu y vas.',
+        texte:
+          'Le contrat arrive dans l’app, tu signes au doigt. Le jour J, l’établissement t’attend.',
+      },
     ],
     zonesTitre: "Partout sur l'île",
-    zonesTexte: 'Nord, Ouest, Sud, Est : tu vois les missions les plus proches de chez toi en premier. Pas de voiture ? Celles avec retour assuré passent en tête.',
+    zonesTexte:
+      'Nord, Ouest, Sud, Est : tu vois les missions les plus proches de chez toi en premier. Pas de voiture ? Celles avec retour assuré passent en tête.',
     finTitre: 'Ta première mission t’attend.',
   },
   desinscription: {
     titre: 'Désinscription',
     enCours: 'Désinscription en cours.',
     ok: 'C’est fait : vous ne recevrez plus nos messages de présentation.',
-    inconnu: 'Ce lien n’est plus valable. Écrivez à bonjour@kivien.re pour ne plus recevoir nos messages.',
+    inconnu:
+      'Ce lien n’est plus valable. Écrivez à bonjour@kivien.re pour ne plus recevoir nos messages.',
     retour: 'Retour à l’accueil',
   },
   lettre: {
@@ -230,9 +329,15 @@ export const textesVitrine = {
   pied: {
     signature: 'Les extras péi, près de chez vous.',
     colonnes: [
-      { titre: 'Établissements', liens: ['Trouver un extra', 'Tarif', "Le contrat d'extra", 'Se connecter'] },
+      {
+        titre: 'Établissements',
+        liens: ['Trouver un extra', 'Tarif', "Le contrat d'extra", 'Se connecter'],
+      },
       { titre: 'Extras', liens: ['Devenir extra', 'Missions près de chez moi', 'Mes droits'] },
-      { titre: 'Aide', liens: ['Questions fréquentes', 'Qui sommes-nous', 'Nous écrire', 'bonjour@kivien.re'] },
+      {
+        titre: 'Aide',
+        liens: ['Questions fréquentes', 'Qui sommes-nous', 'Nous écrire', 'bonjour@kivien.re'],
+      },
       { titre: "Télécharger l'app", liens: ['Android', 'iPhone'] },
     ],
     copyright: '© Kivien 2026 · Saint-Denis · Saint-Paul · Saint-Pierre · Le Tampon',
@@ -250,8 +355,16 @@ export const textesVitrine = {
 export const MINUTES_EXEMPLE_VITRINE = 360;
 
 /** Montants affichés sur la page d'accueil, tous dérivés des paramètres en vigueur. */
-export function montantsVitrine(tauxHoraireBrutCentimes: number, fraisHTCentimes: number) {
+export function montantsVitrine(
+  tauxHoraireBrutCentimes: number,
+  fraisHoraireHTCentimes: number,
+  dureeMinimumMinutes = 0,
+) {
   const brut = brutParExtraCentimes(MINUTES_EXEMPLE_VITRINE, tauxHoraireBrutCentimes);
+  const fraisHTCentimes = fraisParExtraCentimes(
+    { fraisMiseEnRelationHTCentimes: 0, fraisHoraireHTCentimes },
+    MINUTES_EXEMPLE_VITRINE,
+  );
   const taux = formatEuros(tauxHoraireBrutCentimes);
   const heures = MINUTES_EXEMPLE_VITRINE / 60;
   const cp = `+ ${CONGES_PAYES_POURCENT}${NBSP}% de congés payés`;
@@ -259,10 +372,15 @@ export function montantsVitrine(tauxHoraireBrutCentimes: number, fraisHTCentimes
     taux,
     brut: formatEuros(brut),
     net: `${netEstimeEuros(brut)}${NBSP}€`,
-    fraisCourt: formatHT(fraisHTCentimes),
+    /** Tarif à l'heure : « 3,50 € HT ». */
+    fraisCourt: formatHT(fraisHoraireHTCentimes),
     /** Chiffre du haut de page : « HT » peut passer à la ligne sur mobile (colonne étroite). */
-    fraisChiffre: formatHT(fraisHTCentimes).replace(`${NBSP}HT`, ' HT'),
+    fraisChiffre: formatHT(fraisHoraireHTCentimes).replace(`${NBSP}HT`, ' HT'),
+    /** Frais de l'exemple (6 h) : « 21,00 € HT ». */
     fraisDetail: `${formatEuros(fraisHTCentimes)}${NBSP}HT`,
+    fraisCalcul: `${heures}${NBSP}h × ${formatHT(fraisHoraireHTCentimes)}. Facturés seulement si l'extra a fait la mission.`,
+    minimum:
+      dureeMinimumMinutes > 0 ? `Missions de ${formatDuree(dureeMinimumMinutes)} minimum.` : '',
     noteApp: `Montant calculé sur ${taux} brut/h (SMIC, revu chaque 1er janvier), ${cp}.`,
     noteTarif: `Taux minimum légal en vigueur : ${taux} brut/h (SMIC, revu chaque 1er janvier).`,
     detailSalaire: `${heures}${NBSP}h × ${taux} ${cp}. Versé par vous, hors charges patronales.`,

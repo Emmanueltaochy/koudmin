@@ -16,7 +16,9 @@ import {
   formatEuros,
   formatHT,
   formatPlage,
-  fraisParExtra,
+  calculFrais,
+  fraisParExtraCentimes,
+  fraisParHeure,
   jourMoisCourt,
   legendeFrais,
   legendeSalaires,
@@ -99,7 +101,12 @@ export function FormulaireDemande() {
         setSaisie(base);
         setTente(true);
         setErreurs(
-          validerDemande(base, p.tauxHoraireBrutCentimes, { jour: aujourdhuiReunion(), minute: 0 }),
+          validerDemande(
+            base,
+            p.tauxHoraireBrutCentimes,
+            { jour: aujourdhuiReunion(), minute: 0 },
+            p.dureeMinimumMinutes,
+          ),
         );
         return;
       }
@@ -117,7 +124,8 @@ export function FormulaireDemande() {
     if (!saisie) return;
     const suivante = { ...saisie, ...m };
     setSaisie(suivante);
-    if (tente && parametres) setErreurs(validerDemande(suivante, smic, maintenant()));
+    if (tente && parametres)
+      setErreurs(validerDemande(suivante, smic, maintenant(), parametres.dureeMinimumMinutes));
   }
 
   const minutes = saisie
@@ -137,7 +145,10 @@ export function FormulaireDemande() {
       minutes: heuresValides ? minutes! : 0,
       tauxHoraireBrutCentimes: tauxCalcul,
       nbExtras: saisie.nbExtras,
-      fraisMiseEnRelationHTCentimes: parametres.fraisMiseEnRelationHTCentimes,
+      fraisMiseEnRelationHTCentimes: fraisParExtraCentimes(
+        parametres,
+        heuresValides ? minutes! : 0,
+      ),
     });
   }, [saisie, parametres, heuresValides, minutes, tauxCalcul]);
 
@@ -157,7 +168,7 @@ export function FormulaireDemande() {
     if (envoi || !saisie || !parametres) return;
     setTente(true);
     setErreurEnvoi(null);
-    const trouvees = validerDemande(saisie, smic, maintenant());
+    const trouvees = validerDemande(saisie, smic, maintenant(), parametres.dureeMinimumMinutes);
     setErreurs(trouvees);
     if (Object.keys(trouvees).length) {
       focaliserResume();
@@ -524,9 +535,7 @@ export function FormulaireDemande() {
               <span className={ui.corpsFort} id="lib-nb">
                 {td.nbExtras}
               </span>
-              <span className={ui.legende}>
-                {fraisParExtra(parametres.fraisMiseEnRelationHTCentimes)}
-              </span>
+              <span className={ui.legende}>{fraisParHeure(parametres.fraisHoraireHTCentimes)}</span>
             </div>
             <div className={s.stepper} role="group" aria-labelledby="lib-nb">
               <button
@@ -625,7 +634,13 @@ export function FormulaireDemande() {
               </span>
             </div>
             <p className={ui.legende}>
-              {legendeFrais(saisie.nbExtras, parametres.fraisMiseEnRelationHTCentimes)}
+              {legendeFrais(
+                saisie.nbExtras,
+                recap.fraisHTCentimes / saisie.nbExtras,
+                heuresValides
+                  ? calculFrais(minutes!, parametres.fraisHoraireHTCentimes)
+                  : undefined,
+              )}
             </p>
           </div>
           <button type="submit" className={ui.boutonPrincipal} aria-busy={envoi} disabled={envoi}>

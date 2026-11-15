@@ -930,7 +930,7 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         await client
           .from('parametres')
           .select(
-            'date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes, tva_pour_mille',
+            'date_effet, taux_horaire_brut_centimes, frais_mise_en_relation_ht_centimes, tva_pour_mille, frais_horaire_ht_centimes, duree_minimum_minutes',
           )
           .lte('date_effet', aujourdhuiReunion())
           .order('date_effet', { ascending: false })
@@ -941,11 +941,15 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         taux_horaire_brut_centimes: number;
         frais_mise_en_relation_ht_centimes: number;
         tva_pour_mille: number;
+        frais_horaire_ht_centimes: number;
+        duree_minimum_minutes: number;
       };
       return {
         dateEffet: p.date_effet,
         tauxHoraireBrutCentimes: p.taux_horaire_brut_centimes,
         fraisMiseEnRelationHTCentimes: p.frais_mise_en_relation_ht_centimes,
+        fraisHoraireHTCentimes: p.frais_horaire_ht_centimes,
+        dureeMinimumMinutes: p.duree_minimum_minutes,
         tvaPourMille: p.tva_pour_mille,
       };
     },
