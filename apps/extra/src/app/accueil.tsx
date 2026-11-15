@@ -99,6 +99,7 @@ export default function Accueil() {
 
   return (
     <View style={styles.ecran}>
+      {/* Photos sur toute la hauteur ; le texte et les boutons passent par-dessus. */}
       <View
         style={[styles.photos, { paddingTop: insets.top + 8 }]}
         accessibilityElementsHidden
@@ -106,11 +107,6 @@ export default function Accueil() {
       >
         <Colonne photos={MONTE} sens="monte" animer={animer} />
         <Colonne photos={DESCEND} sens="descend" animer={animer} />
-        <View style={styles.fondu} pointerEvents="none">
-          {[0.2, 0.45, 0.7, 0.92].map((o) => (
-            <View key={o} style={[styles.bandeFondu, { opacity: o }]} />
-          ))}
-        </View>
       </View>
       <View style={[styles.bas, { paddingBottom: insets.bottom + 24 }]}>
         <Logo />
@@ -118,7 +114,7 @@ export default function Accueil() {
           <Texte variante="titre" accessibilityRole="header">
             {ta.titre}
           </Texte>
-          <Texte couleur="galet">{ta.texte}</Texte>
+          <Texte>{ta.texte}</Texte>
         </View>
         <BoutonPrincipal libelle={ta.extra} onPress={() => router.push('/bienvenue')} />
         <Pressable
@@ -141,12 +137,32 @@ export default function Accueil() {
 
 const styles = StyleSheet.create({
   ecran: { flex: 1, backgroundColor: couleurs.creme },
-  photos: { flex: 1, flexDirection: 'row', gap: ECART, paddingHorizontal: 16, overflow: 'hidden' },
+  photos: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    gap: ECART,
+    paddingHorizontal: 16,
+    overflow: 'hidden',
+  },
   masque: { flex: 1, overflow: 'hidden', borderRadius: rayons.carte },
   photo: { width: '100%', borderRadius: rayons.carte, marginBottom: ECART },
-  fondu: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 56 },
-  bandeFondu: { flex: 1, backgroundColor: couleurs.creme },
-  bas: { paddingHorizontal: 16, paddingTop: 16, gap: 16, backgroundColor: couleurs.creme },
+  bas: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    gap: 16,
+    // Crème légèrement transparent : les photos restent visibles derrière.
+    backgroundColor: 'rgba(251, 246, 238, 0.9)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
   textes: { gap: 6 },
   pro: {
     height: 52,
