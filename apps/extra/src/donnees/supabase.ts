@@ -199,6 +199,11 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       const u = data.user as { email?: string; new_email?: string } | null;
       return { email: u?.email || null, enAttente: u?.new_email || null };
     },
+    async enregistrerJetonPush(jeton, plateforme) {
+      verifier(
+        await client.rpc('enregistrer_jeton_push', { p_jeton: jeton, p_plateforme: plateforme }),
+      );
+    },
     async noterOrigine(commentConnu, origine) {
       verifier(
         await client.rpc('noter_origine', {

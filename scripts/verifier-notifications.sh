@@ -108,4 +108,27 @@ assert "<li" in m.get_body(("html",)).get_content()
 print("OK  message de l'admin")
 PY
 [ "$($P -At -c "select statut from envois_admin")" = envoye ] || { echo "ÉCHEC : envoi admin non noté" >&2; exit 1; }
+echo "--- 5. Extra sans e-mail mais avec l'app : alerte sur son téléphone"
+$P <<'SQL'
+insert into auth.users (id, phone) values ('00000000-0000-0000-0000-0000000000e2', '262693000002');
+insert into extras (id, prenom, nom, telephone, commune, lat, lng, a_voiture)
+values ('00000000-0000-0000-0000-0000000000e2', 'Maëlle', 'Payet', '+262693000002', 'Saint-Paul', -21.01, 55.27, false);
+insert into jetons_push (jeton, utilisateur_id, plateforme) values ('ExponentPushToken[maelle_1]', '00000000-0000-0000-0000-0000000000e2', 'ios');
+insert into demandes (id, restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000d0b3', '00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 6,
+        1140, 1380, 'x', 'Saint-Paul', -21.04, 55.24);
+update notifications_email set envoyer_apres = now() - interval '1 second' where demande_id = '00000000-0000-0000-0000-00000000d0b3';
+SQL
+bash "$RACINE/deploy/vps/notifications.sh"
+python3 -I - "$DIR"/mails/push-*.json <<'PY'
+import json, sys
+messages = json.load(open(sys.argv[1], encoding="utf-8"))
+m = messages[0]
+assert m["to"] == "ExponentPushToken[maelle_1]", m
+assert m["title"].startswith("Nouvelle mission près de chez toi : Plonge"), m["title"]
+assert "Le Boucan Grillé cherche un extra" in m["body"] and m["data"]["url"] == "/mission/00000000-0000-0000-0000-00000000d0b3", m
+print("OK  alerte sur le téléphone : " + m["title"])
+PY
+[ "$($P -At -c "select statut from notifications_email where demande_id = '00000000-0000-0000-0000-00000000d0b3' and destinataire = '00000000-0000-0000-0000-0000000000e2'")" = envoye ] \
+  || { echo "ÉCHEC : alerte sur téléphone non notée" >&2; exit 1; }
 echo "Notifications conformes."

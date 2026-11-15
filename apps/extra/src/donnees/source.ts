@@ -121,6 +121,8 @@ export interface SourceDonnees {
   /** Pointage de la mission (ISO), null tant que rien n'est pointé. */
   monPointage(demandeId: string): Promise<Pointage | null>;
   pointer(demandeId: string, moment: 'arrivee' | 'depart'): Promise<Pointage>;
+  /** Jeton du téléphone pour les notifications (app installée). */
+  enregistrerJetonPush(jeton: string, plateforme: 'ios' | 'android'): Promise<void>;
   /** Origine du compte : réponse à « Comment as-tu connu Kivien ? » et première visite (web). */
   noterOrigine(commentConnu: CanalConnu | null, origine: OrigineVisite | null): Promise<void>;
   /** Alertes des nouvelles missions par e-mail (activées par défaut). */

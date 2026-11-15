@@ -9,6 +9,7 @@ import Wallet from 'lucide-react-native/icons/wallet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textes as t } from '@kivien/core';
 import { source } from '../../donnees';
+import { activerNotifications, suivreNotifications } from '../../notifications';
 import { couleurs } from '../../ui/theme';
 import { Texte } from '../../ui/Texte';
 
@@ -59,8 +60,12 @@ export default function Onglets() {
     void source.session().then((s) => {
       if (s === 'aucune') router.replace('/bienvenue');
       else if (s === 'sansProfil') router.replace('/bienvenue?etape=profil');
-      else setPret(true);
+      else {
+        setPret(true);
+        void activerNotifications().catch(() => undefined);
+      }
     });
+    return suivreNotifications();
   }, []);
   if (!pret) return null;
 

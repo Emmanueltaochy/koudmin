@@ -102,7 +102,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByLabel('Ton adresse e-mail').fill('kevin@exemple.re');
   await p.getByText('Enregistrer mon adresse').click();
   await p.getByText('Lien envoyé à kevin@exemple.re', { exact: false }).waitFor(); await etape('profil : adresse e-mail à confirmer');
-  const alertes = p.getByRole('checkbox', { name: 'Me prévenir par e-mail des nouvelles missions près de chez moi' });
+  const alertes = p.getByRole('checkbox', { name: 'Me prévenir des nouvelles missions près de chez moi' });
   if ((await alertes.getAttribute('aria-checked')) !== 'true') throw new Error('alertes non activées par défaut');
   await alertes.click();
   await p.waitForFunction(() => document.querySelector('[role="checkbox"][aria-checked="false"]'));

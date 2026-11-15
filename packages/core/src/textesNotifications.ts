@@ -75,7 +75,7 @@ export const textesNotifications: Record<TypeNotification, ModeleNotification> =
 
 /** Alertes de missions par e-mail, réglées dans l'onglet Profil de l'app extra. */
 export const textesAlertes = {
-  libelle: 'Me prévenir par e-mail des nouvelles missions près de chez moi',
-  aide: 'Il faut une adresse confirmée. Les missions sur tes créneaux de l’onglet Dispos, ou toutes si tu n’en as indiqué aucun.',
+  libelle: 'Me prévenir des nouvelles missions près de chez moi',
+  aide: 'Sur ton téléphone avec l’app, et par e-mail si ton adresse est confirmée. Les missions sur tes créneaux de l’onglet Dispos, ou toutes si tu n’en as indiqué aucun.',
   erreur: 'Réglage non enregistré. Vérifie ta connexion et réessaie.',
 } as const;

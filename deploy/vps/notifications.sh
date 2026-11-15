@@ -23,7 +23,7 @@ SMTP_HOST=$(lire SMTP_HOST || true) SMTP_PORT=$(lire SMTP_PORT || true) SMTP_USE
 SMTP_PASS=$(lire SMTP_PASS || true) SITE=$(lire SITE_URL || true) \
 KIVIEN_PSQL=${KIVIEN_PSQL:-} KIVIEN_NOTIF_DOSSIER=${KIVIEN_NOTIF_DOSSIER:-} \
 python3 -I - <<'PY'
-import datetime, html, json, os, re, smtplib, ssl, subprocess
+import datetime, html, json, os, re, smtplib, ssl, subprocess, urllib.request
 from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 
@@ -258,12 +258,8 @@ if not lot and not lot_admin:
         print(f"Notifications : {rappels} rappel(s) programmé(s).")
     raise SystemExit(0)
 
-envoyes = echecs = 0
-# (lot, fonction qui construit le message, fonction de la base qui note le résultat, nom du fichier d'essai)
-FILES = [
-    (lot, message, "noter_notification", lambda n: f"{n['id']}-{n['type']}.eml"),
-    (lot_admin, message_admin, "noter_envoi_admin", lambda n: f"admin-{n['id']}.eml"),
-]
+envoyes = echecs = telephones = 0
+PUSH_URL = os.environ.get("KIVIEN_PUSH_URL") or "https://exp.host/--/api/v2/push/send"
 
 
 def noter(fonction, n, erreur=None):
@@ -273,25 +269,80 @@ def noter(fonction, n, erreur=None):
         sql(f"select {fonction}(:id, :'erreur');", id=n["id"], erreur=erreur)
 
 
-if dossier:
-    for elements, construire, fonction, fichier in FILES:
-        for n in elements:
-            with open(os.path.join(dossier, fichier(n)), "wb") as f:
-                f.write(bytes(construire(n)))
-            noter(fonction, n)
+def pousser(n):
+    """Notification sur les téléphones du destinataire (service Expo). Renvoie le nombre d'appareils
+    atteints ; les appareils qui n'ont plus l'app sont oubliés."""
+    jetons = n.get("jetons") or []
+    if not jetons:
+        return 0
+    m = TEXTES[n["type"]]
+    titre = remplir(m["sujet"], n)
+    corps = remplir(m["paragraphes"][1], n)
+    chemin = lien(n).split("app.kivien.re", 1)[-1] if "app.kivien.re" in lien(n) else "/"
+    messages = [{"to": j, "title": titre[:1].upper() + titre[1:], "body": corps, "sound": "default",
+                 "data": {"url": chemin}} for j in jetons]
+    if dossier:
+        with open(os.path.join(dossier, f"push-{n['id']}.json"), "w", encoding="utf-8") as f:
+            json.dump(messages, f, ensure_ascii=False)
+        return len(jetons)
+    requete = urllib.request.Request(PUSH_URL, data=json.dumps(messages).encode(), method="POST",
+                                     headers={"Content-Type": "application/json", "Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(requete, timeout=20) as r:
+            tickets = json.loads(r.read().decode()).get("data") or []
+    except Exception as e:  # service injoignable : l'e-mail, s'il existe, part quand même
+        print(f"Notification sur téléphone impossible : {e}")
+        return 0
+    atteints = 0
+    for jeton, ticket in zip(jetons, tickets):
+        if ticket.get("status") == "ok":
+            atteints += 1
+        elif (ticket.get("details") or {}).get("error") == "DeviceNotRegistered":
+            sql("select oublier_jeton_push(:'jeton');", jeton=jeton)
+    return atteints
+
+
+def envoyer_tout(envoyer_mail):
+    """envoyer_mail(message) envoie un e-mail (ou l'écrit en fichier pour les essais)."""
+    global envoyes, echecs, telephones
+    for n in lot:
+        atteints = pousser(n)
+        telephones += atteints
+        erreur = None
+        if n.get("email"):
+            try:
+                envoyer_mail(message(n), f"{n['id']}-{n['type']}.eml")
+            except smtplib.SMTPRecipientsRefused:
+                erreur = "Adresse refusée par le serveur de destination"
+        elif not atteints:
+            erreur = "Aucun téléphone joignable"
+        if erreur and not atteints:
+            noter("noter_notification", n, erreur)
+            echecs += 1
+        else:
+            noter("noter_notification", n)
             envoyes += 1
+    for n in lot_admin:
+        try:
+            envoyer_mail(message_admin(n), f"admin-{n['id']}.eml")
+            noter("noter_envoi_admin", n)
+            envoyes += 1
+        except smtplib.SMTPRecipientsRefused:
+            noter("noter_envoi_admin", n, "Adresse refusée par le serveur de destination")
+            echecs += 1
+
+
+if dossier:
+    def ecrire(msg, nom):
+        with open(os.path.join(dossier, nom), "wb") as f:
+            f.write(bytes(msg))
+    envoyer_tout(ecrire)
+elif not any(n.get("email") for n in lot) and not lot_admin:
+    envoyer_tout(lambda msg, nom: None)
 else:
     with smtplib.SMTP_SSL(os.environ["SMTP_HOST"], int(os.environ.get("SMTP_PORT") or 465),
                           context=ssl.create_default_context(), timeout=30) as smtp:
         smtp.login(boite, os.environ["SMTP_PASS"])
-        for elements, construire, fonction, _ in FILES:
-            for n in elements:
-                try:
-                    smtp.send_message(construire(n))
-                    noter(fonction, n)
-                    envoyes += 1
-                except smtplib.SMTPRecipientsRefused:
-                    noter(fonction, n, "Adresse refusée par le serveur de destination")
-                    echecs += 1
-print(f"Notifications : {envoyes} envoyée(s), {echecs} échec(s), {rappels or 0} rappel(s) programmé(s).")
+        envoyer_tout(lambda msg, nom: smtp.send_message(msg))
+print(f"Notifications : {envoyes} envoyée(s), {telephones} sur téléphone, {echecs} échec(s), {rappels or 0} rappel(s) programmé(s).")
 PY

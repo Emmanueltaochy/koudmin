@@ -211,6 +211,7 @@ export function sourceFictive(): SourceDonnees {
       return emailDemo;
     },
     async noterOrigine() {},
+    async enregistrerJetonPush() {},
     async monPointage(id) {
       return pointagesDemo.get(id) ?? null;
     },

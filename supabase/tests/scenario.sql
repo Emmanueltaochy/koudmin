@@ -642,3 +642,20 @@ reset role;
 do $$ begin
   assert (select representant((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d0a1'))) = 'Marie Hoarau';
 end $$;
+\echo '--- Notifications sur le téléphone : un extra sans e-mail reçoit ses alertes sur son téléphone'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e2';
+\set ON_ERROR_STOP 0
+select enregistrer_jeton_push('pas-un-jeton', 'android');
+\set ON_ERROR_STOP 1
+select enregistrer_jeton_push('ExponentPushToken[abc123_XYZ]', 'android');
+reset role;
+insert into demandes (id, restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000d0c1', '00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 7,
+        1140, 1380, 'x', 'Saint-Paul', -21.04, 55.24);
+update notifications_email set envoyer_apres = now() - interval '1 second' where demande_id = '00000000-0000-0000-0000-00000000d0c1';
+do $$ begin
+  assert (select email is null and jetons = array['ExponentPushToken[abc123_XYZ]']
+          from prendre_notifications(100) where demande_id = '00000000-0000-0000-0000-00000000d0c1'
+            and jetons <> '{}'), 'alerte sur le téléphone de Maëlle';
+end $$;
