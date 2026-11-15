@@ -12,6 +12,8 @@ import {
   textesPointage,
   textesOrigine,
   textesMessages,
+  textesProspectionAuto,
+  modeleRelance,
   textesMessagesMobile,
   textesFicheExtra,
   LIBELLES_ETAT_MISSION,

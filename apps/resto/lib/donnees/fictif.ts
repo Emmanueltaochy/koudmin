@@ -12,6 +12,7 @@ import {
 import type {
   CampagneProspection,
   MessageAdmin,
+  ReglagesProspectionAuto,
   RechercheProspects,
   MoyenPaiement,
   Prospect,
@@ -111,6 +112,16 @@ const CONFIANCE: Record<string, ExtraAffecte['confiance']> = {
 };
 
 const messagesDemo: MessageAdmin[] = [];
+let reglagesAutoDemo: Omit<ReglagesProspectionAuto, 'aLancer' | 'aRelancer'> = {
+  actif: false,
+  zones: ['ouest'],
+  sujet: null,
+  message: null,
+  relance: true,
+  relanceJours: 10,
+  relanceSujet: null,
+  relanceMessage: null,
+};
 /** Démonstration : prénom et nom à compléter (encart de l'espace), gardés pour la session. */
 const CLE_RESPONSABLE = 'kivien-demo-responsable';
 function lireResponsable(): { prenom: string; nom: string } | null {
@@ -666,6 +677,13 @@ export function sourceFictive(): SourceResto {
             envois: 0,
           });
           return 'ok';
+        },
+        async reglagesAuto() {
+          return { ...reglagesAutoDemo, aLancer: 12, aRelancer: 3 };
+        },
+        async reglerAuto(r) {
+          await attendre(400);
+          reglagesAutoDemo = r;
         },
         async lancerCampagne(sujet, _message, ids) {
           const cibles = prospectionDemo.prospects.filter(

@@ -659,3 +659,37 @@ do $$ begin
           from prendre_notifications(100) where demande_id = '00000000-0000-0000-0000-00000000d0c1'
             and jetons <> '{}'), 'alerte sur le téléphone de Maëlle';
 end $$;
+\echo '--- Prospection automatique : désactivée par défaut, puis par zone, avec une relance'
+do $$ begin
+  assert zone_du_lieu('Saint-Gilles-les-Bains', -21.04, 55.24) = 'ouest';
+  assert zone_du_lieu('L''Étang-Salé', null, null) = 'sud';
+  assert programmer_prospection_auto(40) = 0, 'désactivée par défaut';
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select actif, zones, a_lancer from admin_reglages_prospection();
+\set ON_ERROR_STOP 0
+select admin_regler_prospection(true, '{sud}', null, null, true, 10, null, null);
+\set ON_ERROR_STOP 1
+select admin_regler_prospection(true, '{sud}', 'Kivien arrive', 'Bonjour, Kivien ouvre très bientôt près de {commune}.', true, 10,
+  'Kivien : on vous relance', 'Bonjour, petit rappel : Kivien ouvre très bientôt près de {commune}.');
+select actif, zones, a_lancer, a_relancer from admin_reglages_prospection();
+reset role;
+do $$
+declare n integer;
+begin
+  n := programmer_prospection_auto(40);
+  assert n = (select count(*) from envois_prospection e join campagnes c on c.id = e.campagne_id where c.automatique = 'lancement'),
+    'premiers e-mails programmés';
+  assert n >= 1, 'au moins un établissement du Sud à contacter';
+  assert not exists (select 1 from envois_prospection e join campagnes c on c.id = e.campagne_id
+                     join prospects p on p.id = e.prospect_id
+                     where c.automatique is not null and zone_du_lieu(p.commune, p.lat, p.lng) <> 'sud'), 'hors zone';
+  assert programmer_prospection_auto(40) = 0, 'pas deux fois le même établissement';
+  -- Dix jours plus tard, sans clic : une relance, une seule.
+  update envois_prospection e set statut = 'envoye', envoye_le = now() - interval '11 days'
+   from campagnes c where c.id = e.campagne_id and c.automatique = 'lancement';
+  n := programmer_prospection_auto(40);
+  assert n >= 1 and exists (select 1 from campagnes where automatique = 'relance'), 'relance programmée';
+  assert programmer_prospection_auto(40) = 0, 'une seule relance';
+end $$;

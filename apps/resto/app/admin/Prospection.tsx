@@ -21,6 +21,7 @@ import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import { source, type CampagneProspection, type Prospect, type RechercheProspects, type SuiviEnvoi } from '@/lib/donnees';
+import { ProspectionAuto } from './ProspectionAuto';
 import s from './admin.module.css';
 
 const tp = textesEcrans.resto.admin.prospection;
@@ -391,6 +392,8 @@ export function Prospection() {
               </tbody>
             </table>
           </div>
+
+          <ProspectionAuto />
 
           <form onSubmit={lancer} className={`${s.carte} ${s.campagne}`} aria-labelledby="campagne">
             <h2 id="campagne" className={`${p.ligne} ${ui.sousTitre}`}>

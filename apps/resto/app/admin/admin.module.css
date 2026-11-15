@@ -462,3 +462,31 @@
   gap: 16px;
   padding: 0 12px 10px 44px;
 }
+.caseLigne {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 32px;
+  cursor: pointer;
+}
+.caseLigne input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--k-basalte);
+}
+.zonesAuto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.zonesAuto legend {
+  width: 100%;
+  margin-bottom: 4px;
+}
+.champCourt {
+  max-width: 120px;
+}

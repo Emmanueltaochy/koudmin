@@ -1,4 +1,5 @@
 import type {
+  Zone,
   CanalConnu,
   MissionFicheExtra,
   PublicMessage,
@@ -212,7 +213,23 @@ export interface RechercheProspects {
 }
 
 /** Espace prospection (administrateurs) : fiches, recherche OpenStreetMap, campagnes e-mail. */
+export interface ReglagesProspectionAuto {
+  actif: boolean;
+  zones: Zone[];
+  sujet: string | null;
+  message: string | null;
+  relance: boolean;
+  relanceJours: number;
+  relanceSujet: string | null;
+  relanceMessage: string | null;
+  /** Aperçu : établissements qui seraient écrits aujourd'hui. */
+  aLancer: number;
+  aRelancer: number;
+}
+
 export interface SourceProspection {
+  reglagesAuto(): Promise<ReglagesProspectionAuto>;
+  reglerAuto(r: Omit<ReglagesProspectionAuto, 'aLancer' | 'aRelancer'>): Promise<void>;
   /** Dépose une demande : le VPS la prend dans la minute. */
   demanderRecherche(): Promise<void>;
   derniereRecherche(): Promise<RechercheProspects | null>;

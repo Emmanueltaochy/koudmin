@@ -41,6 +41,12 @@ def sql(requete, **variables):
     return subprocess.run(cmd, input=requete, text=True, capture_output=True, check=True).stdout.strip()
 
 
+# Prospection automatique (désactivée par défaut, réglée dans l'espace admin) : premiers e-mails
+# et relances du jour, dans la limite du plafond quotidien.
+programmes = int(sql("select programmer_prospection_auto(:n);", n=par_jour) or 0)
+if programmes:
+    print(f"Prospection automatique : {programmes} e-mail(s) programmé(s) aujourd'hui.")
+
 deja = int(sql("""select count(*) from envois_prospection
                   where statut = 'envoye' and envoye_le >= (jour_reunion()::timestamp at time zone 'Indian/Reunion');"""))
 reste = min(PAR_LOT, par_jour - deja)

@@ -10,6 +10,7 @@ import {
   type StatutAffectation,
   type StatutDemande,
   type ConfianceExtra,
+  type Zone,
   type MissionFicheExtra,
   type PublicMessage,
 } from '@kivien/core';
@@ -713,6 +714,38 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           if (error && /e-mail invalide/i.test(error.message)) return 'email';
           verifier({ data: null, error });
           return 'ok';
+        },
+        async reglagesAuto() {
+          const [r] = verifier(await client.rpc('admin_reglages_prospection')) as {
+            actif: boolean; zones: Zone[]; sujet: string | null; message: string | null; relance: boolean; relance_jours: number;
+            relance_sujet: string | null; relance_message: string | null; a_lancer: number; a_relancer: number;
+          }[];
+          return {
+            actif: r!.actif,
+            zones: r!.zones,
+            sujet: r!.sujet,
+            message: r!.message,
+            relance: r!.relance,
+            relanceJours: r!.relance_jours,
+            relanceSujet: r!.relance_sujet,
+            relanceMessage: r!.relance_message,
+            aLancer: r!.a_lancer,
+            aRelancer: r!.a_relancer,
+          };
+        },
+        async reglerAuto(r) {
+          verifier(
+            await client.rpc('admin_regler_prospection', {
+              p_actif: r.actif,
+              p_zones: r.zones,
+              p_sujet: r.sujet,
+              p_message: r.message,
+              p_relance: r.relance,
+              p_relance_jours: r.relanceJours,
+              p_relance_sujet: r.relanceSujet,
+              p_relance_message: r.relanceMessage,
+            }),
+          );
         },
         async lancerCampagne(sujet, message, ids) {
           return verifier(
