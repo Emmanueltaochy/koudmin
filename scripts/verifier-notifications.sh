@@ -54,6 +54,7 @@ PY
 echo "--- 2. Kévin accepte : l'établissement est prévenu ; il signe : Kévin est prévenu du contrat"
 $P <<'SQL'
 update auth.users set email = 'gerant@exemple.re', email_confirmed_at = now() where id = '00000000-0000-0000-0000-0000000000a1';
+insert into responsables (utilisateur_id, prenom, nom) values ('00000000-0000-0000-0000-0000000000a1', 'Marie', 'Hoarau');
 set role authenticated;
 set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
 select accepter_mission('00000000-0000-0000-0000-00000000d0b1');
@@ -70,6 +71,7 @@ lire = lambda f: BytesParser(policy=policy.default).parse(open(f, "rb"))
 trouve, contrat = lire(sys.argv[1]), lire(sys.argv[2])
 assert trouve["To"] == "gerant@exemple.re" and trouve["Subject"].startswith("Extra trouvé : Kévin, "), trouve["Subject"]
 texte = trouve.get_body(("plain",)).get_content()
+assert texte.startswith("Bonjour Marie,"), texte
 assert "Kévin a accepté votre mission Aide au service du brunch" in texte and "/contrat?affectation=" in texte, texte
 assert contrat["To"] == "kevin@exemple.re" and contrat["Subject"].startswith("Ton contrat du "), contrat["Subject"]
 assert "Le Boucan Grillé a signé ton contrat" in contrat.get_body(("plain",)).get_content()

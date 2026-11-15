@@ -61,3 +61,21 @@ describe('numéro de sécurité sociale', () => {
     expect(nirValide('123')).toBe(false);
   });
 });
+
+describe('représentant de l’établissement', () => {
+  it('indique qui signe pour l’employeur', () => {
+    const c = redigerContrat({
+      employeur: { nom: 'Le Boucan Grillé', adresse: 'Saint-Gilles-les-Bains', siret: '732 829 320 00074', representant: 'Marie Hoarau' },
+      salarie: { prenom: 'Kévin', nom: 'Payet', dateNaissance: null, lieuNaissance: null, adresse: null },
+      poste: 'serveur',
+      jour: '2026-10-30',
+      debut: 1080,
+      fin: 0,
+      tauxHoraireBrutCentimes: SMIC,
+      adresseService: 'Saint-Gilles-les-Bains',
+    });
+    expect(c.articles[0]!.texte).toBe(
+      'Employeur : Le Boucan Grillé, Saint-Gilles-les-Bains, SIRET 732 829 320 00074, représenté par Marie Hoarau. Salarié·e : Kévin Payet.',
+    );
+  });
+});

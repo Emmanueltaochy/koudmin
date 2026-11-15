@@ -20,7 +20,14 @@ import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import type { AdresseGeo } from '@/lib/adresse';
-import { accepterCgu, aUnEtablissement, noterOrigineInscription, changerEmail, connecte, inscrireRestaurateur } from '@/lib/auth';
+import {
+  accepterCgu,
+  aUnEtablissement,
+  noterOrigineInscription,
+  changerEmail,
+  connecte,
+  inscrireRestaurateur,
+} from '@/lib/auth';
 import { donneesFictives, source } from '@/lib/donnees';
 import { noterInscription } from '@/lib/suivi';
 import s from '../inscription.module.css';
@@ -33,7 +40,17 @@ type Erreurs = ErreursInscriptionResto & { general?: string };
 /** Inscription d'un établissement : compte actif tout de suite, SIRET et secteur obligatoires. */
 export default function InscriptionRestaurant() {
   const router = useRouter();
-  const [saisie, setSaisie] = useState({ etablissement: '', secteur: '' as Secteur | '', adresse: '', siret: '', telephone: '', email: '', motDePasse: '' });
+  const [saisie, setSaisie] = useState({
+    prenom: '',
+    nom: '',
+    etablissement: '',
+    secteur: '' as Secteur | '',
+    adresse: '',
+    siret: '',
+    telephone: '',
+    email: '',
+    motDePasse: '',
+  });
   const [cgu, setCgu] = useState(false);
   const [adresseGeo, setAdresseGeo] = useState<AdresseGeo | null>(null);
   const [erreurs, setErreurs] = useState<Erreurs>({});
@@ -51,7 +68,13 @@ export default function InscriptionRestaurant() {
     })().catch(() => undefined);
   }, [router]);
 
-  const pourValidation = (v: typeof saisie, geo: AdresseGeo | null, accepte = cgu): SaisieInscriptionResto => ({
+  const pourValidation = (
+    v: typeof saisie,
+    geo: AdresseGeo | null,
+    accepte = cgu,
+  ): SaisieInscriptionResto => ({
+    prenom: v.prenom,
+    nom: v.nom,
     etablissement: v.etablissement,
     secteur: v.secteur,
     adresseChoisie: !!geo && geo.libelle === v.adresse,
@@ -70,7 +93,8 @@ export default function InscriptionRestaurant() {
 
   const cocherCgu = (v: boolean) => {
     setCgu(v);
-    if (tente) setErreurs(validerInscriptionResto(pourValidation(saisie, adresseGeo, v), compteOuvert));
+    if (tente)
+      setErreurs(validerInscriptionResto(pourValidation(saisie, adresseGeo, v), compteOuvert));
   };
 
   async function soumettre(e: FormEvent) {
@@ -94,11 +118,17 @@ export default function InscriptionRestaurant() {
       );
       if (r === 'ok') {
         await accepterCgu().catch(() => undefined);
+        await source()
+          .noterResponsable(saisie.prenom, saisie.nom)
+          .catch(() => undefined);
         await noterOrigineInscription().catch(() => undefined);
         // Lien de confirmation envoyé sur l'adresse ; l'inscription ne dépend pas de son envoi.
         if (!compteOuvert) await changerEmail(normaliserEmail(saisie.email)).catch(() => undefined);
         // Venu d'un e-mail de prospection : le compte est rattaché à la campagne.
-        await source().restaurant().then((resto) => noterInscription(resto.id)).catch(() => undefined);
+        await source()
+          .restaurant()
+          .then((resto) => noterInscription(resto.id))
+          .catch(() => undefined);
         router.replace('/espace');
         return;
       }
@@ -123,7 +153,12 @@ export default function InscriptionRestaurant() {
     setEnvoi(false);
   }
 
-  const champ = (id: Exclude<keyof typeof saisie, 'secteur'>, erreur: string | undefined, aide: string | undefined, props: React.InputHTMLAttributes<HTMLInputElement>) => (
+  const champ = (
+    id: Exclude<keyof typeof saisie, 'secteur'>,
+    erreur: string | undefined,
+    aide: string | undefined,
+    props: React.InputHTMLAttributes<HTMLInputElement>,
+  ) => (
     <>
       <span className={ui.champ} data-erreur={!!erreur}>
         <input
@@ -137,7 +172,11 @@ export default function InscriptionRestaurant() {
         />
       </span>
       {(erreur || aide) && (
-        <p id={`${id}-aide`} className={erreur ? ui.messageErreur : ui.legende} role={erreur ? 'alert' : undefined}>
+        <p
+          id={`${id}-aide`}
+          className={erreur ? ui.messageErreur : ui.legende}
+          role={erreur ? 'alert' : undefined}
+        >
           {erreur ?? aide}
         </p>
       )}
@@ -146,17 +185,43 @@ export default function InscriptionRestaurant() {
 
   return (
     <main className={`${p.etroite} ${s.page}`}>
-      <img src="/brand/logo-pilule-basalte.svg" alt="Kivien" width={96} style={{ height: 'auto' }} />
+      <img
+        src="/brand/logo-pilule-basalte.svg"
+        alt="Kivien"
+        width={96}
+        style={{ height: 'auto' }}
+      />
       <div className={s.intro}>
         <h1 className={ui.titre}>{ti.titre}</h1>
         <p className={`${ui.corps} ${ui.galet}`}>{ti.sousTitre}</p>
       </div>
       <form onSubmit={soumettre} className={s.formulaire} noValidate>
+        <div className={s.deuxChamps}>
+          <div className={s.bloc}>
+            <label htmlFor="prenom" className={ui.corpsFort}>
+              {ti.prenom}
+            </label>
+            {champ('prenom', erreurs.prenom, undefined, {
+              autoComplete: 'given-name',
+              maxLength: 60,
+            })}
+          </div>
+          <div className={s.bloc}>
+            <label htmlFor="nom" className={ui.corpsFort}>
+              {ti.nom}
+            </label>
+            {champ('nom', erreurs.nom, undefined, { autoComplete: 'family-name', maxLength: 60 })}
+          </div>
+        </div>
+        <p className={`${ui.legende} ${ui.galet}`}>{ti.responsableAide}</p>
         <div className={s.bloc}>
           <label htmlFor="etablissement" className={ui.corpsFort}>
             {ti.etablissement}
           </label>
-          {champ('etablissement', erreurs.etablissement, undefined, { autoComplete: 'organization', maxLength: 120 })}
+          {champ('etablissement', erreurs.etablissement, undefined, {
+            autoComplete: 'organization',
+            maxLength: 120,
+          })}
         </div>
         <div className={s.bloc}>
           <label htmlFor="secteur" className={ui.corpsFort}>
@@ -195,7 +260,9 @@ export default function InscriptionRestaurant() {
             inputMode: 'numeric',
             autoComplete: 'off',
             placeholder: '732 829 320 00074',
-            onBlur: () => normaliserSiret(saisie.siret).length === 14 && modifier({ siret: formatSiret(saisie.siret) }),
+            onBlur: () =>
+              normaliserSiret(saisie.siret).length === 14 &&
+              modifier({ siret: formatSiret(saisie.siret) }),
           })}
         </div>
         {!compteOuvert && (
@@ -204,13 +271,22 @@ export default function InscriptionRestaurant() {
               <label htmlFor="telephone" className={ui.corpsFort}>
                 {ti.telephone}
               </label>
-              {champ('telephone', erreurs.telephone, ti.telephoneAide, { type: 'tel', inputMode: 'tel', autoComplete: 'tel', placeholder: '0692 12 34 56' })}
+              {champ('telephone', erreurs.telephone, ti.telephoneAide, {
+                type: 'tel',
+                inputMode: 'tel',
+                autoComplete: 'tel',
+                placeholder: '0692 12 34 56',
+              })}
             </div>
             <div className={s.bloc}>
               <label htmlFor="email" className={ui.corpsFort}>
                 {textesEcrans.resto.compte.email}
               </label>
-              {champ('email', erreurs.email, textesEcrans.resto.compte.emailAide, { type: 'email', autoComplete: 'email', placeholder: 'contact@monetablissement.re' })}
+              {champ('email', erreurs.email, textesEcrans.resto.compte.emailAide, {
+                type: 'email',
+                autoComplete: 'email',
+                placeholder: 'contact@monetablissement.re',
+              })}
             </div>
             <div className={s.bloc}>
               <label htmlFor="mot-de-passe" className={ui.corpsFort}>
@@ -228,7 +304,11 @@ export default function InscriptionRestaurant() {
                   disabled={envoi}
                 />
               </span>
-              <p id="mot-de-passe-aide" className={erreurs.motDePasse ? ui.messageErreur : ui.legende} role={erreurs.motDePasse ? 'alert' : undefined}>
+              <p
+                id="mot-de-passe-aide"
+                className={erreurs.motDePasse ? ui.messageErreur : ui.legende}
+                role={erreurs.motDePasse ? 'alert' : undefined}
+              >
                 {erreurs.motDePasse ?? ti.motDePasseAide}
               </p>
             </div>
@@ -236,7 +316,13 @@ export default function InscriptionRestaurant() {
         )}
         <div className={s.bloc}>
           <label className={s.case}>
-            <input type="checkbox" checked={cgu} onChange={(e) => cocherCgu(e.target.checked)} disabled={envoi} aria-invalid={!!erreurs.cgu} />
+            <input
+              type="checkbox"
+              checked={cgu}
+              onChange={(e) => cocherCgu(e.target.checked)}
+              disabled={envoi}
+              aria-invalid={!!erreurs.cgu}
+            />
             <span className={ui.corps}>
               {textesAcceptation.resto}{' '}
               <a href="/conditions" target="_blank" rel="noopener" className={ui.lien}>

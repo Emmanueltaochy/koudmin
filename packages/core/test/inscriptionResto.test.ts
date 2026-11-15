@@ -77,3 +77,19 @@ describe('secteurs du contrat d’extra', () => {
     }
   });
 });
+
+describe('responsable de l’établissement', () => {
+  it('prénom et nom obligatoires à l’inscription', () => {
+    const s = {
+      etablissement: 'Le Cari Péi',
+      secteur: 'hotellerie_restauration',
+      adresseChoisie: true,
+      siret: '73282932000074',
+      telephone: '0692112233',
+      email: 'contact@caripei.re',
+      motDePasse: 'kivien974',
+    };
+    expect(validerInscriptionResto({ ...s, prenom: ' ', nom: '' })).toMatchObject({ prenom: 'Indiquez votre prénom.', nom: 'Indiquez votre nom.' });
+    expect(validerInscriptionResto({ ...s, prenom: 'Marie', nom: 'Hoarau' })).toEqual({});
+  });
+});

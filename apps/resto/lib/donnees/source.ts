@@ -45,6 +45,8 @@ export type ResultatEtablissement = 'ok' | 'siret' | 'siretInvalide' | 'adresse'
 export interface Membre {
   utilisateurId: string | null;
   telephone: string;
+  /** Prénom et nom, s'ils sont renseignés. */
+  nom?: string | null;
   role: Role;
   enAttente: boolean;
   moi: boolean;
@@ -309,6 +311,8 @@ export interface SourceAdmin {
   etablissements(): Promise<EtablissementAdmin[]>;
   extras(): Promise<ExtraAdmin[]>;
   origines(): Promise<OrigineAdmin[]>;
+  /** Responsable de chaque établissement, par identifiant. */
+  responsables(): Promise<Map<string, string>>;
   ficheExtra(id: string): Promise<FicheExtraAdmin | null>;
   destinataires(pub: PublicMessage): Promise<DestinataireMessage[]>;
   /** Programme le message ; renvoie le nombre d'e-mails programmés. */
@@ -434,6 +438,8 @@ export interface Notation {
 export interface SignaturesContrat {
   restaurant: { image: string; le: string } | null;
   extra: { image: string; le: string } | null;
+  /** Prénom et nom de la personne qui a signé pour l'établissement. */
+  signataire: string | null;
 }
 
 /** Informations de l'extra pour la DPAE, visibles du seul restaurateur de la mission. */
@@ -532,6 +538,9 @@ export interface SourceResto {
   signerContrat(affectationId: string, signature: string): Promise<void>;
   /** Signatures du contrat (images en data URL) et leurs dates, pour le PDF. */
   signatures(affectationId: string): Promise<SignaturesContrat>;
+  /** Prénom et nom de la personne connectée (null tant qu'ils ne sont pas renseignés). */
+  responsable(): Promise<{ prenom: string; nom: string } | null>;
+  noterResponsable(prenom: string, nom: string): Promise<void>;
   infosDPAE(affectationId: string): Promise<InfosDPAE | null>;
   noter(affectationId: string, n: Notation): Promise<void>;
   favoris(): Promise<Favori[]>;

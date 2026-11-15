@@ -289,6 +289,7 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
         secteur: string;
         signe_extra: boolean;
         signe_restaurant: boolean;
+        representant: string | null;
       }[];
       const l = lignes[0];
       return l
@@ -300,6 +301,7 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
             secteur: estSecteur(l.secteur) ? l.secteur : SECTEUR_PAR_DEFAUT,
             signeExtra: l.signe_extra,
             signeRestaurant: l.signe_restaurant,
+            representant: l.representant,
           }
         : null;
     },

@@ -32,6 +32,8 @@ export interface ContratExtra {
   secteur: Secteur;
   signeExtra: boolean;
   signeRestaurant: boolean;
+  /** Prénom et nom de la personne qui représente l'établissement. */
+  representant?: string | null;
 }
 
 /** Signatures des deux parties (images), pour le PDF du contrat. */

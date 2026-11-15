@@ -103,7 +103,7 @@ export default function Contrat() {
 
   const { contrat, mission: m, infos, profil } = d;
   const texte = redigerContrat({
-    employeur: { nom: contrat.employeur, adresse: contrat.adresseEmployeur, siret: contrat.siretEmployeur },
+    employeur: { nom: contrat.employeur, adresse: contrat.adresseEmployeur, siret: contrat.siretEmployeur, representant: contrat.representant ?? null },
     secteur: contrat.secteur,
     salarie: { prenom: profil.prenom, nom: profil.nom, dateNaissance: infos?.dateNaissance ?? null, lieuNaissance: infos?.lieuNaissance ?? null, adresse: infos?.adresse ?? null },
     poste: m.poste,

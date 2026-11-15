@@ -61,11 +61,12 @@ Réservé aux administrateurs Kivien
 Aucun destinataire avec une adresse confirmée
 Réservé aux administrateurs Kivien
 Réservé aux administrateurs Kivien
-Mission trop courte'
+Mission trop courte
+Prénom et nom obligatoires'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   echo "ÉCHEC : erreurs SQL inattendues" >&2
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (39 refus attendus)."
+echo "Scénario SQL conforme (40 refus attendus)."

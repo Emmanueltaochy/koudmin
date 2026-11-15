@@ -111,6 +111,15 @@ const CONFIANCE: Record<string, ExtraAffecte['confiance']> = {
 };
 
 const messagesDemo: MessageAdmin[] = [];
+/** Démonstration : prénom et nom à compléter (encart de l'espace), gardés pour la session. */
+const CLE_RESPONSABLE = 'kivien-demo-responsable';
+function lireResponsable(): { prenom: string; nom: string } | null {
+  try {
+    return JSON.parse(sessionStorage.getItem(CLE_RESPONSABLE) ?? 'null');
+  } catch {
+    return null;
+  }
+}
 
 function extra(
   id: string,
@@ -961,6 +970,12 @@ export function sourceFictive(): SourceResto {
       async messages() {
         return messagesDemo;
       },
+      async responsables() {
+        return new Map([
+          ['r001', 'Marie Hoarau'],
+          ['r002', 'Jean-Luc Grondin'],
+        ]);
+      },
       async origines() {
         const il = (j: number) => new Date(Date.now() - j * 86400e3).toISOString();
         return [
@@ -1224,12 +1239,24 @@ export function sourceFictive(): SourceResto {
       await attendre(600);
       ecrire(lire().map((d) => (d.id === id ? { ...d, statut: 'annulee' } : d)));
     },
+    async responsable() {
+      return lireResponsable();
+    },
+    async noterResponsable(prenom, nom) {
+      await attendre(300);
+      try {
+        sessionStorage.setItem(CLE_RESPONSABLE, JSON.stringify({ prenom: prenom.trim(), nom: nom.trim() }));
+      } catch {
+        // Stockage refusé : la démonstration redemandera le nom.
+      }
+    },
     async signatures(affectationId) {
       const r = signaturesDemo.get(affectationId);
       const e = lire()
         .flatMap((d) => d.extras)
         .find((x) => x.affectationId === affectationId);
       return {
+        signataire: r ? 'Marie Hoarau' : null,
         restaurant: r ?? null,
         // Démonstration : signature de l'extra dessinée (en production, celle tracée dans l'app).
         extra: e?.contratSigneExtra

@@ -2,7 +2,12 @@
 
 import { useState, type FormEvent } from 'react';
 import { Clock, UserRound } from 'lucide-react';
-import { formatMobileReunion, normaliserMobileReunion, textes as t, textesEcrans } from '@kivien/core';
+import {
+  formatMobileReunion,
+  normaliserMobileReunion,
+  textes as t,
+  textesEcrans,
+} from '@kivien/core';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
@@ -13,10 +18,25 @@ import s from '../etablissements/etablissements.module.css';
 const tu = textesEcrans.resto.utilisateurs;
 const tr = textesEcrans.resto.roles;
 
-function ChoixRole({ id, valeur, onChange, desactive }: { id: string; valeur: Role; onChange: (r: Role) => void; desactive?: boolean }) {
+function ChoixRole({
+  id,
+  valeur,
+  onChange,
+  desactive,
+}: {
+  id: string;
+  valeur: Role;
+  onChange: (r: Role) => void;
+  desactive?: boolean;
+}) {
   return (
     <span className={ui.champ}>
-      <select id={id} value={valeur} disabled={desactive} onChange={(e) => onChange(e.target.value as Role)}>
+      <select
+        id={id}
+        value={valeur}
+        disabled={desactive}
+        onChange={(e) => onChange(e.target.value as Role)}
+      >
         <option value="equipe">{tr.equipe}</option>
         <option value="gerant">{tr.gerant}</option>
       </select>
@@ -39,7 +59,11 @@ export default function Utilisateurs() {
   if (etat.statut !== 'pret') {
     return (
       <div className={p.page} aria-busy={etat.statut === 'chargement'}>
-        {etat.statut === 'erreur' ? <p className={`${ui.sousTitre} ${ui.braise}`}>{t.extra.missions.horsLigneTitre}</p> : <div className={p.squelette} />}
+        {etat.statut === 'erreur' ? (
+          <p className={`${ui.sousTitre} ${ui.braise}`}>{t.extra.missions.horsLigneTitre}</p>
+        ) : (
+          <div className={p.squelette} />
+        )}
       </div>
     );
   }
@@ -72,7 +96,13 @@ export default function Utilisateurs() {
         setMessage(tu.invitationEnregistree);
         await recharger(true);
       } else {
-        setErreur(r === 'dejaMembre' ? tu.dejaMembre : r === 'compteExtra' ? tu.compteExtra : tu.reserveGerant);
+        setErreur(
+          r === 'dejaMembre'
+            ? tu.dejaMembre
+            : r === 'compteExtra'
+              ? tu.compteExtra
+              : tu.reserveGerant,
+        );
       }
     } catch {
       setErreur(tu.erreur);
@@ -84,8 +114,13 @@ export default function Utilisateurs() {
     <li key={m.utilisateurId ?? m.telephone} className={s.carte}>
       <div className={p.entreDeux}>
         <span className={`${p.ligne} ${ui.corpsFort}`}>
-          {m.enAttente ? <Clock size={20} strokeWidth={2} aria-hidden /> : <UserRound size={20} strokeWidth={2} aria-hidden />}
-          {formatMobileReunion(m.telephone)}
+          {m.enAttente ? (
+            <Clock size={20} strokeWidth={2} aria-hidden />
+          ) : (
+            <UserRound size={20} strokeWidth={2} aria-hidden />
+          )}
+          {m.nom ?? formatMobileReunion(m.telephone)}
+          {m.nom && <span className={ui.legende}>· {formatMobileReunion(m.telephone)}</span>}
           {m.moi && <span className={ui.legende}>· {tu.vous}</span>}
         </span>
         {(!gerant || m.enAttente) && <span className={s.badge}>{tr[m.role]}</span>}
@@ -101,17 +136,31 @@ export default function Utilisateurs() {
               <ChoixRole
                 id={`role-${m.utilisateurId}`}
                 valeur={m.role}
-                onChange={(r) => void agir(() => source().changerRole(restaurant.id, m.utilisateurId!, r))}
+                onChange={(r) =>
+                  void agir(() => source().changerRole(restaurant.id, m.utilisateurId!, r))
+                }
               />
               {!m.moi && (
-                <button type="button" className={ui.lienDiscret} onClick={() => void agir(() => source().retirerMembre(restaurant.id, m.utilisateurId!))}>
+                <button
+                  type="button"
+                  className={ui.lienDiscret}
+                  onClick={() =>
+                    void agir(() => source().retirerMembre(restaurant.id, m.utilisateurId!))
+                  }
+                >
                   {tu.retirer}
                 </button>
               )}
             </>
           )}
           {m.enAttente && (
-            <button type="button" className={ui.lienDiscret} onClick={() => void agir(() => source().annulerInvitation(restaurant.id, m.telephone))}>
+            <button
+              type="button"
+              className={ui.lienDiscret}
+              onClick={() =>
+                void agir(() => source().annulerInvitation(restaurant.id, m.telephone))
+              }
+            >
               {tu.annulerInvitation}
             </button>
           )}
@@ -172,7 +221,12 @@ export default function Utilisateurs() {
               <ChoixRole id="invitation-role" valeur={role} onChange={setRole} desactive={envoi} />
               <p className={ui.legende}>{tr.aide}</p>
             </div>
-            <button type="submit" className={`${ui.boutonPrincipal} ${s.ajouter}`} aria-busy={envoi} disabled={envoi}>
+            <button
+              type="submit"
+              className={`${ui.boutonPrincipal} ${s.ajouter}`}
+              aria-busy={envoi}
+              disabled={envoi}
+            >
               {envoi && <Spinner />}
               {tu.inviter}
             </button>

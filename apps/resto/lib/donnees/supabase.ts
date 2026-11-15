@@ -549,6 +549,10 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
           echecs: m.echecs,
         }));
       },
+      async responsables() {
+        const l = verifier(await client.rpc('admin_responsables')) as { restaurant_id: string; responsable: string }[];
+        return new Map(l.map((r) => [r.restaurant_id, r.responsable]));
+      },
       async origines() {
         const l = (await toutesLesLignes((debut, fin) =>
           client.rpc('admin_origines').range(debut, fin),
@@ -881,10 +885,12 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         role: Role;
         en_attente: boolean;
         moi: boolean;
+        nom: string | null;
       }[];
       return lignes.map((l): Membre => ({
         utilisateurId: l.utilisateur_id,
         telephone: l.telephone,
+        nom: l.nom,
         role: l.role,
         enAttente: l.en_attente,
         moi: l.moi,
@@ -1039,11 +1045,22 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         }),
       );
     },
+    async responsable() {
+      const { data: s } = await client.auth.getUser();
+      if (!s.user) return null;
+      return verifier(await client.from('responsables').select('prenom, nom').eq('utilisateur_id', s.user.id).maybeSingle()) as {
+        prenom: string;
+        nom: string;
+      } | null;
+    },
+    async noterResponsable(prenom, nom) {
+      verifier(await client.rpc('noter_responsable', { p_prenom: prenom, p_nom: nom }));
+    },
     async signatures(affectationId) {
       const l = verifier(
         await client
           .from('contrats')
-          .select('signe_restaurant_le, signature_restaurant, signe_extra_le, signature_extra')
+          .select('signe_restaurant_le, signature_restaurant, signe_extra_le, signature_extra, signataire_restaurant')
           .eq('affectation_id', affectationId)
           .maybeSingle(),
       ) as {
@@ -1051,8 +1068,10 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         signature_restaurant: string | null;
         signe_extra_le: string | null;
         signature_extra: string | null;
+        signataire_restaurant: string | null;
       } | null;
       return {
+        signataire: l?.signataire_restaurant ?? null,
         restaurant:
           l?.signature_restaurant && l.signe_restaurant_le
             ? { image: l.signature_restaurant, le: l.signe_restaurant_le }

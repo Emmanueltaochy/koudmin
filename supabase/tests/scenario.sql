@@ -626,3 +626,19 @@ do $$ begin
   assert (select frais_mise_en_relation_ht_centimes from demandes where debut = 1080 and fin = 0 and jour = jour_reunion() + 6) = 2100;
   assert (select frais_mise_en_relation_ht_centimes from demandes where debut = 1140 and fin = 1290 and jour = jour_reunion() + 6) = 875;
 end $$;
+\echo '--- Responsable de l''établissement : nom repris dans le contrat, l''équipe et l''admin'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+\set ON_ERROR_STOP 0
+select noter_responsable('  ', 'Hoarau');
+\set ON_ERROR_STOP 1
+select noter_responsable(' Marie ', 'Hoarau');
+select nom, moi from equipe_etablissement('00000000-0000-0000-0000-00000000b001') where moi;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000e1';
+select employeur, representant from contrat_extra('00000000-0000-0000-0000-00000000d0a1');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+select responsable from admin_responsables() where restaurant_id = '00000000-0000-0000-0000-00000000b001';
+reset role;
+do $$ begin
+  assert (select representant((select id from affectations where demande_id = '00000000-0000-0000-0000-00000000d0a1'))) = 'Marie Hoarau';
+end $$;

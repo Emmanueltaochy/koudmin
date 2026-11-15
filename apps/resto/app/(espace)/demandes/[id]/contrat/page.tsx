@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { Suspense, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Check, ChevronLeft, Download } from 'lucide-react';
 import { formatHeure, formatSiret, redigerContrat, textesEcrans } from '@kivien/core';
 import { PaveSignature, type PaveSignatureRef } from '@/components/PaveSignature';
@@ -21,19 +21,40 @@ const URL_DPAE = 'https://www.net-entreprises.fr/declaration/dpae/';
 function Contrat() {
   const { id } = useParams<{ id: string }>();
   const affectationId = useSearchParams().get('affectation');
-  const { etat } = useDonnees(async (src) => {
-    const [demande, etablissements] = await Promise.all([src.demande(id), src.etablissements()]);
-    // L'employeur est l'établissement de la demande, pas forcément celui affiché.
-    const restaurant = etablissements.find((r) => r.id === demande?.restaurantId) ?? (await src.restaurant());
-    return { demande, restaurant };
-  }, [id]);
+  const { etat } = useDonnees(
+    async (src) => {
+      const [demande, etablissements] = await Promise.all([src.demande(id), src.etablissements()]);
+      // L'employeur est l'établissement de la demande, pas forcément celui affiché.
+      const restaurant =
+        etablissements.find((r) => r.id === demande?.restaurantId) ?? (await src.restaurant());
+      return { demande, restaurant };
+    },
+    [id],
+  );
   const pave = useRef<PaveSignatureRef>(null);
   const [lu, setLu] = useState(false);
   const [envoi, setEnvoi] = useState(false);
-  const [erreurs, setErreurs] = useState<{ signature?: string; lecture?: string; envoi?: string }>({});
+  const [erreurs, setErreurs] = useState<{ signature?: string; lecture?: string; envoi?: string }>(
+    {},
+  );
   const [pdf, setPdf] = useState(false);
+  // Représentant de l'établissement : le signataire, sinon la personne connectée (qui va signer).
+  const [representant, setRepresentant] = useState<string | null>(null);
+  useEffect(() => {
+    if (!affectationId) return;
+    void Promise.all([source().signatures(affectationId), source().responsable()])
+      .then(([sig, moi]) =>
+        setRepresentant(sig.signataire ?? (moi ? `${moi.prenom} ${moi.nom}` : null)),
+      )
+      .catch(() => undefined);
+  }, [affectationId]);
 
-  if (etat.statut !== 'pret') return <div className={p.etroite} aria-busy><div className={p.squelette} /></div>;
+  if (etat.statut !== 'pret')
+    return (
+      <div className={p.etroite} aria-busy>
+        <div className={p.squelette} />
+      </div>
+    );
   const { demande: d, restaurant } = etat.donnees;
   const extra = d?.extras.find((e) => e.affectationId === affectationId);
   if (!d || !extra) {
@@ -53,9 +74,16 @@ function Contrat() {
       nom: restaurant.nom,
       adresse: restaurant.adresse?.libelle ?? `${d.adresse}, ${d.codePostal ?? ''} ${d.commune}`,
       siret: restaurant.siret ? formatSiret(restaurant.siret) : null,
+      representant,
     },
     secteur: restaurant.secteur,
-    salarie: { prenom: extra.prenom, nom: extra.nom, dateNaissance: null, lieuNaissance: null, adresse: null },
+    salarie: {
+      prenom: extra.prenom,
+      nom: extra.nom,
+      dateNaissance: null,
+      lieuNaissance: null,
+      adresse: null,
+    },
     poste: d.poste,
     intitule: d.intitule,
     descriptionPoste: d.descriptionPoste,
@@ -88,7 +116,10 @@ function Contrat() {
 
   async function signer() {
     const image = pave.current?.image() ?? null;
-    const e = { signature: image ? undefined : tc.erreurSignature, lecture: lu ? undefined : tc.erreurLecture };
+    const e = {
+      signature: image ? undefined : tc.erreurSignature,
+      lecture: lu ? undefined : tc.erreurLecture,
+    };
     setErreurs(e);
     if (e.signature || e.lecture || !image) return;
     setEnvoi(true);
@@ -123,7 +154,13 @@ function Contrat() {
           </section>
         ))}
       </article>
-      <button type="button" className={`${ui.boutonSecondaire} ${s.pdf}`} onClick={() => void telecharger()} aria-busy={pdf} disabled={pdf}>
+      <button
+        type="button"
+        className={`${ui.boutonSecondaire} ${s.pdf}`}
+        onClick={() => void telecharger()}
+        aria-busy={pdf}
+        disabled={pdf}
+      >
         {pdf ? <Spinner /> : <Download size={18} strokeWidth={2} aria-hidden />}
         {pdf ? tc.preparationPdf : tc.telechargerPdf}
       </button>
@@ -139,7 +176,12 @@ function Contrat() {
               {tc.dpaeTitre}
             </h2>
             <p className={ui.corps}>{tc.dpaeTexte}</p>
-            <a href={URL_DPAE} target="_blank" rel="noopener noreferrer" className={ui.boutonPrincipal}>
+            <a
+              href={URL_DPAE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={ui.boutonPrincipal}
+            >
               {tc.dpaeLien}
               <ArrowUpRight size={18} strokeWidth={2} aria-hidden />
             </a>
@@ -157,14 +199,22 @@ function Contrat() {
             </button>
           </div>
           <PaveSignature ref={pave} libelle={tc.signatureAide} erreur={!!erreurs.signature} />
-          <p className={erreurs.signature ? ui.messageErreur : ui.legende}>{erreurs.signature ?? tc.signatureAide}</p>
+          <p className={erreurs.signature ? ui.messageErreur : ui.legende}>
+            {erreurs.signature ?? tc.signatureAide}
+          </p>
           <label className={s.case}>
             <input type="checkbox" checked={lu} onChange={(e) => setLu(e.target.checked)} />
             <span className={ui.corps}>{tc.lu}</span>
           </label>
           {erreurs.lecture && <p className={ui.messageErreur}>{erreurs.lecture}</p>}
           {erreurs.envoi && <p className={ui.encadreErreur}>{erreurs.envoi}</p>}
-          <button type="button" className={ui.boutonPrincipal} onClick={signer} aria-busy={envoi} disabled={envoi}>
+          <button
+            type="button"
+            className={ui.boutonPrincipal}
+            onClick={signer}
+            aria-busy={envoi}
+            disabled={envoi}
+          >
             {envoi ? (
               <>
                 <Spinner />
@@ -181,7 +231,15 @@ function Contrat() {
 }
 
 /** Ce que le restaurateur reporte sur net-entreprises.fr. */
-function InfosDPAEListe({ affectationId, jour, debut }: { affectationId: string; jour: string; debut: number }) {
+function InfosDPAEListe({
+  affectationId,
+  jour,
+  debut,
+}: {
+  affectationId: string;
+  jour: string;
+  debut: number;
+}) {
   const { etat } = useDonnees((src) => src.infosDPAE(affectationId), [affectationId]);
   if (etat.statut !== 'pret' || !etat.donnees) return null;
   const i = etat.donnees;
@@ -189,7 +247,10 @@ function InfosDPAEListe({ affectationId, jour, debut }: { affectationId: string;
     ['Salarié·e', `${i.prenom} ${i.nom}`],
     ['Date de naissance', i.dateNaissance ? i.dateNaissance.split('-').reverse().join('/') : null],
     ['Lieu de naissance', i.lieuNaissance],
-    ['Numéro de sécurité sociale', i.nir ?? 'Non communiqué : la date et le lieu de naissance suffisent'],
+    [
+      'Numéro de sécurité sociale',
+      i.nir ?? 'Non communiqué : la date et le lieu de naissance suffisent',
+    ],
     ['Adresse', i.adresse],
     ["Date et heure d'embauche", `${jour.split('-').reverse().join('/')} à ${formatHeure(debut)}`],
     ['Contrat', "CDD d'usage, une journée"],

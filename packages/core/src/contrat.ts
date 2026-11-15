@@ -13,7 +13,8 @@ import { dureeMinutes, formatDuree, formatPlage } from './temps';
  * caisses de retraite et de prévoyance de chaque employeur).
  */
 export interface DonneesContrat {
-  employeur: { nom: string; adresse: string; siret: string | null };
+  /** representant : prénom et nom de la personne qui signe pour l'établissement. */
+  employeur: { nom: string; adresse: string; siret: string | null; representant?: string | null };
   salarie: {
     prenom: string;
     nom: string;
@@ -56,6 +57,7 @@ export function redigerContrat(d: DonneesContrat): { titre: string; articles: Ar
         texte:
           `Employeur : ${d.employeur.nom}, ${d.employeur.adresse}` +
           (d.employeur.siret ? `, SIRET ${d.employeur.siret}` : '') +
+          (d.employeur.representant ? `, représenté par ${d.employeur.representant}` : '') +
           `. Salarié·e : ${d.salarie.prenom} ${d.salarie.nom}${naissance}` +
           (d.salarie.adresse ? `, demeurant ${d.salarie.adresse}` : '') +
           '.',
@@ -72,7 +74,9 @@ export function redigerContrat(d: DonneesContrat): { titre: string; articles: Ar
         titre: 'Emploi',
         texte:
           `${libellePoste(d.poste, d.intitule)}.` +
-          (d.descriptionPoste?.trim() ? ` ${d.descriptionPoste.trim().replace(/[.\s]+$/, '')}.` : '') +
+          (d.descriptionPoste?.trim()
+            ? ` ${d.descriptionPoste.trim().replace(/[.\s]+$/, '')}.`
+            : '') +
           ` Lieu de travail : ${d.adresseService}.`,
       },
       {

@@ -5,6 +5,7 @@ import { CalendarCheck, Check, ClipboardList, PenLine, Star, Users, type LucideI
 import { aujourdhuiReunion, dateLongue, etiquetteJour, formatPlage, libellePoste, minuteReunion, textes as t, textesEcrans } from '@kivien/core';
 import { AvatarExtra } from '@/components/AvatarExtra';
 import { CarteDemande } from '@/components/CarteDemande';
+import { EncartResponsable } from '@/components/EncartResponsable';
 import p from '@/components/pages.module.css';
 import ui from '@/components/ui.module.css';
 import { aVenir, extrasActifs, phaseDemande } from '@/lib/phase';
@@ -72,6 +73,7 @@ export default function Accueil() {
 
   return (
     <div className={p.page}>
+      <EncartResponsable />
       <section className={s.bandeau} data-photo={photo ? 'true' : undefined} style={photo ? { backgroundImage: `url(${photo})` } : undefined}>
         <div className={s.voile}>
           <p className={s.salut}>

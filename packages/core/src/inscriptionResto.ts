@@ -9,6 +9,9 @@ import { textesAcceptation } from './textesLegal';
 const ti = textesEcrans.resto.inscription;
 
 export interface SaisieInscriptionResto {
+  /** Prénom et nom de la personne qui crée le compte (absents quand on ajoute un établissement). */
+  prenom?: string;
+  nom?: string;
   etablissement: string;
   /** Secteur choisi, vide tant qu'aucun n'est choisi. */
   secteur: string;
@@ -26,8 +29,14 @@ export interface SaisieInscriptionResto {
 export type ErreursInscriptionResto = Partial<Record<keyof SaisieInscriptionResto, string>>;
 
 /** `compteOuvert` : la session existe déjà (seul l'établissement reste à créer). */
-export function validerInscriptionResto(s: SaisieInscriptionResto, compteOuvert = false): ErreursInscriptionResto {
+export function validerInscriptionResto(
+  s: SaisieInscriptionResto,
+  compteOuvert = false,
+): ErreursInscriptionResto {
   const e: ErreursInscriptionResto = {};
+  if (s.prenom !== undefined && (!s.prenom.trim() || s.prenom.trim().length > 60))
+    e.prenom = ti.erreurPrenom;
+  if (s.nom !== undefined && (!s.nom.trim() || s.nom.trim().length > 60)) e.nom = ti.erreurNom;
   const nom = s.etablissement.trim();
   if (!nom || nom.length > 120) e.etablissement = ti.erreurEtablissement;
   if (!estSecteur(s.secteur)) e.secteur = ti.erreurSecteur;

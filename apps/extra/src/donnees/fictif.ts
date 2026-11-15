@@ -293,6 +293,7 @@ export function sourceFictive(): SourceDonnees {
         secteur: SECTEUR_PAR_DEFAUT,
         signeExtra: signes.has(demandeId),
         signeRestaurant: false,
+        representant: 'Marie Hoarau',
       };
     },
     async infosContrat() {

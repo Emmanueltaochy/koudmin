@@ -277,6 +277,13 @@ export function ListeEtablissements() {
     (r: EtablissementAdmin) =>
       `${r.nom} ${r.commune ?? ''} ${r.siret ?? ''} ${estSecteur(r.secteur) ? DEFINITION_SECTEURS[r.secteur].libelle : ''}`,
   );
+  const [responsables, setResponsables] = useState<Map<string, string>>(new Map());
+  useEffect(() => {
+    source()
+      .admin.responsables()
+      .then(setResponsables)
+      .catch(() => undefined);
+  }, []);
   const origines = useOrigines('etablissement');
   if (!Array.isArray(lignes)) return <Etat lignes={lignes} />;
   return (
@@ -304,6 +311,7 @@ export function ListeEtablissements() {
                 <th scope="row">
                   {r.nom}
                   <span className={s.sousLigne}>
+                    {responsables.get(r.id) ? `${responsables.get(r.id)} · ` : ''}
                     {r.commune ?? '–'}
                     {r.telephone ? ` · ${formatMobileReunion(r.telephone)}` : ''}
                   </span>

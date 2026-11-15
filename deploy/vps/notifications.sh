@@ -48,7 +48,7 @@ TEXTES = {
     "extra_trouve": {
         "sujet": "Extra trouvé : {extra}, {jour}",
         "paragraphes": [
-            "Bonjour,",
+            "Bonjour {prenom},",
             "{extra} a accepté votre mission {poste} du {jour}, de {horaire}, chez {restaurant}.",
             "Il reste à signer le contrat d’extra, puis à faire la DPAE avant le début de la mission.",
         ],
@@ -78,7 +78,7 @@ TEXTES = {
     "rappel_pro": {
         "sujet": "Demain : {extra} en extra chez {restaurant}",
         "paragraphes": [
-            "Bonjour,",
+            "Bonjour {prenom},",
             "Rappel : demain, {jour}, {extra} sera en extra chez {restaurant} pour la mission {poste}, de {horaire}.",
             "Pensez à la DPAE si ce n’est pas encore fait.",
         ],
@@ -168,6 +168,9 @@ def remplir(texte, n):
         "horaire": f"{heure(n['debut'])} à {heure(n['fin'])}",
         "distance": distance(n.get("distance_metres")),
     }
+    # Prénom inconnu (établissement sans responsable nommé) : « Bonjour, » plutôt que « Bonjour , ».
+    if not valeurs["prenom"]:
+        texte = texte.replace(" {prenom}", "")
     for k, v in valeurs.items():
         texte = texte.replace("{" + k + "}", v)
     return texte

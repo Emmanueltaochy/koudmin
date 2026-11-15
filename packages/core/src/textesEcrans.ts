@@ -72,6 +72,12 @@ export const textesEcrans = {
       paiement: 'Paiement',
       etablissement: 'Établissement',
     },
+    responsable: {
+      titre: 'Votre prénom et votre nom',
+      texte: 'Ils figurent sur les contrats que vous signez et dans nos e-mails.',
+      bouton: 'Enregistrer',
+      erreur: 'Enregistrement impossible. Vérifiez la connexion et réessayez.',
+    },
     paiement: {
       titre: 'Paiement',
       sousTitre: (frais: string) =>
@@ -166,6 +172,7 @@ export const textesEcrans = {
       erreurIdentifiants: 'E-mail ou mot de passe incorrect.',
       deconnexion: 'Se déconnecter',
       groupes: { pilotage: 'Pilotage', activite: 'Activité', reseau: 'Réseau' },
+      responsable: 'Responsable',
       onglets: { vue: "Vue d'ensemble", demandes: 'Demandes', extras: 'Extras', etablissements: 'Établissements', recrutement: 'Recrutement', prospection: 'Prospection', messages: 'Messages' },
       prospection: {
         intro: "Établissements de l'île trouvés dans OpenStreetMap ou ajoutés à la main, pour les prévenir du lancement.",
@@ -359,6 +366,11 @@ export const textesEcrans = {
       choixExtraTexte: 'Des soirées payées près de chez toi. Inscription gratuite.',
       titre: 'Créer votre compte',
       sousTitre: 'Environ 20 % moins cher que l’intérim. Contrat rédigé pour vous.',
+      prenom: 'Votre prénom',
+      nom: 'Votre nom',
+      responsableAide: 'Ils figurent sur les contrats que vous signez et dans nos e-mails.',
+      erreurPrenom: 'Indiquez votre prénom.',
+      erreurNom: 'Indiquez votre nom.',
       etablissement: "Nom de l'établissement",
       secteur: "Secteur d'activité",
       secteurAide: "Le contrat d'extra n'est permis que dans ces secteurs (article D1242-1 du Code du travail).",

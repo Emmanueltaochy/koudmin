@@ -34,7 +34,7 @@ export const textesNotifications: Record<TypeNotification, ModeleNotification> =
   extra_trouve: {
     sujet: 'Extra trouvé : {extra}, {jour}',
     paragraphes: [
-      'Bonjour,',
+      'Bonjour {prenom},',
       '{extra} a accepté votre mission {poste} du {jour}, de {horaire}, chez {restaurant}.',
       'Il reste à signer le contrat d’extra, puis à faire la DPAE avant le début de la mission.',
     ],
@@ -64,7 +64,7 @@ export const textesNotifications: Record<TypeNotification, ModeleNotification> =
   rappel_pro: {
     sujet: 'Demain : {extra} en extra chez {restaurant}',
     paragraphes: [
-      'Bonjour,',
+      'Bonjour {prenom},',
       'Rappel : demain, {jour}, {extra} sera en extra chez {restaurant} pour la mission {poste}, de {horaire}.',
       'Pensez à la DPAE si ce n’est pas encore fait.',
     ],
