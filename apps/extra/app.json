@@ -82,6 +82,12 @@
     "experiments": {
       "typedRoutes": true
     },
-    "description": "Kivien : missions d'extra près de chez toi à La Réunion. Un vrai contrat à chaque mission."
+    "description": "Kivien : missions d'extra près de chez toi à La Réunion. Un vrai contrat à chaque mission.",
+    "owner": "emmanuel_taochy",
+    "extra": {
+      "eas": {
+        "projectId": "e8e5b8c8-464a-4ad9-acd1-2479bb5df0d7"
+      }
+    }
   }
 }

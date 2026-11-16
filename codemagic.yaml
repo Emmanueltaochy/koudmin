@@ -4,7 +4,7 @@
 # À régler une fois dans Codemagic (Team settings) :
 # - intégration App Store Connect (clé API) : son nom remplace « Kivien App Store Connect » ;
 # - clé de signature Android (Code signing identities → Android keystores) : référence « kivien_keystore » ;
-# - groupe de variables « kivien » : EXPO_PROJECT_ID, APP_STORE_APPLE_ID, et pour Android
+# - groupe de variables « kivien » : APP_STORE_APPLE_ID, et pour Android
 #   GOOGLE_SERVICES_JSON (google-services.json encodé en base64) et GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
 #   (compte de service Google Play, en secret).
 

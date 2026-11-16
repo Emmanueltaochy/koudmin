@@ -15,7 +15,7 @@ aucune annonce tant que le vivier d'extras n'est pas prêt.
 |---|---|
 | App Store Connect | Créer l'app : Mes apps → + → identifiant de lot `re.kivien.extra` (à créer dans Certificats, identifiants et profils, avec la capacité **Push Notifications** cochée). Noter son **Apple ID** (un nombre). |
 | Google Play Console | Créer l'app « Kivien ». Le **premier** fichier `.aab` se dépose à la main (test interne) ; Codemagic envoie les suivants. |
-| expo.dev (gratuit) | Créer un projet « kivien-extra » : son **ID de projet** sert aux notifications sur le téléphone. Aucune compilation ne passe par Expo. |
+| expo.dev (gratuit) | Projet « kivien-extra » (compte emmanuel_taochy) : son ID est déjà dans `apps/extra/app.json`. Aucune compilation ne passe par Expo. |
 | Firebase (gratuit) | Projet « Kivien » → app Android `re.kivien.extra` → télécharger `google-services.json`. |
 
 ---
@@ -49,7 +49,6 @@ et **Kivien · Android**.
 
 | Variable | Valeur | Secret |
 |---|---|---|
-| `EXPO_PROJECT_ID` | l'ID du projet expo.dev | non |
 | `APP_STORE_APPLE_ID` | l'Apple ID de l'app (un nombre) | non |
 | `GOOGLE_SERVICES_JSON` | `google-services.json` encodé en base64 (`base64 -i google-services.json`) | oui |
 | `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS` | le compte de service Google Play (le même que pour ton autre app convient s'il a accès à la nouvelle) | oui |
