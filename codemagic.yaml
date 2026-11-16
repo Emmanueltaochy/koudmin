@@ -56,8 +56,9 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        # TestFlight seulement : la mise en vente reste manuelle dans App Store Connect.
-        submit_to_testflight: true
+        # Envoi dans App Store Connect : le build est disponible en test interne TestFlight sans
+        # relecture d'Apple. Test externe et mise en vente restent manuels dans App Store Connect.
+        submit_to_testflight: false
         submit_to_app_store: false
 
   kivien-android:
