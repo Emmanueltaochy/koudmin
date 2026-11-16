@@ -49,7 +49,6 @@ et **Kivien · Android**.
 
 | Variable | Valeur | Secret |
 |---|---|---|
-| `APP_STORE_APPLE_ID` | l'Apple ID de l'app (un nombre) | non |
 | `GOOGLE_SERVICES_JSON` | `google-services.json` encodé en base64 (`base64 -i google-services.json`) | oui |
 | `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS` | le compte de service Google Play (le même que pour ton autre app convient s'il a accès à la nouvelle) | oui |
 
