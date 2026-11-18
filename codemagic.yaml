@@ -43,9 +43,16 @@ workflows:
       - name: Projet iOS (numéro de build suivant celui de l'App Store)
         working_directory: apps/extra
         script: |
-          DERNIER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo 0)
-          export BUILD_NUMBER=$((DERNIER + 1))
-          echo "Numéro de build : $BUILD_NUMBER"
+          # Dernier build déjà envoyé à Apple : on regarde TestFlight (tous les envois) et l'App Store
+          # (versions publiées), et on prend le plus grand des deux.
+          dernier() {
+            n=$(app-store-connect "$1" "$APP_STORE_APPLE_ID" 2>/dev/null | tail -n1 || true)
+            if [[ "$n" =~ ^[0-9]+$ ]]; then echo "$n"; else echo 0; fi
+          }
+          TESTFLIGHT=$(dernier get-latest-testflight-build-number)
+          APP_STORE=$(dernier get-latest-app-store-build-number)
+          export BUILD_NUMBER=$(( (TESTFLIGHT > APP_STORE ? TESTFLIGHT : APP_STORE) + 1 ))
+          echo "Numéro de build : $BUILD_NUMBER (TestFlight : $TESTFLIGHT, App Store : $APP_STORE)"
           npx expo prebuild -p ios --clean
       - name: Signature
         script: xcode-project use-profiles
