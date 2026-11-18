@@ -615,7 +615,13 @@ export const textesEcrans = {
       vide: 'Tes gains apparaissent ici dès ta première mission.',
       videAction: 'Voir les missions',
     },
-    missionsPassees: 'Passées ou annulées',
+    /** Deux vues de l'onglet Missions : ce qui reste à faire, et l'historique à part. */
+    vuesMissions: {
+      aVenir: 'À venir',
+      historique: (n: number) => `Historique (${n})`,
+      annulees: "Annulées par l'entreprise",
+      terminees: 'Terminées',
+    },
     missionPassee: 'Mission terminée',
     missionAnnulee: "L'entreprise a annulé la mission.",
     missionAnnuleeAide: 'Rien à faire de ton côté. Tu peux choisir une autre mission.',

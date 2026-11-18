@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Calendar from 'lucide-react-native/icons/calendar';
 import MapPin from 'lucide-react-native/icons/map-pin';
@@ -24,16 +24,19 @@ import { demoAutorisee } from '../../donnees';
 import { useMissions, type Demo } from '../../missions/useMissions';
 import { EtatPlein } from '../../ui/EtatPlein';
 import { PiluleFiltre, PiluleInfo } from '../../ui/Pilule';
-import { couleurs } from '../../ui/theme';
+import { couleurs, rayons } from '../../ui/theme';
 import { Texte } from '../../ui/Texte';
 
 const FILTRES: FiltreMissions[] = ['toutes', 'ceSoir', 'weekEnd'];
 const tm = t.extra.missions;
+const tv = textesEcrans.extra.vuesMissions;
+type Vue = 'aVenir' | 'historique';
 
 export default function Missions() {
   const { demo } = useLocalSearchParams<{ demo?: Demo }>();
   const { etat, profil, confirmees, recharger } = useMissions(demoAutorisee(demo));
   const [filtre, setFiltre] = useState<FiltreMissions>('toutes');
+  const [vue, setVue] = useState<Vue>('aVenir');
   const insets = useSafeAreaInsets();
   const aujourdhui = aujourdhuiReunion();
 
@@ -45,7 +48,7 @@ export default function Missions() {
     [etat, profil, filtre, aujourdhui],
   );
 
-  // En haut ce qui reste à faire ; en bas les missions terminées ou annulées par l'entreprise.
+  // « À venir » : ce qui reste à faire. « Historique » : annulées puis terminées, à part.
   const actives = useMemo(() => confirmees.filter((m) => !m.annulee && !m.passee), [confirmees]);
   const anciennes = useMemo(
     () =>
@@ -54,6 +57,9 @@ export default function Missions() {
         .sort((a, b) => b.jour.localeCompare(a.jour) || b.debut - a.debut),
     [confirmees],
   );
+  const annulees = anciennes.filter((m) => m.annulee);
+  const terminees = anciennes.filter((m) => !m.annulee);
+  const historique = vue === 'historique' && anciennes.length > 0;
 
   const ouvrir = useCallback((id: string) => router.push(`/mission/${id}`), []);
   const rendreCarte = useCallback(
@@ -78,16 +84,38 @@ export default function Missions() {
             />
           )}
         </View>
-        <View style={styles.filtres}>
-          {FILTRES.map((f) => (
-            <PiluleFiltre
-              key={f}
-              libelle={tm.filtres[f]}
-              active={filtre === f}
-              onPress={() => setFiltre(f)}
-            />
-          ))}
-        </View>
+        {anciennes.length > 0 && (
+          <View style={styles.vues} accessibilityRole="tablist">
+            {(['aVenir', 'historique'] as const).map((v) => (
+              <Pressable
+                key={v}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: vue === v }}
+                onPress={() => setVue(v)}
+                style={[styles.vue, vue === v && styles.vueActive]}
+              >
+                <Texte
+                  variante={vue === v ? 'corpsFort' : 'corps'}
+                  couleur={vue === v ? 'basalte' : 'galet'}
+                >
+                  {v === 'aVenir' ? tv.aVenir : tv.historique(anciennes.length)}
+                </Texte>
+              </Pressable>
+            ))}
+          </View>
+        )}
+        {!historique && (
+          <View style={styles.filtres}>
+            {FILTRES.map((f) => (
+              <PiluleFiltre
+                key={f}
+                libelle={tm.filtres[f]}
+                active={filtre === f}
+                onPress={() => setFiltre(f)}
+              />
+            ))}
+          </View>
+        )}
       </View>
 
       <BandeauEmail />
@@ -125,53 +153,64 @@ export default function Missions() {
         />
       )}
 
-      {etat.statut === 'pret' && (missions.length > 0 || confirmees.length > 0) && profil && (
-        <FlatList
-          data={missions}
-          keyExtractor={(m) => m.id}
-          renderItem={rendreCarte}
-          ListHeaderComponent={
-            <>
-              <Bandeau missions={missions} />
-              {actives.length > 0 && (
-                <View style={styles.confirmees}>
-                  <Texte variante="legendeForte">{textesEcrans.extra.missionsConfirmees}</Texte>
-                  {actives.map((m) => (
-                    <CarteConfirmee
-                      key={m.id}
-                      mission={m}
-                      aujourdhui={aujourdhui}
-                      onPress={ouvrir}
-                    />
-                  ))}
-                </View>
-              )}
-              <Texte variante="legende" couleur="galet" style={styles.legende}>
-                {missions.length > 0
-                  ? legendeListe(missions.length, !profil.aVoiture)
-                  : tm.videTitre}
-              </Texte>
-            </>
-          }
-          ListFooterComponent={
-            anciennes.length > 0 ? (
-              <View style={styles.anciennes}>
+      {etat.statut === 'pret' && historique && (
+        <ScrollView contentContainerStyle={styles.liste}>
+          {[
+            { titre: tv.annulees, liste: annulees },
+            { titre: tv.terminees, liste: terminees },
+          ]
+            .filter((g) => g.liste.length > 0)
+            .map((g) => (
+              <View key={g.titre} style={styles.groupe}>
                 <Texte variante="legendeForte" couleur="galet">
-                  {textesEcrans.extra.missionsPassees}
+                  {g.titre}
                 </Texte>
-                {anciennes.map((m) => (
+                {g.liste.map((m) => (
                   <CarteConfirmee key={m.id} mission={m} aujourdhui={aujourdhui} onPress={ouvrir} />
                 ))}
               </View>
-            ) : undefined
-          }
-          ItemSeparatorComponent={Separateur}
-          contentContainerStyle={styles.liste}
-          initialNumToRender={6}
-          windowSize={5}
-          removeClippedSubviews
-        />
+            ))}
+        </ScrollView>
       )}
+
+      {etat.statut === 'pret' &&
+        !historique &&
+        (missions.length > 0 || confirmees.length > 0) &&
+        profil && (
+          <FlatList
+            data={missions}
+            keyExtractor={(m) => m.id}
+            renderItem={rendreCarte}
+            ListHeaderComponent={
+              <>
+                <Bandeau missions={missions} />
+                {actives.length > 0 && (
+                  <View style={styles.confirmees}>
+                    <Texte variante="legendeForte">{textesEcrans.extra.missionsConfirmees}</Texte>
+                    {actives.map((m) => (
+                      <CarteConfirmee
+                        key={m.id}
+                        mission={m}
+                        aujourdhui={aujourdhui}
+                        onPress={ouvrir}
+                      />
+                    ))}
+                  </View>
+                )}
+                <Texte variante="legende" couleur="galet" style={styles.legende}>
+                  {missions.length > 0
+                    ? legendeListe(missions.length, !profil.aVoiture)
+                    : tm.videTitre}
+                </Texte>
+              </>
+            }
+            ItemSeparatorComponent={Separateur}
+            contentContainerStyle={styles.liste}
+            initialNumToRender={6}
+            windowSize={5}
+            removeClippedSubviews
+          />
+        )}
     </View>
   );
 }
@@ -194,6 +233,21 @@ const styles = StyleSheet.create({
   liste: { paddingHorizontal: 16, paddingBottom: 16 },
   legende: { marginBottom: 16 },
   confirmees: { gap: 16, marginBottom: 24 },
-  anciennes: { gap: 16, marginTop: 32 },
+  groupe: { gap: 16, marginBottom: 24 },
+  // Sélecteur À venir / Historique : fond galet clair, vue choisie sur carte blanche.
+  vues: {
+    flexDirection: 'row',
+    backgroundColor: couleurs.trait,
+    borderRadius: rayons.carte,
+    padding: 4,
+  },
+  vue: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: rayons.carte - 4,
+  },
+  vueActive: { backgroundColor: couleurs.blanc },
   separateur: { height: 16 },
 });
