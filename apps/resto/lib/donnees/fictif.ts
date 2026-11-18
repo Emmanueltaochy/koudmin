@@ -8,8 +8,10 @@ import {
   miseEnRelationFacturee,
   type ProfilPublic,
   type ProspectOsm,
+  type FormulesProposees,
 } from '@kivien/core';
 import type {
+  MandatDpae,
   CampagneProspection,
   MessageAdmin,
   ReglagesProspectionAuto,
@@ -122,6 +124,31 @@ let reglagesAutoDemo: Omit<ReglagesProspectionAuto, 'aLancer' | 'aRelancer'> = {
   relanceSujet: null,
   relanceMessage: null,
 };
+/** Démonstration : formule tout compris fermée au départ, réglage gardé pour la session. */
+const CLE_FORMULES = 'kivien-demo-formules';
+function lireFormules(): FormulesProposees {
+  try {
+    return JSON.parse(sessionStorage.getItem(CLE_FORMULES) ?? 'null') ?? { toutCompris: false, coefficientMilliemes: 2000 };
+  } catch {
+    return { toutCompris: false, coefficientMilliemes: 2000 };
+  }
+}
+/** Démonstration : DPAE automatique fermée au départ ; ouverture et mandats gardés pour la session. */
+const CLE_DPAE = 'kivien-demo-dpae';
+function lireDpae(): { ouverte: boolean; mandats: Record<string, MandatDpae> } {
+  try {
+    return JSON.parse(sessionStorage.getItem(CLE_DPAE) ?? 'null') ?? { ouverte: false, mandats: {} };
+  } catch {
+    return { ouverte: false, mandats: {} };
+  }
+}
+function ecrireDpae(d: { ouverte: boolean; mandats: Record<string, MandatDpae> }) {
+  try {
+    sessionStorage.setItem(CLE_DPAE, JSON.stringify(d));
+  } catch {
+    // session indisponible : la démonstration repart fermée
+  }
+}
 /** Démonstration : prénom et nom à compléter (encart de l'espace), gardés pour la session. */
 const CLE_RESPONSABLE = 'kivien-demo-responsable';
 function lireResponsable(): { prenom: string; nom: string } | null {
@@ -567,6 +594,29 @@ export function sourceFictive(): SourceResto {
       },
     },
     admin: {
+      async dpae() {
+        const d = lireDpae();
+        const mandats = Object.keys(d.mandats).length;
+        return {
+          reglages: { actif: d.ouverte, mandats, aEnvoyer: 0, envoyees: 0, acceptees: 0, aReprendre: 0 },
+          liste: [],
+        };
+      },
+      async reglerDpae(actif) {
+        await attendre(300);
+        ecrireDpae({ ...lireDpae(), ouverte: actif });
+      },
+      async formules() {
+        return { ...lireFormules(), demandesToutCompris: 0 };
+      },
+      async reglerFormules(toutCompris, coefficientMilliemes) {
+        await attendre(300);
+        try {
+          sessionStorage.setItem(CLE_FORMULES, JSON.stringify({ toutCompris, coefficientMilliemes }));
+        } catch {
+          // session indisponible : la démonstration repart fermée
+        }
+      },
       prospection: {
         // Démonstration : échantillon fixe à la place d'OpenStreetMap, aucun e-mail n'est envoyé.
         async demanderRecherche() {
@@ -1202,6 +1252,9 @@ export function sourceFictive(): SourceResto {
     async parametres() {
       return PARAMETRES;
     },
+    async formules() {
+      return lireFormules();
+    },
     async publier(n: NouvelleDemande) {
       await attendre(1200);
       const id = `d${Date.now().toString(36)}`;
@@ -1289,6 +1342,39 @@ export function sourceFictive(): SourceResto {
       await attendre(800);
       signaturesDemo.set(affectationId, { image: signature, le: new Date().toISOString() });
       modifierExtra(affectationId, (e) => ({ ...e, contratSigneRestaurant: true }));
+    },
+    async etatDpae(affectationId) {
+      const d = lire().find((x) => x.extras.some((e) => e.affectationId === affectationId));
+      const e = d?.extras.find((x) => x.affectationId === affectationId);
+      if (!d || !e) return null;
+      const { ouverte, mandats } = lireDpae();
+      const mandat = !!mandats[d.restaurantId];
+      // Démonstration : l'Urssaf « accepte » dès que l'extra a signé son contrat.
+      const faite = ouverte && mandat && e.contratSigneExtra;
+      return {
+        ouverte,
+        mandat,
+        prevue: ouverte && mandat,
+        statut: faite ? 'acceptee' : null,
+        motif: null,
+        reference: faite ? 'DEMO-974-0001' : null,
+        envoyeeLe: null,
+      };
+    },
+    async mandatsDpae() {
+      return lireDpae();
+    },
+    async donnerMandatDpae(restaurantId, codeApe, serviceSante) {
+      await attendre(400);
+      const d = lireDpae();
+      d.mandats[restaurantId] = { codeApe, serviceSante, accepteLe: new Date().toISOString() };
+      ecrireDpae(d);
+    },
+    async retirerMandatDpae(restaurantId) {
+      await attendre(300);
+      const d = lireDpae();
+      delete d.mandats[restaurantId];
+      ecrireDpae(d);
     },
     async infosDPAE(affectationId) {
       const e = lire()

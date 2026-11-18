@@ -1,6 +1,10 @@
 import type {
   Zone,
   CanalConnu,
+  EtatDpae,
+  StatutDpae,
+  Formule,
+  FormulesProposees,
   MissionFicheExtra,
   PublicMessage,
   CategorieProspect,
@@ -341,6 +345,10 @@ export interface SourceAdmin {
   ): Promise<number>;
   messages(): Promise<MessageAdmin[]>;
   demandes(limite?: number): Promise<DemandeAdmin[]>;
+  dpae(): Promise<{ reglages: ReglagesDpaeAdmin; liste: DpaeAdmin[] }>;
+  reglerDpae(actif: boolean): Promise<void>;
+  formules(): Promise<FormulesProposees & { demandesToutCompris: number }>;
+  reglerFormules(toutCompris: boolean, coefficientMilliemes: number): Promise<void>;
   prospection: SourceProspection;
 }
 
@@ -378,6 +386,8 @@ export interface NouvelleDemande {
   retourAssure: boolean;
   nbExtras: number;
   consignes: string | null;
+  /** « declaration » par défaut ; « tout_compris » seulement quand la formule est ouverte. */
+  formule?: Formule;
 }
 
 /** Extra sur une demande, avec son profil public (compétences, expérience, langues, présentation). */
@@ -469,6 +479,34 @@ export interface InfosDPAE {
   adresse: string | null;
 }
 
+/** Mandat donné à Kivien pour faire les DPAE d'un établissement. */
+export interface MandatDpae {
+  codeApe: string;
+  serviceSante: string;
+  accepteLe: string;
+}
+
+/** Espace admin : interrupteur et compteurs de la DPAE automatique. */
+export interface ReglagesDpaeAdmin {
+  actif: boolean;
+  mandats: number;
+  aEnvoyer: number;
+  envoyees: number;
+  acceptees: number;
+  aReprendre: number;
+}
+
+export interface DpaeAdmin {
+  affectationId: string;
+  restaurant: string;
+  extra: string;
+  jour: string;
+  statut: StatutDpae;
+  motif: string | null;
+  reference: string | null;
+  majLe: string;
+}
+
 export type ModePaiement = 'carte_mission' | 'sepa_mission' | 'mensuel_carte' | 'mensuel_sepa';
 
 /** Moyen de paiement des frais Kivien (gérant seulement). */
@@ -546,6 +584,8 @@ export interface SourceResto {
   /** Photo de profil d'un extra affecté à une de vos demandes (JPEG base64), null sans photo. */
   photoExtra(extraId: string): Promise<string | null>;
   parametres(): Promise<ParametresTarifaires>;
+  /** Formules proposées dans le formulaire de demande. */
+  formules(): Promise<FormulesProposees>;
   publier(d: NouvelleDemande): Promise<{ id: string }>;
   /** Demandes de l'établissement affiché. */
   demandes(): Promise<DemandeSuivi[]>;
@@ -559,6 +599,12 @@ export interface SourceResto {
   responsable(): Promise<{ prenom: string; nom: string } | null>;
   noterResponsable(prenom: string, nom: string): Promise<void>;
   infosDPAE(affectationId: string): Promise<InfosDPAE | null>;
+  /** Où en est la DPAE de cette embauche (null : embauche introuvable). */
+  etatDpae(affectationId: string): Promise<EtatDpae | null>;
+  /** DPAE automatique : ouverte ou non par Kivien, et mandat de chaque établissement (par identifiant). */
+  mandatsDpae(): Promise<{ ouverte: boolean; mandats: Record<string, MandatDpae> }>;
+  donnerMandatDpae(restaurantId: string, codeApe: string, serviceSante: string): Promise<void>;
+  retirerMandatDpae(restaurantId: string): Promise<void>;
   noter(affectationId: string, n: Notation): Promise<void>;
   favoris(): Promise<Favori[]>;
   retirerFavori(extraId: string): Promise<void>;

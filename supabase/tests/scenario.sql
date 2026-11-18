@@ -693,3 +693,46 @@ begin
   assert n >= 1 and exists (select 1 from campagnes where automatique = 'relance'), 'relance programmée';
   assert programmer_prospection_auto(40) = 0, 'une seule relance';
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- DPAE automatique et formule tout compris : fermées par défaut.
+-- ---------------------------------------------------------------------------
+\echo '--- DPAE automatique fermée : pas de mandat ; formule tout compris fermée : demande refusée'
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select dpae_auto_active() as dpae_ouverte;
+select tout_compris from formules_proposees();
+\set ON_ERROR_STOP 0
+select donner_mandat_dpae('00000000-0000-0000-0000-00000000b001', '5610A', 'MT974');
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng, formule)
+values ('00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 2, 1080, 0, 'x', 'Saint-Paul', 0, 0, 'tout_compris');
+select admin_regler_dpae(true);
+\set ON_ERROR_STOP 1
+\echo '--- Admin : coefficient hors limites refusé, puis formule ouverte à × 1,95'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a3';
+\set ON_ERROR_STOP 0
+select admin_regler_formules(true, 5000);
+\set ON_ERROR_STOP 1
+select admin_regler_formules(true, 1950);
+select admin_regler_dpae(true);
+select actif, mandats from admin_reglages_dpae();
+\echo '--- Gérant : mandat DPAE donné ; demande tout compris : coefficient figé, pas de frais Kivien'
+set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select donner_mandat_dpae('00000000-0000-0000-0000-00000000b001', '56.10a', 'mt974');
+select code_ape, service_sante from mandats_dpae;
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng, formule)
+values ('00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 2, 1080, 0, 'x', 'Saint-Paul', 0, 0, 'tout_compris')
+returning formule, coefficient_milliemes, frais_mise_en_relation_ht_centimes, frais_horaire_ht_centimes;
+insert into demandes (restaurant_id, poste, jour, debut, fin, adresse, commune, lat, lng)
+values ('00000000-0000-0000-0000-00000000b001', 'plonge', jour_reunion() + 2, 660, 900, 'x', 'Saint-Paul', 0, 0)
+returning formule, coefficient_milliemes, frais_mise_en_relation_ht_centimes;
+reset role;
+do $$
+begin
+  -- 2 h 30 à 12,31 € × 1,95 = 60,01 € ; 1 h à 10,01 € × 1,5 = 15,02 € (même arrondi que core).
+  assert prix_tout_compris_centimes(1231, 150, 1950) = 6001, 'prix tout compris';
+  assert prix_tout_compris_centimes(1001, 60, 1500) = 1502, 'arrondi au centime';
+end $$;
+-- Le reste du scénario et les données de démonstration repartent fermés.
+update reglages_formules set tout_compris_actif = false;
+update reglages_dpae set actif = false;

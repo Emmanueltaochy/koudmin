@@ -41,3 +41,24 @@
 .ajouter {
   align-self: flex-start;
 }
+
+/* DPAE automatique : sous la carte de l'établissement, séparée par un trait. */
+.dpae {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--k-trait);
+}
+.accord {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.accord input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}

@@ -382,3 +382,35 @@
   background: var(--k-blanc);
   box-shadow: var(--k-ombre-carte);
 }
+
+/* Choix de la formule (affiché seulement quand la formule tout compris est ouverte). */
+.formules {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+.formules legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+.formule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--k-trait);
+  border-radius: var(--k-rayon-champ);
+  cursor: pointer;
+}
+.formule[data-choisie='true'] {
+  border-color: var(--k-basalte);
+}
+.formule input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}

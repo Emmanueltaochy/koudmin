@@ -34,13 +34,17 @@ import {
   NB_EXTRAS_MIN,
   ORDRE_CHAMPS,
   phraseDuree,
+  prixToutComprisCentimes,
   postesDuSecteur,
   SECTEUR_PAR_DEFAUT,
   recapDemande,
   saisieParDefaut,
   textes as t,
+  textesFormules,
   validerDemande,
   type ErreursDemande,
+  type Formule,
+  type FormulesProposees,
   type ParametresTarifaires,
   type SaisieDemande,
 } from '@kivien/core';
@@ -53,6 +57,7 @@ import { donneesFictives, ErreurReseau, source } from '@/lib/donnees';
 import s from './demande.module.css';
 
 const td = t.resto.demande;
+const tf = textesFormules.demande;
 const PRESETS = [
   { debut: '18:00', fin: '00:00' },
   { debut: '11:30', fin: '15:00' },
@@ -83,6 +88,9 @@ export function FormulaireDemande() {
   const [envoi, setEnvoi] = useState(false);
   // Mission récurrente : une demande par semaine, même jour et mêmes horaires.
   const [semaines, setSemaines] = useState(1);
+  // Formule tout compris : proposée seulement quand Kivien l'a ouverte (fermée par défaut).
+  const [formules, setFormules] = useState<FormulesProposees | null>(null);
+  const [formule, setFormule] = useState<Formule>('declaration');
   const [erreurEnvoi, setErreurEnvoi] = useState<string | null>(null);
   const resume = useRef<HTMLDivElement>(null);
   const champDate = useRef<HTMLInputElement>(null);
@@ -95,6 +103,10 @@ export function FormulaireDemande() {
     void (async () => {
       const [p, r] = await Promise.all([source().parametres(), source().restaurant()]);
       setParametres(p);
+      void source()
+        .formules()
+        .then(setFormules)
+        .catch(() => undefined);
       setPostes(postesDuSecteur(r.secteur));
       const base = saisieParDefaut(aujourdhuiReunion(), p.tauxHoraireBrutCentimes);
       if (demo === 'erreur') {
@@ -162,6 +174,12 @@ export function FormulaireDemande() {
     (p) => libellePlage(p.debut, p.fin) === libellePlage(saisie.debut, saisie.fin),
   );
   const nbErreurs = Object.keys(erreurs).length;
+  const toutCompris = !!formules?.toutCompris && formule === 'tout_compris';
+  const prixToutCompris =
+    toutCompris && heuresValides
+      ? prixToutComprisCentimes(tauxCalcul, minutes!, formules!.coefficientMilliemes) *
+        saisie.nbExtras
+      : null;
 
   async function envoyer(e: FormEvent) {
     e.preventDefault();
@@ -202,6 +220,7 @@ export function FormulaireDemande() {
           retourAssure: saisie.retourAssure,
           nbExtras: saisie.nbExtras,
           consignes: saisie.consignes.trim() || null,
+          formule: toutCompris ? 'tout_compris' : 'declaration',
         });
         ids.push(id);
       }
@@ -535,7 +554,11 @@ export function FormulaireDemande() {
               <span className={ui.corpsFort} id="lib-nb">
                 {td.nbExtras}
               </span>
-              <span className={ui.legende}>{fraisParHeure(parametres.fraisHoraireHTCentimes)}</span>
+              {!toutCompris && (
+                <span className={ui.legende}>
+                  {fraisParHeure(parametres.fraisHoraireHTCentimes)}
+                </span>
+              )}
             </div>
             <div className={s.stepper} role="group" aria-labelledby="lib-nb">
               <button
@@ -613,36 +636,84 @@ export function FormulaireDemande() {
 
         {/* Récapitulatif en direct et envoi */}
         <aside className={s.action} aria-label="Récapitulatif">
-          <div className={s.ligneRecap}>
-            <div className={s.montant}>
-              <span className={ui.corps}>{td.salaires}</span>
-              <span className={ui.corpsFort} aria-live="polite">
-                {heuresValides ? formatEuros(recap.salairesBrutsCentimes) : '—'}
-              </span>
+          {formules?.toutCompris && (
+            <fieldset className={s.formules}>
+              <legend className={ui.corpsFort}>{tf.titre}</legend>
+              {(['declaration', 'tout_compris'] as const).map((f) => (
+                <label key={f} className={s.formule} data-choisie={formule === f}>
+                  <input
+                    type="radio"
+                    name="formule"
+                    checked={formule === f}
+                    onChange={() => setFormule(f)}
+                  />
+                  <span className={s.retourTextes}>
+                    <span className={ui.corpsFort}>
+                      {f === 'declaration' ? tf.declaration : tf.toutCompris}
+                    </span>
+                    <span className={ui.legende}>
+                      {f === 'declaration'
+                        ? tf.declarationAide(formatEuros(parametres.fraisHoraireHTCentimes))
+                        : tf.toutComprisAide}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {toutCompris ? (
+            <div className={s.ligneRecap}>
+              <div className={s.montant}>
+                <span className={ui.corps}>{tf.prix}</span>
+                <span className={ui.corpsFort} aria-live="polite">
+                  {prixToutCompris !== null ? formatHT(prixToutCompris) : '—'}
+                </span>
+              </div>
+              <p className={ui.legende}>
+                {heuresValides
+                  ? tf.legendePrix(
+                      saisie.nbExtras,
+                      minutes!,
+                      tauxCalcul,
+                      formules!.coefficientMilliemes,
+                    )
+                  : "Indiquez l'heure de début et de fin."}
+              </p>
             </div>
-            <p className={ui.legende}>
-              {heuresValides
-                ? legendeSalaires(saisie.nbExtras, minutes!, tauxCalcul)
-                : "Indiquez l'heure de début et de fin."}
-            </p>
-          </div>
-          <div className={`${s.ligneRecap} ${s.ligneSeparee}`}>
-            <div className={s.montant}>
-              <span className={ui.corps}>{td.frais}</span>
-              <span className={ui.corpsFort} aria-live="polite">
-                {formatHT(recap.fraisHTCentimes)}
-              </span>
-            </div>
-            <p className={ui.legende}>
-              {legendeFrais(
-                saisie.nbExtras,
-                recap.fraisHTCentimes / saisie.nbExtras,
-                heuresValides
-                  ? calculFrais(minutes!, parametres.fraisHoraireHTCentimes)
-                  : undefined,
-              )}
-            </p>
-          </div>
+          ) : (
+            <>
+              <div className={s.ligneRecap}>
+                <div className={s.montant}>
+                  <span className={ui.corps}>{td.salaires}</span>
+                  <span className={ui.corpsFort} aria-live="polite">
+                    {heuresValides ? formatEuros(recap.salairesBrutsCentimes) : '—'}
+                  </span>
+                </div>
+                <p className={ui.legende}>
+                  {heuresValides
+                    ? legendeSalaires(saisie.nbExtras, minutes!, tauxCalcul)
+                    : "Indiquez l'heure de début et de fin."}
+                </p>
+              </div>
+              <div className={`${s.ligneRecap} ${s.ligneSeparee}`}>
+                <div className={s.montant}>
+                  <span className={ui.corps}>{td.frais}</span>
+                  <span className={ui.corpsFort} aria-live="polite">
+                    {formatHT(recap.fraisHTCentimes)}
+                  </span>
+                </div>
+                <p className={ui.legende}>
+                  {legendeFrais(
+                    saisie.nbExtras,
+                    recap.fraisHTCentimes / saisie.nbExtras,
+                    heuresValides
+                      ? calculFrais(minutes!, parametres.fraisHoraireHTCentimes)
+                      : undefined,
+                  )}
+                </p>
+              </div>
+            </>
+          )}
           <button type="submit" className={ui.boutonPrincipal} aria-busy={envoi} disabled={envoi}>
             {envoi ? (
               <>
@@ -653,10 +724,12 @@ export function FormulaireDemande() {
               td.envoyer
             )}
           </button>
-          <p className={`${ui.legende} ${s.contrat}`}>
-            <FileText size={16} strokeWidth={2} aria-hidden />
-            {td.contrat}
-          </p>
+          {!toutCompris && (
+            <p className={`${ui.legende} ${s.contrat}`}>
+              <FileText size={16} strokeWidth={2} aria-hidden />
+              {td.contrat}
+            </p>
+          )}
         </aside>
       </form>
     </div>

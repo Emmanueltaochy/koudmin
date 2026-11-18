@@ -212,6 +212,39 @@ Stripe et de GoCardless : ils ne passent jamais par Kivien.
   relancer ne débite jamais deux fois.
 - Passage en réel : seules les missions à partir de ce jour-là sont débitées.
 
+## DPAE automatique
+
+Kivien envoie à l'Urssaf les DPAE des établissements qui lui ont donné mandat (page Établissements de
+l'espace pro), par l'« API DPAE » de l'Urssaf. Tout est fermé par défaut : sans les deux étapes
+ci-dessous, chaque établissement fait sa DPAE lui-même, comme avant.
+
+1. **Compte Urssaf de Kivien.** Sur urssaf.fr, le compte en ligne de l'entreprise qui porte Kivien doit
+   avoir le service DPAE. Le script demande le SIRET, le nom et le prénom du compte (rubrique « Mon
+   profil ») et le mot de passe (saisie masquée), les vérifie auprès de l'Urssaf et les range dans
+   `.env` :
+
+   ```bash
+   sudo /opt/kivien/source/deploy/vps/configurer-dpae.sh essai   # d'abord en mode d'essai
+   sudo /opt/kivien/source/deploy/vps/configurer-dpae.sh         # puis en réel
+   sudo /opt/kivien/source/deploy/vps/configurer-dpae.sh arret   # pour tout arrêter
+   ```
+
+2. **Ouverture.** Espace admin, onglet Réglages : « Ouvrir la DPAE automatique ». Les gérants peuvent
+   alors donner mandat, avec leur code APE et le code de leur service de santé au travail.
+
+Fonctionnement : `kivien-dpae.timer` lance `dpae.sh` toutes les 5 minutes. Une DPAE part quand l'extra
+a signé son contrat, au plus tard 3 heures avant le début, jamais après. Le fichier est déposé, puis
+l'accusé de réception est relevé et sa référence affichée sur la page du contrat. Si l'envoi est
+impossible (numéro de sécurité sociale manquant, rejet de l'Urssaf, panne), l'équipe de l'établissement
+reçoit un e-mail et fait la DPAE elle-même. Suivi : onglet Réglages de l'admin, et
+`journalctl -u kivien-dpae`.
+
+À valider en mode d'essai avant le passage en réel, car seul un vrai compte permet de le vérifier :
+le code de service de l'authentification (`DPAE_SERVICE`, 98 par défaut), le code de l'Urssaf
+destinataire (`DPAE_CODE_URSSAF`, 974 par défaut), le format des codes de service de santé au travail
+et la lecture de l'accusé de réception. `scripts/verifier-dpae.sh` vérifie tout le reste avec un faux
+service Urssaf.
+
 ## Reste à faire avant l'ouverture
 
 - Copie des sauvegardes hors du VPS, chiffrée (aujourd'hui elles sont sur le même disque).

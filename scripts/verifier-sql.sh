@@ -64,11 +64,15 @@ Réservé aux administrateurs Kivien
 Mission trop courte
 Prénom et nom obligatoires
 new row for relation "jetons_push" violates check constraint "jetons_push_jeton_check"
-new row for relation "reglages_prospection" violates check constraint "reglages_prospection_check"'
+new row for relation "reglages_prospection" violates check constraint "reglages_prospection_check"
+La DPAE automatique n'"'"'est pas encore ouverte
+Formule tout compris indisponible
+Réservé aux administrateurs Kivien
+Coefficient hors limites'
 obtenues=$(grep -oP 'ERROR:  \K.*' "$DIR/scenario.log" | LC_ALL=C sort)
 if [ "$obtenues" != "$(LC_ALL=C sort <<<"$attendues")" ]; then
   echo "ÉCHEC : erreurs SQL inattendues" >&2
   diff <(LC_ALL=C sort <<<"$attendues") <(echo "$obtenues") >&2 || true
   exit 1
 fi
-echo "Scénario SQL conforme (42 refus attendus)."
+echo "Scénario SQL conforme (46 refus attendus)."

@@ -13,10 +13,12 @@ import {
   type Zone,
   type MissionFicheExtra,
   type PublicMessage,
+  type StatutDpae,
 } from '@kivien/core';
 import { resoudreEtablissement } from './etablissementCourant';
 import {
   ErreurReseau,
+  type MandatDpae,
   type DemandeSuivi,
   type ExtraAffecte,
   type Facture,
@@ -355,6 +357,34 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
       },
     },
     admin: {
+      async dpae() {
+        const [reglages, liste] = await Promise.all([client.rpc('admin_reglages_dpae'), client.rpc('admin_dpae', { p_limite: 50 })]);
+        const [r] = verifier(reglages) as {
+          actif: boolean; mandats: number; a_envoyer: number; envoyees: number; acceptees: number; a_reprendre: number;
+        }[];
+        return {
+          reglages: { actif: r!.actif, mandats: r!.mandats, aEnvoyer: r!.a_envoyer, envoyees: r!.envoyees, acceptees: r!.acceptees, aReprendre: r!.a_reprendre },
+          liste: (verifier(liste) as {
+            affectation_id: string; restaurant: string; extra: string; jour: string; statut: StatutDpae; motif: string | null;
+            reference: string | null; maj_le: string;
+          }[]).map((l) => ({
+            affectationId: l.affectation_id, restaurant: l.restaurant, extra: l.extra, jour: l.jour, statut: l.statut,
+            motif: l.motif, reference: l.reference, majLe: l.maj_le,
+          })),
+        };
+      },
+      async reglerDpae(actif) {
+        verifier(await client.rpc('admin_regler_dpae', { p_actif: actif }));
+      },
+      async formules() {
+        const [f] = verifier(await client.rpc('admin_reglages_formules')) as {
+          tout_compris_actif: boolean; coefficient_milliemes: number; demandes_tout_compris: number;
+        }[];
+        return { toutCompris: f!.tout_compris_actif, coefficientMilliemes: f!.coefficient_milliemes, demandesToutCompris: f!.demandes_tout_compris };
+      },
+      async reglerFormules(toutCompris, coefficientMilliemes) {
+        verifier(await client.rpc('admin_regler_formules', { p_tout_compris: toutCompris, p_coefficient_milliemes: coefficientMilliemes }));
+      },
       async tableau(jours) {
         const { data, error } = await client.rpc('admin_tableau', { p_jours: jours });
         if (refus(error, /administrateurs Kivien/)) return null;
@@ -996,6 +1026,10 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
         tvaPourMille: p.tva_pour_mille,
       };
     },
+    async formules() {
+      const [f] = verifier(await client.rpc('formules_proposees')) as { tout_compris: boolean; coefficient_milliemes: number }[];
+      return { toutCompris: f?.tout_compris ?? false, coefficientMilliemes: f?.coefficient_milliemes ?? 0 };
+    },
     async publier(d) {
       const r = await source.restaurant();
       const ligne = verifier(
@@ -1018,6 +1052,7 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
             retour_assure: d.retourAssure,
             nb_extras: d.nbExtras,
             consignes: d.consignes,
+            ...(d.formule === 'tout_compris' ? { formule: d.formule } : {}),
           })
           .select('id')
           .single(),
@@ -1114,6 +1149,33 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
             ? { image: l.signature_extra, le: l.signe_extra_le }
             : null,
       };
+    },
+    async etatDpae(affectationId) {
+      const [l] = verifier(await client.rpc('etat_dpae', { p_affectation: affectationId })) as {
+        ouverte: boolean; mandat: boolean; prevue: boolean; statut: StatutDpae | null; motif: string | null;
+        reference: string | null; envoyee_le: string | null;
+      }[];
+      return l
+        ? { ouverte: l.ouverte, mandat: l.mandat, prevue: l.prevue, statut: l.statut, motif: l.motif, reference: l.reference, envoyeeLe: l.envoyee_le }
+        : null;
+    },
+    async mandatsDpae() {
+      const [ouverte, lignes] = await Promise.all([
+        client.rpc('dpae_auto_active'),
+        client.from('mandats_dpae').select('restaurant_id, code_ape, service_sante, accepte_le'),
+      ]);
+      const mandats: Record<string, MandatDpae> = {};
+      for (const m of verifier(lignes) as { restaurant_id: string; code_ape: string; service_sante: string; accepte_le: string }[])
+        mandats[m.restaurant_id] = { codeApe: m.code_ape, serviceSante: m.service_sante, accepteLe: m.accepte_le };
+      return { ouverte: verifier(ouverte) === true, mandats };
+    },
+    async donnerMandatDpae(restaurantId, codeApe, serviceSante) {
+      verifier(
+        await client.rpc('donner_mandat_dpae', { p_restaurant: restaurantId, p_code_ape: codeApe, p_service_sante: serviceSante }),
+      );
+    },
+    async retirerMandatDpae(restaurantId) {
+      verifier(await client.rpc('retirer_mandat_dpae', { p_restaurant: restaurantId }));
     },
     async infosDPAE(affectationId) {
       const lignes = verifier(await client.rpc('infos_dpae', { p_affectation: affectationId })) as {

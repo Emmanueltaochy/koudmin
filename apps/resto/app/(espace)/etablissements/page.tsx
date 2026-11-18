@@ -1,15 +1,20 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Building2, Check } from 'lucide-react';
+import { Building2, Check, FileCheck2 } from 'lucide-react';
 import {
   DEFINITION_SECTEURS,
   formatSiret,
   normaliserSiret,
+  normaliserCodeApe,
+  normaliserServiceSante,
   textes as t,
+  textesDpae,
   textesEcrans,
   validerInscriptionResto,
+  validerMandatDpae,
   type ErreursInscriptionResto,
+  type ErreursMandatDpae,
   type Secteur,
 } from '@kivien/core';
 import { ChampAdresse } from '@/components/ChampAdresse';
@@ -18,13 +23,14 @@ import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import type { AdresseGeo } from '@/lib/adresse';
-import { choisirEtablissement, source, type Restaurant } from '@/lib/donnees';
+import { choisirEtablissement, source, type MandatDpae, type Restaurant } from '@/lib/donnees';
 import { useDonnees } from '@/lib/useDonnees';
 import s from './etablissements.module.css';
 
 const te = textesEcrans.resto.etablissements;
 const ti = textesEcrans.resto.inscription;
 const tr = textesEcrans.resto.roles;
+const tm = textesDpae.mandat;
 
 type Erreurs = ErreursInscriptionResto & { general?: string };
 
@@ -154,10 +160,133 @@ function FormEtablissement({
   );
 }
 
+/**
+ * DPAE automatique d'un établissement (gérant seulement, quand Kivien a ouvert l'envoi) :
+ * mandat donné avec le code APE et le service de santé au travail, modifiable et retirable.
+ */
+function BlocMandatDpae({
+  restaurant,
+  mandat,
+  onChange,
+}: {
+  restaurant: Restaurant;
+  mandat: MandatDpae | undefined;
+  onChange: (message: string) => void;
+}) {
+  const [ouvert, setOuvert] = useState(false);
+  const [codeApe, setCodeApe] = useState(mandat?.codeApe ?? '');
+  const [serviceSante, setServiceSante] = useState(mandat?.serviceSante ?? '');
+  const [accord, setAccord] = useState(false);
+  const [erreurs, setErreurs] = useState<ErreursMandatDpae & { general?: string }>({});
+  const [envoi, setEnvoi] = useState(false);
+  const prefixe = `dpae-${restaurant.id}`;
+
+  async function envoyer(e: FormEvent) {
+    e.preventDefault();
+    const err = validerMandatDpae({ codeApe, serviceSante, accord });
+    setErreurs(err);
+    if (Object.keys(err).length) return;
+    setEnvoi(true);
+    try {
+      await source().donnerMandatDpae(restaurant.id, normaliserCodeApe(codeApe), normaliserServiceSante(serviceSante));
+      setOuvert(false);
+      setAccord(false);
+      onChange(tm.enregistre);
+    } catch {
+      setErreurs({ general: tm.erreur });
+    }
+    setEnvoi(false);
+  }
+
+  async function retirer() {
+    setEnvoi(true);
+    try {
+      await source().retirerMandatDpae(restaurant.id);
+      setOuvert(false);
+      onChange(tm.retire);
+    } catch {
+      setErreurs({ general: tm.erreur });
+    }
+    setEnvoi(false);
+  }
+
+  return (
+    <section className={s.dpae} aria-labelledby={`${prefixe}-titre`}>
+      <h3 id={`${prefixe}-titre`} className={`${p.ligne} ${ui.corpsFort}`}>
+        <FileCheck2 size={18} strokeWidth={2} aria-hidden />
+        {tm.titre}
+      </h3>
+      {mandat ? (
+        <>
+          <span className={`${p.ligne} ${ui.legendeForte} ${ui.vacoa}`}>
+            <Check size={16} strokeWidth={2.5} aria-hidden />
+            {tm.actif}
+          </span>
+          <span className={ui.legende}>{tm.resume(mandat.codeApe, mandat.serviceSante)}</span>
+        </>
+      ) : (
+        <p className={`${ui.corps} ${ui.galet}`}>{tm.inactif}</p>
+      )}
+      {ouvert ? (
+        <form onSubmit={envoyer} className={s.formulaire} noValidate>
+          <div className={s.bloc}>
+            <label htmlFor={`${prefixe}-ape`} className={ui.corpsFort}>
+              {tm.codeApe}
+            </label>
+            <span className={ui.champ} data-erreur={!!erreurs.codeApe}>
+              <input id={`${prefixe}-ape`} value={codeApe} maxLength={8} autoComplete="off" disabled={envoi} onChange={(e) => setCodeApe(e.target.value)} />
+            </span>
+            <p className={erreurs.codeApe ? ui.messageErreur : ui.legende}>{erreurs.codeApe ?? tm.codeApeAide}</p>
+          </div>
+          <div className={s.bloc}>
+            <label htmlFor={`${prefixe}-sante`} className={ui.corpsFort}>
+              {tm.serviceSante}
+            </label>
+            <span className={ui.champ} data-erreur={!!erreurs.serviceSante}>
+              <input id={`${prefixe}-sante`} value={serviceSante} maxLength={12} autoComplete="off" disabled={envoi} onChange={(e) => setServiceSante(e.target.value)} />
+            </span>
+            <p className={erreurs.serviceSante ? ui.messageErreur : ui.legende}>{erreurs.serviceSante ?? tm.serviceSanteAide}</p>
+          </div>
+          <label className={s.accord}>
+            <input type="checkbox" checked={accord} disabled={envoi} onChange={(e) => setAccord(e.target.checked)} />
+            <span className={ui.corps}>{tm.accord}</span>
+          </label>
+          {erreurs.accord && <p className={ui.messageErreur}>{erreurs.accord}</p>}
+          {erreurs.general && (
+            <p className={ui.messageErreur} role="alert">
+              {erreurs.general}
+            </p>
+          )}
+          <div className={s.actions}>
+            <button type="submit" className={ui.boutonPrincipal} aria-busy={envoi} disabled={envoi}>
+              {envoi && <Spinner />}
+              {tm.valider}
+            </button>
+            {mandat && (
+              <button type="button" className={ui.lienDiscret} onClick={() => void retirer()} disabled={envoi}>
+                {tm.retirer}
+              </button>
+            )}
+            <button type="button" className={ui.lienDiscret} onClick={() => setOuvert(false)} disabled={envoi}>
+              {tm.fermer}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className={s.actions}>
+          <button type="button" className={mandat ? ui.lienDiscret : ui.boutonSecondaire} onClick={() => setOuvert(true)}>
+            {mandat ? tm.modifier : tm.activer}
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function Etablissements() {
-  const { etat } = useDonnees(async (src) => {
-    const [liste, courant] = await Promise.all([src.etablissements(), src.restaurant()]);
-    return { liste, courant };
+  const { etat, recharger } = useDonnees(async (src) => {
+    const [liste, courant, dpae] = await Promise.all([src.etablissements(), src.restaurant(), src.mandatsDpae()]);
+    return { liste, courant, dpae };
   });
   const [ouvert, setOuvert] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -169,7 +298,7 @@ export default function Etablissements() {
       </div>
     );
   }
-  const { liste, courant } = etat.donnees;
+  const { liste, courant, dpae } = etat.donnees;
   const fini = (m: string, id?: string) => {
     setOuvert(null);
     setMessage(m);
@@ -232,6 +361,16 @@ export default function Etablissements() {
                   </button>
                 )}
               </div>
+            )}
+            {dpae.ouverte && r.role === 'gerant' && (
+              <BlocMandatDpae
+                restaurant={r}
+                mandat={dpae.mandats[r.id]}
+                onChange={(m) => {
+                  setMessage(m);
+                  void recharger(true);
+                }}
+              />
             )}
           </li>
         ))}

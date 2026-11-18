@@ -31,3 +31,5 @@ export * from './confiance';
 export * from './origine';
 export * from './messagesAdmin';
 export * from './ficheExtra';
+export * from './dpae';
+export * from './formules';

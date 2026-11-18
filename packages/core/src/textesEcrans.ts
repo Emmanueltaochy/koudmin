@@ -171,9 +171,9 @@ export const textesEcrans = {
       seConnecter: 'Se connecter',
       erreurIdentifiants: 'E-mail ou mot de passe incorrect.',
       deconnexion: 'Se déconnecter',
-      groupes: { pilotage: 'Pilotage', activite: 'Activité', reseau: 'Réseau' },
+      groupes: { pilotage: 'Pilotage', activite: 'Activité', reseau: 'Réseau', plateforme: 'Plateforme' },
       responsable: 'Responsable',
-      onglets: { vue: "Vue d'ensemble", demandes: 'Demandes', extras: 'Extras', etablissements: 'Établissements', recrutement: 'Recrutement', prospection: 'Prospection', messages: 'Messages' },
+      onglets: { vue: "Vue d'ensemble", demandes: 'Demandes', extras: 'Extras', etablissements: 'Établissements', recrutement: 'Recrutement', prospection: 'Prospection', messages: 'Messages', reglages: 'Réglages' },
       prospection: {
         intro: "Établissements de l'île trouvés dans OpenStreetMap ou ajoutés à la main, pour les prévenir du lancement.",
         importer: 'Chercher les établissements sur OpenStreetMap',
@@ -408,7 +408,7 @@ export const textesEcrans = {
       signeParLesDeux: 'Contrat signé par les deux parties.',
       dpaeTitre: "Dernière étape : la DPAE",
       dpaeTexte:
-        "Déclarez l'embauche à l'URSSAF avant le début du service. C'est gratuit et en ligne, sur net-entreprises.fr. L'envoi automatique par Kivien arrive bientôt : nous vous préviendrons.",
+        "Déclarez l'embauche à l'URSSAF avant le début du service. C'est gratuit et en ligne, sur net-entreprises.fr.",
       dpaeLien: 'Faire la DPAE',
       telechargerPdf: 'Télécharger le contrat en PDF',
       preparationPdf: 'Préparation du PDF',

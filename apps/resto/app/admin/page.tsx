@@ -9,6 +9,7 @@ import {
   Mail,
   MapPinned,
   Megaphone,
+  Settings,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -22,13 +23,21 @@ import { ListeDemandes, ListeEtablissements, ListeExtras } from './Listes';
 import { Messages } from './Messages';
 import { Prospection } from './Prospection';
 import { Recrutement } from './Recrutement';
+import { Reglages } from './Reglages';
 import { VueEnsemble } from './VueEnsemble';
 import s from './admin.module.css';
 
 const ta = textesEcrans.resto.admin;
 
 type Onglet =
-  'vue' | 'demandes' | 'extras' | 'etablissements' | 'recrutement' | 'prospection' | 'messages';
+  | 'vue'
+  | 'demandes'
+  | 'extras'
+  | 'etablissements'
+  | 'recrutement'
+  | 'prospection'
+  | 'messages'
+  | 'reglages';
 /** Menu de gauche : piloter (chiffres), suivre l'activité, développer le réseau. */
 const GROUPES: { titre: string; onglets: { id: Onglet; icone: LucideIcon }[] }[] = [
   { titre: ta.groupes.pilotage, onglets: [{ id: 'vue', icone: BarChart3 }] },
@@ -43,6 +52,7 @@ const GROUPES: { titre: string; onglets: { id: Onglet; icone: LucideIcon }[] }[]
       { id: 'messages', icone: Mail },
     ],
   },
+  { titre: ta.groupes.plateforme, onglets: [{ id: 'reglages', icone: Settings }] },
 ];
 
 /** Connexion des administrateurs par e-mail (comptes créés avec deploy/vps/creer-admin.sh). */
@@ -188,6 +198,7 @@ export default function Admin() {
               {onglet === 'recrutement' && <Recrutement />}
               {onglet === 'prospection' && <Prospection />}
               {onglet === 'messages' && <Messages />}
+              {onglet === 'reglages' && <Reglages />}
             </main>
           </div>
         </>

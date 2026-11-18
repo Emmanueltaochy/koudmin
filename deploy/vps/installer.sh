@@ -374,12 +374,37 @@ AccuracySec=5s
 [Install]
 WantedBy=timers.target
 UNIT
+# DPAE automatique : dépôt à l'Urssaf et suivi des accusés de réception, toutes les 5 minutes.
+# Sans compte Urssaf configuré (deploy/vps/configurer-dpae.sh), le script ne fait rien.
+install -m 0700 "$SOURCE/deploy/vps/dpae.sh" /usr/local/sbin/kivien-dpae
+cat > /etc/systemd/system/kivien-dpae.service <<'UNIT'
+[Unit]
+Description=DPAE automatique Kivien (dépôt à l'Urssaf)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kivien-dpae
+TimeoutStartSec=10min
+UNIT
+cat > /etc/systemd/system/kivien-dpae.timer <<'UNIT'
+[Unit]
+Description=DPAE automatique Kivien, toutes les 5 minutes
+
+[Timer]
+OnCalendar=*-*-* *:0/5:10
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target
+UNIT
 systemctl daemon-reload
 systemctl enable --now kivien-sauvegarde.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prelevements.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prospection.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-recherche-prospects.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-notifications.timer >> "$JOURNAL" 2>&1
+systemctl enable --now kivien-dpae.timer >> "$JOURNAL" 2>&1
 info "prochaine sauvegarde : $(systemctl show kivien-sauvegarde.timer -p NextElapseUSecRealtime --value)"
 /usr/local/sbin/kivien-sauvegarde | tee -a "$JOURNAL" || arret "la première sauvegarde a échoué."
 

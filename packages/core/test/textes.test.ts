@@ -42,6 +42,9 @@ import {
   montantsVitrine,
   LIBELLES_EXPERIENCE,
   LIBELLES_LANGUE,
+  textesDpae,
+  LIBELLES_STATUT_DPAE,
+  textesFormules,
 } from '../src';
 import { FRAIS, l, SMIC } from './aide';
 
@@ -67,6 +70,8 @@ const generes = [
   questionDesistement('ce soir'),
   legendeRepetition('2026-11-03', 1),
   legendeRepetition('2026-11-03', 4),
+  textesFormules.demande.declarationAide('3,50 €'),
+  textesFormules.demande.legendePrix(2, 360, 1231, 2000),
 ];
 const corpus = [
   ...tousLesTextes(textes),
@@ -91,6 +96,14 @@ const corpus = [
     modeleBienvenueExtras,
     textesFicheExtra,
     LIBELLES_ETAT_MISSION,
+    textesDpae,
+    LIBELLES_STATUT_DPAE,
+    textesFormules.admin,
+    textesFormules.demande.titre,
+    textesFormules.demande.declaration,
+    textesFormules.demande.toutCompris,
+    textesFormules.demande.toutComprisAide,
+    textesFormules.demande.prix,
   ]),
   ...badgesConfiance({
     missions: 5,

@@ -50,6 +50,7 @@ jobs:
           scripts/verifier-sql.sh
           scripts/verifier-recherche.sh
           scripts/verifier-notifications.sh
+          scripts/verifier-dpae.sh
 
       - name: Scripts du serveur
         run: |

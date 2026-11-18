@@ -85,6 +85,16 @@ TEXTES = {
         "bouton": "Voir la mission",
         "pied": "Vous recevez ce message pour une mission de votre établissement sur Kivien.",
     },
+    "dpae_a_faire": {
+        "sujet": "DPAE à faire vous-même : {extra}, {jour}",
+        "paragraphes": [
+            "Bonjour {prenom},",
+            "La DPAE de {extra} pour la mission {poste} du {jour}, de {horaire}, chez {restaurant}, n’a pas pu être envoyée automatiquement à l’Urssaf.",
+            "Faites-la vous-même sur net-entreprises.fr avant le début de la mission. Le motif et les informations à reporter sont dans votre espace.",
+        ],
+        "bouton": "Voir la DPAE",
+        "pied": "Vous recevez ce message pour une mission de votre établissement sur Kivien.",
+    },
 }
 POSTES = {
     "serveur": "Service en salle",
@@ -151,7 +161,7 @@ def lien(n):
         return f"{app}/mission/{n['demande_id']}"
     if t == "contrat_a_signer":
         return f"{app}/contrat/{n['demande_id']}"
-    if t == "extra_trouve":
+    if t == "extra_trouve" or t == "dpae_a_faire":
         return f"{site}/demandes/{n['demande_id']}/contrat?affectation={n['affectation_id']}"
     return f"{site}/demandes/{n['demande_id']}"
 

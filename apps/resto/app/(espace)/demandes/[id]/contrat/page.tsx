@@ -3,8 +3,15 @@
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Check, ChevronLeft, Download } from 'lucide-react';
-import { formatHeure, formatSiret, redigerContrat, textesEcrans } from '@kivien/core';
+import { ArrowUpRight, Check, ChevronLeft, Clock, Download } from 'lucide-react';
+import {
+  formatHeure,
+  formatSiret,
+  redigerContrat,
+  textesDpae,
+  textesEcrans,
+  vueDpae,
+} from '@kivien/core';
 import { PaveSignature, type PaveSignatureRef } from '@/components/PaveSignature';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
@@ -15,6 +22,7 @@ import { useDonnees } from '@/lib/useDonnees';
 import s from './contrat.module.css';
 
 const tc = textesEcrans.resto.contrat;
+const td = textesDpae.contrat;
 /** Portail officiel de la déclaration préalable à l'embauche. */
 const URL_DPAE = 'https://www.net-entreprises.fr/declaration/dpae/';
 
@@ -171,22 +179,12 @@ function Contrat() {
             <Check size={20} strokeWidth={2.5} aria-hidden />
             {extra.contratSigneExtra ? tc.signeParLesDeux : `${tc.signe} ${tc.attenteExtra}`}
           </div>
-          <section className={s.dpae} aria-labelledby="dpae">
-            <h2 id="dpae" className={ui.sousTitre}>
-              {tc.dpaeTitre}
-            </h2>
-            <p className={ui.corps}>{tc.dpaeTexte}</p>
-            <a
-              href={URL_DPAE}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={ui.boutonPrincipal}
-            >
-              {tc.dpaeLien}
-              <ArrowUpRight size={18} strokeWidth={2} aria-hidden />
-            </a>
-            <InfosDPAEListe affectationId={extra.affectationId} jour={d.jour} debut={d.debut} />
-          </section>
+          <SectionDpae
+            affectationId={extra.affectationId}
+            signeExtra={extra.contratSigneExtra}
+            jour={d.jour}
+            debut={d.debut}
+          />
         </>
       ) : (
         <section className={s.signature} aria-labelledby="signature">
@@ -227,6 +225,85 @@ function Contrat() {
         </section>
       )}
     </div>
+  );
+}
+
+/**
+ * DPAE de cette embauche. Sans mandat (ou envoi automatique fermé), l'établissement la fait
+ * lui-même sur net-entreprises.fr ; avec mandat, Kivien l'envoie et l'état s'affiche ici.
+ */
+function SectionDpae({
+  affectationId,
+  signeExtra,
+  jour,
+  debut,
+}: {
+  affectationId: string;
+  signeExtra: boolean;
+  jour: string;
+  debut: number;
+}) {
+  const { etat } = useDonnees((src) => src.etatDpae(affectationId), [affectationId, signeExtra]);
+  if (etat.statut === 'chargement') return null;
+  const e = etat.statut === 'pret' ? etat.donnees : null;
+  const vue = vueDpae(e);
+  const aLaMain = vue === 'manuelle' || vue === 'proposer' || vue === 'a_reprendre';
+
+  return (
+    <section className={s.dpae} aria-labelledby="dpae">
+      <h2 id="dpae" className={ui.sousTitre}>
+        {aLaMain ? tc.dpaeTitre : td.titre}
+      </h2>
+      {vue === 'faite' && (
+        <div className={ui.bandeauVacoa} role="status">
+          <Check size={20} strokeWidth={2.5} aria-hidden />
+          <span>
+            {td.faite}
+            {e?.reference ? ` ${td.reference(e.reference)}` : ''}
+          </span>
+        </div>
+      )}
+      {(vue === 'attente' || vue === 'envoyee') && (
+        <p className={`${p.ligne} ${ui.corps}`} role="status">
+          <Clock size={18} strokeWidth={2} aria-hidden />
+          <span>{vue === 'attente' ? td.attente : td.envoyee}</span>
+        </p>
+      )}
+      {vue === 'a_annuler' && (
+        <p className={ui.encadreErreur} role="alert">
+          {td.aAnnuler}
+        </p>
+      )}
+      {vue === 'a_reprendre' && (
+        <p className={ui.encadreErreur} role="alert">
+          {td.aReprendre}
+          {e?.motif ? ` ${td.motif(e.motif)}` : ''}
+        </p>
+      )}
+      {aLaMain && (
+        <>
+          {vue !== 'a_reprendre' && <p className={ui.corps}>{tc.dpaeTexte}</p>}
+          <a
+            href={URL_DPAE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={ui.boutonPrincipal}
+          >
+            {tc.dpaeLien}
+            <ArrowUpRight size={18} strokeWidth={2} aria-hidden />
+          </a>
+          {vue === 'proposer' && (
+            <p className={ui.legende}>
+              {td.proposer}{' '}
+              <Link href="/etablissements" className={ui.lien}>
+                {td.proposerLien}
+              </Link>
+            </p>
+          )}
+          <InfosDPAEListe affectationId={affectationId} jour={jour} debut={debut} />
+        </>
+      )}
+    </section>
   );
 }
 

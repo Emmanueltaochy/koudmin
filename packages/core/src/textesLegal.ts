@@ -150,7 +150,7 @@ export const confidentialite: PageLegale = {
       titre: 'Données des extras',
       paragraphes: [
         'Prénom, nom, mobile, adresse e-mail, commune et position approximative (pour proposer les missions proches), métiers, expérience, langues, présentation, photo facultative, disponibilités.',
-        'Pour le contrat et la DPAE : date et lieu de naissance, adresse, numéro de sécurité sociale (facultatif), signature. Ces informations ne sont transmises qu’à l’établissement de la mission acceptée.',
+        'Pour le contrat et la DPAE : date et lieu de naissance, adresse, numéro de sécurité sociale (facultatif), signature. Ces informations ne sont transmises qu’à l’établissement de la mission acceptée et, pour la DPAE, à l’URSSAF lorsque l’établissement a chargé Kivien de l’envoyer.',
       ],
     },
     {

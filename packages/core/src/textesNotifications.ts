@@ -7,7 +7,12 @@
  */
 
 export type TypeNotification =
-  'nouvelle_mission' | 'extra_trouve' | 'contrat_a_signer' | 'rappel_extra' | 'rappel_pro';
+  | 'nouvelle_mission'
+  | 'extra_trouve'
+  | 'contrat_a_signer'
+  | 'rappel_extra'
+  | 'rappel_pro'
+  | 'dpae_a_faire';
 
 export interface ModeleNotification {
   sujet: string;
@@ -69,6 +74,16 @@ export const textesNotifications: Record<TypeNotification, ModeleNotification> =
       'Pensez à la DPAE si ce n’est pas encore fait.',
     ],
     bouton: 'Voir la mission',
+    pied: PIED_PRO,
+  },
+  dpae_a_faire: {
+    sujet: 'DPAE à faire vous-même : {extra}, {jour}',
+    paragraphes: [
+      'Bonjour {prenom},',
+      'La DPAE de {extra} pour la mission {poste} du {jour}, de {horaire}, chez {restaurant}, n’a pas pu être envoyée automatiquement à l’Urssaf.',
+      'Faites-la vous-même sur net-entreprises.fr avant le début de la mission. Le motif et les informations à reporter sont dans votre espace.',
+    ],
+    bouton: 'Voir la DPAE',
     pied: PIED_PRO,
   },
 };
