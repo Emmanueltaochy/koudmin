@@ -115,6 +115,22 @@ export const textesEcrans = {
       reessayer: 'Réessayer',
       erreur: 'Le service de paiement ne répond pas. Réessayez dans un instant.',
     },
+    /** Espace pro installé comme une application (ordinateur ou téléphone). */
+    installation: {
+      nomApp: 'Kivien · Espace pro',
+      nomCourt: 'Kivien',
+      description: "Trouvez un extra, suivez vos missions et vos contrats.",
+      titre: "L'application Kivien sur votre ordinateur",
+      texte: "Installez l'espace pro comme une application : une icône sur votre bureau, une fenêtre à part, sans passer par le navigateur. Rien à télécharger ailleurs.",
+      installer: "Installer l'application",
+      installee: "L'application est installée sur cet appareil.",
+      safari: 'Sur Safari : menu Fichier, puis « Ajouter au Dock ».',
+      ios: "Sur iPhone ou iPad : bouton Partager, puis « Sur l'écran d'accueil ».",
+      autre: "Ouvrez kivien.re avec Chrome ou Edge, puis revenez ici : le bouton d'installation s'affichera.",
+      horsLigneTitre: 'Pas de connexion',
+      horsLigneTexte: "Kivien a besoin d'Internet. Vérifiez votre connexion, puis réessayez.",
+      reessayer: 'Réessayer',
+    },
     compte: {
       titre: 'Mon compte',
       sousTitre: 'Votre adresse e-mail et votre mot de passe.',
@@ -462,6 +478,16 @@ export const textesEcrans = {
     pro: 'Je recrute des extras',
     connexion: "J'ai déjà un compte : me connecter",
     photos: { cuisine: 'Cuisine', salle: 'Service en salle', extra: 'Un extra souriant' },
+  },
+  /** Espace pro ouvert dans l'app mobile (les établissements sont vouvoyés). */
+  proApp: {
+    titre: 'Espace pro',
+    quitter: 'Quitter',
+    quitterAide: "Revenir à l'accueil de l'app",
+    chargement: "Ouverture de l'espace pro",
+    horsLigneTitre: 'Pas de connexion',
+    horsLigneTexte: "L'espace pro a besoin d'Internet. Vérifiez votre connexion, puis réessayez.",
+    reessayer: 'Réessayer',
   },
   connexion: {
     titreResto: 'Votre espace restaurateur',

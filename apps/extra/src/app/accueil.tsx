@@ -4,7 +4,6 @@ import {
   Animated,
   Easing,
   Image,
-  Linking,
   Pressable,
   StyleSheet,
   View,
@@ -13,6 +12,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textesEcrans } from '@kivien/core';
+import { ouvrirEspacePro } from '../pro/modePro';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
 import { couleurs, rayons } from '../ui/theme';
 import { Logo } from '../ui/Logo';
@@ -86,7 +86,7 @@ function Colonne({
 
 /**
  * Premier écran sans compte : photos des métiers qui défilent, puis le choix.
- * Extra : inscription dans l'app. Établissement : l'espace pro est sur le site (kivien.re/pro).
+ * Extra : inscription dans l'app. Établissement : l'espace pro de kivien.re, ouvert dans l'app.
  */
 export default function Accueil() {
   const insets = useSafeAreaInsets();
@@ -123,7 +123,7 @@ export default function Accueil() {
         <BoutonPrincipal libelle={ta.extra} onPress={() => router.push('/bienvenue')} />
         <Pressable
           accessibilityRole="link"
-          onPress={() => void Linking.openURL('https://kivien.re/pro')}
+          onPress={() => void ouvrirEspacePro('/pro')}
           style={({ pressed }) => [styles.pro, pressed && styles.proPresse]}
         >
           <Texte variante="bouton">{ta.pro}</Texte>

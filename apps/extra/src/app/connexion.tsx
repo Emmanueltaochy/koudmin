@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { normaliserMobileReunion, textesEcrans } from '@kivien/core';
 import { source } from '../donnees';
+import { ouvrirEspaceProAvecSession } from '../pro/modePro';
 import { BoutonPrincipal, Lien } from '../ui/Bouton';
 import { ChampTexte } from '../ui/ChampTexte';
 import { couleurs } from '../ui/theme';
@@ -32,6 +33,8 @@ export default function Connexion() {
       const r = await source.connecter(e164, motDePasse);
       if (r === 'ok') {
         const s = await source.session();
+        // Compte d'un établissement : son espace pro s'ouvre dans l'app, sans nouveau mot de passe.
+        if (s === 'pro') return void (await ouvrirEspaceProAvecSession());
         router.replace(s === 'sansProfil' ? '/bienvenue?etape=profil' : '/');
         return;
       }

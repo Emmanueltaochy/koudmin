@@ -34,6 +34,27 @@ export async function connecter(
   throw error;
 }
 
+/**
+ * Ouvre la session transmise par l'app mobile (compte d'établissement connecté dans l'app).
+ * Sans jetons valables, dit seulement si une session existe déjà dans ce navigateur.
+ */
+export async function ouvrirSession(
+  accessToken: string | null,
+  refreshToken: string | null,
+): Promise<boolean> {
+  if (donneesFictives) return true;
+  const c = client()!;
+  if (accessToken && refreshToken) {
+    const { error } = await c.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if (!error) return true;
+  }
+  const { data } = await c.auth.getSession();
+  return !!data.session;
+}
+
 export async function deconnecter(): Promise<void> {
   if (!donneesFictives) await client()!.auth.signOut();
 }

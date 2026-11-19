@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textes as t } from '@kivien/core';
 import { source } from '../../donnees';
 import { activerNotifications, suivreNotifications } from '../../notifications';
+import { modeProActif, ouvrirEspacePro, ouvrirEspaceProAvecSession } from '../../pro/modePro';
 import { couleurs } from '../../ui/theme';
 import { Texte } from '../../ui/Texte';
 
@@ -57,9 +58,13 @@ export default function Onglets() {
   // Sans compte : inscription. Numéro vérifié mais profil à créer : fin de l'inscription.
   const [pret, setPret] = useState(false);
   useEffect(() => {
-    void source.session().then((s) => {
-      if (s === 'aucune') router.replace('/accueil' as never);
-      else if (s === 'sansProfil') router.replace('/bienvenue?etape=profil');
+    void source.session().then(async (s) => {
+      // Établissement : l'espace pro (session de l'app transmise, ou déjà ouverte dans l'espace pro).
+      if (s === 'pro') await ouvrirEspaceProAvecSession();
+      else if (s === 'aucune') {
+        if (await modeProActif()) await ouvrirEspacePro();
+        else router.replace('/accueil' as never);
+      } else if (s === 'sansProfil') router.replace('/bienvenue?etape=profil');
       else {
         setPret(true);
         void activerNotifications().catch(() => undefined);

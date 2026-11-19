@@ -581,6 +581,42 @@ let pageCourante = null;
   await p.getByText('Frais Kivien', { exact: true }).waitFor().catch(() => undefined);
   await p.setViewportSize({ width: 390, height: 844 });
 
+  // Application installable (ordinateur) : manifeste, service worker, page hors ligne, carte dans Mon compte.
+  const manifeste = await (await p.request.get(URL_SITE + '/manifest.webmanifest')).json();
+  if (manifeste.name !== 'Kivien · Espace pro' || manifeste.start_url !== '/espace' || manifeste.display !== 'standalone') throw new Error('manifeste incomplet');
+  if (manifeste.icons.length !== 3 || !manifeste.icons.some((i) => i.sizes === '512x512' && i.purpose === 'maskable')) throw new Error('icônes du manifeste');
+  for (const i of manifeste.icons) if (!(await p.request.get(URL_SITE + i.src)).ok()) throw new Error('icône absente : ' + i.src);
+  ok('application : manifeste (nom, départ sur l’espace, icônes)');
+  await p.goto(URL_SITE + '/compte');
+  await p.getByRole('heading', { name: "L'application Kivien sur votre ordinateur" }).waitFor();
+  await p.getByText(/Installer l'application|Ouvrez kivien\.re avec Chrome ou Edge/).first().waitFor(); ok('mon compte : installation de l’application proposée');
+  await p.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+  await p.reload();
+  await p.waitForFunction(() => !!navigator.serviceWorker.controller);
+  // Coupure volontaire : les erreurs de chargement de cette étape sont attendues.
+  const avantCoupure = logs.length;
+  await p.context().setOffline(true);
+  await p.goto(URL_SITE + '/planning').catch(() => undefined);
+  await p.getByRole('heading', { name: 'Pas de connexion' }).waitFor();
+  await p.getByRole('button', { name: 'Réessayer' }).waitFor(); ok('sans connexion : page claire servie par le service worker');
+  await p.context().setOffline(false);
+  logs.length = avantCoupure;
+  await p.goto(URL_SITE + '/planning');
+  await p.getByRole('heading', { name: 'Planning' }).waitFor(); ok('connexion revenue : la page vient de nouveau du serveur');
+  // Arrivée depuis l'app mobile : session reçue, jetons retirés de l'adresse, espace ouvert.
+  await p.goto(URL_SITE + '/connexion/app#access_token=aaa&refresh_token=bbb');
+  await p.waitForURL(URL_SITE + '/espace');
+  if (p.url().includes('#')) throw new Error('jetons restés dans l’adresse');
+  ok('arrivée depuis l’app mobile : espace ouvert, jetons retirés de l’adresse');
+  // Dans l'app mobile, rien à installer.
+  const dansApp = await b.newContext({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 KivienApp', viewport: { width: 390, height: 844 } });
+  const pa = await dansApp.newPage();
+  await pa.goto(URL_SITE + '/compte');
+  await pa.getByRole('heading', { name: 'Mon compte' }).waitFor();
+  await pa.waitForTimeout(500);
+  if (await pa.getByText("L'application Kivien sur votre ordinateur").count()) throw new Error('installation proposée dans l’app mobile');
+  await dansApp.close(); ok('dans l’app mobile : pas de proposition d’installation');
+
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {
     await p.setViewportSize({ width: w, height: 900 });

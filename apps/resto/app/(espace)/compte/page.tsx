@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Check, Mail } from 'lucide-react';
 import { emailValide, MOT_DE_PASSE_MIN, normaliserEmail, textesEcrans } from '@kivien/core';
+import { CarteInstallation } from '@/components/Installation';
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
@@ -114,6 +115,8 @@ export default function Compte() {
           {tc.changerMotDePasse}
         </button>
       </form>
+
+      <CarteInstallation className={`${s.carte} ${s.formulaire}`} />
     </div>
   );
 }

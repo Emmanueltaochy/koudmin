@@ -64,7 +64,16 @@ export type Creneau = 'midi' | 'soir';
 /** « 2026-10-30:soir » */
 export type CleDispo = `${string}:${Creneau}`;
 
-export type EtatSession = 'aucune' | 'sansProfil' | 'ok';
+/** « pro » : compte d'un établissement (membre d'une équipe), sans profil d'extra. */
+export type EtatSession = 'aucune' | 'sansProfil' | 'ok' | 'pro';
+
+/** Session à confier à l'espace pro (kivien.re), ouvert dans l'app. */
+export interface SessionCedee {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  expiresAt: number | null;
+}
 
 /** Lieu exact : renvoyé seulement une fois la mission confirmée par l'extra. */
 export interface LieuMission {
@@ -145,6 +154,11 @@ export interface SourceDonnees {
   /** Note l'acceptation des conditions générales (version donnée) pour le compte connecté. */
   accepterCgu(version: string): Promise<void>;
   deconnecter(): Promise<void>;
+  /**
+   * Compte d'établissement : rend la session pour l'espace pro et l'oublie ici, sans la fermer
+   * côté serveur (elle continue de vivre dans l'espace pro). null sans session.
+   */
+  cederSession(): Promise<SessionCedee | null>;
 }
 
 export interface Pointage {

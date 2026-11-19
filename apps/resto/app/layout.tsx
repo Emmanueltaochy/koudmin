@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import '@kivien/ui-tokens/tokens.css';
 import './globals.css';
+import { PreparerInstallation } from '@/components/Installation';
 import { SuiviPages } from '@/components/SuiviPages';
 
 const bricolage = localFont({
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <SuiviPages />
+        <PreparerInstallation />
       </body>
     </html>
   );

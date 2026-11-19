@@ -364,5 +364,8 @@ export function sourceFictive(): SourceDonnees {
       photo = null;
     },
     async deconnecter() {},
+    async cederSession() {
+      return null;
+    },
   };
 }

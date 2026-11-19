@@ -102,10 +102,13 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       detectSessionInUrl: false,
     },
   });
+  // Session confiée à l'espace pro : cette app ne doit plus la rafraîchir (un jeton de
+  // rafraîchissement ne sert qu'une fois, deux utilisateurs se déconnecteraient l'un l'autre).
+  let sessionCedee = false;
   // Rafraîchissement du jeton seulement app au premier plan (économie de batterie).
   if (Platform.OS !== 'web') {
     AppState.addEventListener('change', (etat) => {
-      if (etat === 'active') void client.auth.startAutoRefresh();
+      if (etat === 'active' && !sessionCedee) void client.auth.startAutoRefresh();
       else void client.auth.stopAutoRefresh();
     });
   }
@@ -413,17 +416,47 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       verifier(await client.rpc('supprimer_photo'));
     },
     async session() {
+      if (sessionCedee) return 'aucune';
       const { data } = await client.auth.getSession();
       if (!data.session) return 'aucune';
       const { count } = await client.from('extras').select('id', { count: 'exact', head: true });
-      return count ? 'ok' : 'sansProfil';
+      if (count) return 'ok';
+      // Pas de profil d'extra : compte d'un établissement, ou inscription d'extra à terminer.
+      const etablissements = await client.rpc('mes_restaurants');
+      return Array.isArray(etablissements.data) && etablissements.data.length ? 'pro' : 'sansProfil';
+    },
+    async cederSession() {
+      const { data } = await client.auth.getSession();
+      const s = data.session;
+      if (!s) return null;
+      sessionCedee = true;
+      await client.auth.stopAutoRefresh();
+      // Copie locale effacée sans appel au serveur : la session reste valable pour l'espace pro.
+      const cle = (client.auth as unknown as { storageKey?: string }).storageKey;
+      if (cle) {
+        if (Platform.OS === 'web') globalThis.localStorage?.removeItem(cle);
+        else await AsyncStorage.removeItem(cle);
+      }
+      return {
+        accessToken: s.access_token,
+        refreshToken: s.refresh_token,
+        expiresIn: s.expires_in,
+        expiresAt: s.expires_at ?? null,
+      };
     },
     async connecter(telephone, motDePasse) {
       const { error } = await client.auth.signInWithPassword({
         phone: telephone,
         password: motDePasse,
       });
-      if (!error) return 'ok';
+      if (!error) {
+        // Nouvelle session, propre à cette app : elle se rafraîchit de nouveau ici.
+        if (sessionCedee) {
+          sessionCedee = false;
+          void client.auth.startAutoRefresh();
+        }
+        return 'ok';
+      }
       if (error.status === 400 || error.code === 'invalid_credentials') return 'identifiants';
       if (error.status === 429) return 'attente';
       throw /network|fetch/i.test(error.message) ? new ErreurReseau(error.message) : error;
@@ -439,6 +472,10 @@ export function sourceSupabase(url: string, cle: string): SourceDonnees {
       // Sans session, le serveur attend une vérification par SMS (fournisseur configuré) : non géré ici.
       if (!data.session)
         throw new Error('Compte créé sans session : vérification du numéro requise');
+      if (sessionCedee) {
+        sessionCedee = false;
+        void client.auth.startAutoRefresh();
+      }
       return 'ok';
     },
     async accepterCgu(version) {

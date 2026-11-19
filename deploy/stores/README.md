@@ -145,7 +145,17 @@ publient. »
 
 ---
 
-## 8. Sortie discrète
+## 8. Établissements dans l'app, et application sur ordinateur
+
+- **Dans l'app mobile :** un compte d'établissement qui se connecte arrive dans son espace pro,
+  affiché dans l'app (le même que sur kivien.re). « Je recrute des extras » ouvre la présentation
+  pro. L'app retient ce choix ; le bouton « Quitter » ramène à l'accueil. Pour la validation Apple
+  et Google, donne aussi un compte d'établissement de test.
+- **Sur ordinateur (Windows, Mac) :** l'espace pro s'installe depuis le navigateur, sans passer par
+  un store. Chrome ou Edge : menu de l'espace pro ou page Mon compte, bouton « Installer
+  l'application ». Safari sur Mac : menu Fichier, « Ajouter au Dock ».
+
+## 9. Sortie discrète
 
 - **Apple :** dans la version, choisis **« Publier manuellement cette version »**. Une fois
   validée, l'app attend ton feu vert.

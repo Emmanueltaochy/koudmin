@@ -24,6 +24,7 @@ import { deconnecter } from '@/lib/auth';
 import { choisirEtablissement, donneesFictives } from '@/lib/donnees';
 import { useDonnees } from '@/lib/useDonnees';
 import { Cloche } from './Cloche';
+import { BoutonInstaller } from './Installation';
 import s from './EnTete.module.css';
 
 const tm = textesEcrans.resto.menu;
@@ -146,6 +147,7 @@ export function EnTete() {
           {liens(g.liens, classe)}
         </div>
       ))}
+      <BoutonInstaller className={classe} />
       {!donneesFictives && (
         <button type="button" className={classe} onClick={sortir}>
           <LogOut size={20} strokeWidth={2} aria-hidden />

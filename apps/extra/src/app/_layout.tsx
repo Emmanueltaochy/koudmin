@@ -52,6 +52,7 @@ export default function Racine() {
         <Stack.Screen name="accueil" />
         <Stack.Screen name="bienvenue" />
         <Stack.Screen name="connexion" />
+        <Stack.Screen name="pro" />
       </Stack>
     </SafeAreaProvider>
   );
