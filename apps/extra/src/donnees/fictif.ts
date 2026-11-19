@@ -184,7 +184,7 @@ export function sourceFictive(): SourceDonnees {
       };
     },
     async accepter(id) {
-      // Délai de la maquette : le temps de voir « On prévient le restaurant ».
+      // Délai de la maquette : le temps de voir « On prévient l'établissement ».
       await attendre(1400);
       confirmees.add(id);
       prevenir();

@@ -59,7 +59,7 @@ describe('cartes', () => {
   it('ligne retour : assuré, dernier bus avant la fin, bus après la fin', () => {
     const p = { aVoiture: false };
     const [filaos, tatie, , boucan] = missions;
-    expect(ligneRetour(boucan!, p)).toEqual({ type: 'assure', texte: 'Retour assuré par le restaurant' });
+    expect(ligneRetour(boucan!, p)).toEqual({ type: 'assure', texte: "Retour assuré par l'établissement" });
     expect(l((ligneRetour(tatie!, p) as { texte: string }).texte)).toBe('Dernier bus 20 h 15 : retour à prévoir');
     expect(l((ligneRetour(filaos!, p) as { texte: string }).texte)).toBe('Bus retour à 15 h 20');
     expect(ligneRetour(boucan!, { aVoiture: true })).toEqual({ type: 'aucune' });

@@ -26,7 +26,7 @@ const URL_APP = process.env.URL_APP ?? 'http://localhost:8090';
   await p.getByText('Le Boucan Grillé').click();
   await p.getByText('Adresse exacte après confirmation.').waitFor(); await etape('détail ouvert, adresse cachée');
   await p.getByText('Mi lé la', { exact: true }).click();
-  await p.getByText('On prévient le restaurant').waitFor(); await etape('envoi affiché');
+  await p.getByText("On prévient l'établissement").waitFor(); await etape('envoi affiché');
   await p.getByText("C'est confirmé.", { exact: false }).waitFor({ timeout: 5000 }); await etape('confirmé');
   await p.getByText('14 rue du Général de Gaulle').waitFor(); await etape('adresse exacte visible après confirmation');
   const contrat = await p.getByText("Contrat d'extra à signer", { exact: false }).count();

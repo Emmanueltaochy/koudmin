@@ -7,6 +7,7 @@ import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
 import Link from 'next/link';
+import { RetourApp } from '@/components/RetourApp';
 import { aUnEtablissement, connecter } from '@/lib/auth';
 import s from './connexion.module.css';
 
@@ -105,6 +106,7 @@ export default function Connexion() {
       <Link href="/mot-de-passe-oublie" className={ui.lienDiscret}>
         {textesEcrans.resto.motDePasseOublie.lien}
       </Link>
+      <RetourApp className={ui.lienDiscret} />
     </main>
   );
 }

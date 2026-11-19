@@ -72,7 +72,7 @@ export type LigneRetour =
 /** Ligne retour d'une carte, affichée seulement aux profils sans voiture. */
 export function ligneRetour(m: MissionResume, profil: ProfilExtra): LigneRetour {
   if (profil.aVoiture) return { type: 'aucune' };
-  if (m.retourAssure) return { type: 'assure', texte: 'Retour assuré par le restaurant' };
+  if (m.retourAssure) return { type: 'assure', texte: "Retour assuré par l'établissement" };
   if (m.busRetour === null) return { type: 'aucune' };
   // La fin peut passer minuit : on compare sur une même échelle de temps.
   const fin = m.fin > m.debut ? m.fin : m.fin + 24 * 60;

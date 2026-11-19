@@ -164,7 +164,7 @@ describe('textes calculés (README)', () => {
     expect(legendeListe(4, true)).toBe('4 missions près de toi · retour assuré en premier');
     expect(legendeListe(1, false)).toBe('1 mission près de toi');
     expect(l(legendeBrut(8125))).toBe('81,25 € brut, congés payés compris');
-    expect(l(detailCalculExtra(360, SMIC))).toBe('6 h × 12,31 € brut. Payé par le restaurant.');
+    expect(l(detailCalculExtra(360, SMIC))).toBe("6 h × 12,31 € brut. Payé par l'établissement.");
     expect(l(legendeSalaires(2, 360, SMIC))).toBe(
       '2 × 6 h × 12,31 €, + 10 % de congés payés. Versés par vous aux extras, hors charges patronales.',
     );
@@ -186,7 +186,7 @@ describe('textes calculés (README)', () => {
       'Kévin a dit mi lé la. Arrivée prévue à 18 h.',
     );
     expect(textes.extra.missions.videTexte).toBe(
-      "Coche tes soirées libres. On te prévient dès qu'un restaurant a besoin de toi.",
+      "Coche tes soirées libres. On te prévient dès qu'un établissement a besoin de toi.",
     );
     expect(l(textes.extra.detail.regleAbsence)).toBe(
       'Un empêchement ? Préviens au moins 4 h avant. Une absence sans prévenir = exclusion.',

@@ -615,7 +615,18 @@ let pageCourante = null;
   await pa.getByRole('heading', { name: 'Mon compte' }).waitFor();
   await pa.waitForTimeout(500);
   if (await pa.getByText("L'application Kivien sur votre ordinateur").count()) throw new Error('installation proposée dans l’app mobile');
-  await dansApp.close(); ok('dans l’app mobile : pas de proposition d’installation');
+  ok('dans l’app mobile : pas de proposition d’installation');
+  // Un seul en-tête dans l'app : la sortie vers l'accueil de l'app est dans le menu du site et sur la connexion.
+  await pa.getByRole('button', { name: 'Ouvrir le menu' }).click();
+  await pa.locator('#menu-mobile').getByRole('button', { name: "Revenir à l'accueil de l'app" }).waitFor();
+  await pa.goto(URL_SITE + '/connexion');
+  await pa.getByRole('heading', { name: 'Votre espace pro' }).waitFor();
+  await pa.getByRole('button', { name: "Revenir à l'accueil de l'app" }).waitFor();
+  await dansApp.close();
+  await p.goto(URL_SITE + '/connexion');
+  await p.getByRole('heading', { name: 'Votre espace pro' }).waitFor();
+  if (await p.getByText("Revenir à l'accueil de l'app").count()) throw new Error('retour vers l’app affiché hors de l’app');
+  ok('dans l’app mobile : retour à l’accueil de l’app dans le menu et sur la connexion, absent ailleurs');
 
   // Grand écran : pas de débordement
   for (const w of [360, 768, 1024, 1440]) {

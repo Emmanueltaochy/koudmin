@@ -50,6 +50,9 @@ export async function ouvrirSession(
       refresh_token: refreshToken,
     });
     if (!error) return true;
+    // Jeton d'accès refusé (horloge du téléphone, délai) : le jeton de rafraîchissement suffit.
+    const second = await c.auth.refreshSession({ refresh_token: refreshToken });
+    if (!second.error && second.data.session) return true;
   }
   const { data } = await c.auth.getSession();
   return !!data.session;

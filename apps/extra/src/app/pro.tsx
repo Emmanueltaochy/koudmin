@@ -14,17 +14,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, type WebViewNavigation } from 'react-native-webview';
 import { textesEcrans } from '@kivien/core';
 import { noterModePro, prendreDepart, SITE_PRO } from '../pro/modePro';
+import { Lien } from '../ui/Bouton';
 import { EtatPlein } from '../ui/EtatPlein';
-import { Logo } from '../ui/Logo';
 import { couleurs } from '../ui/theme';
-import { Texte } from '../ui/Texte';
 
 const tp = textesEcrans.proApp;
 /** Pages gardées dans l'app : kivien.re, et les pages de paiement qui y reviennent ensuite. */
 const DANS_APP = /^https:\/\/([a-z0-9-]+\.)*(kivien\.re|stripe\.com|gocardless\.com)(\/|$|\?|#)/i;
 
 /**
- * Espace pro (kivien.re) affiché dans l'app : les établissements y retrouvent tout leur espace.
+ * Espace pro (kivien.re) affiché dans l'app, sans barre de l'app : un seul en-tête, celui du site,
+ * dont le menu propose le retour à l'accueil de l'app. Les établissements y retrouvent tout leur espace.
  * Téléphone, SMS, e-mail et sites extérieurs s'ouvrent dans leurs propres apps.
  */
 export default function EspacePro() {
@@ -65,22 +65,6 @@ export default function EspacePro() {
 
   return (
     <View style={[styles.ecran, { paddingTop: insets.top }]}>
-      <View style={styles.barre}>
-        <View style={styles.marque}>
-          <Logo />
-          <Texte variante="legendeForte" couleur="galet">
-            {tp.titre}
-          </Texte>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={tp.quitterAide}
-          onPress={() => void quitter()}
-          hitSlop={12}
-        >
-          <Texte variante="legendeForte">{tp.quitter}</Texte>
-        </Pressable>
-      </View>
       {horsLigne ? (
         <EtatPlein
           icone={<WifiOff size={28} color={couleurs.braise} strokeWidth={1.75} />}
@@ -90,6 +74,16 @@ export default function EspacePro() {
           action={tp.reessayer}
           onAction={() => setHorsLigne(false)}
         />
+      ) : null}
+      {horsLigne ? (
+        <View style={styles.sortie}>
+          <Lien
+            libelle={tp.retourAccueil}
+            onPress={() => void quitter()}
+            variante="legende"
+            couleur="galet"
+          />
+        </View>
       ) : (
         <WebView<object>
           ref={vue}
@@ -100,6 +94,10 @@ export default function EspacePro() {
           onShouldStartLoadWithRequest={filtrer}
           onNavigationStateChange={(n: WebViewNavigation) => setRetourPossible(n.canGoBack)}
           onError={() => setHorsLigne(true)}
+          // Le site demande le retour à l'accueil de l'app (bouton de son menu).
+          onMessage={(e) => {
+            if (e.nativeEvent.data === 'accueil') void quitter();
+          }}
           // Liens « nouvel onglet » ouverts dans la même vue (puis filtrés ci-dessus).
           setSupportMultipleWindows={false}
           domStorageEnabled
@@ -120,16 +118,7 @@ export default function EspacePro() {
 
 const styles = StyleSheet.create({
   ecran: { flex: 1, backgroundColor: couleurs.creme },
-  barre: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: couleurs.trait,
-  },
-  marque: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sortie: { alignItems: 'center', paddingBottom: 32 },
   vue: { flex: 1, backgroundColor: couleurs.creme },
   chargement: {
     position: 'absolute',

@@ -54,7 +54,7 @@ export const textes = {
       filtres: { toutes: 'Toutes', ceSoir: 'Ce soir', weekEnd: 'Week-end' },
       chargement: 'Recherche des missions près de toi',
       videTitre: "Pas de mission près de toi pour l'instant.",
-      videTexte: "Coche tes soirées libres. On te prévient dès qu'un restaurant a besoin de toi.",
+      videTexte: "Coche tes soirées libres. On te prévient dès qu'un établissement a besoin de toi.",
       videAction: 'Mettre à jour mes dispos',
       horsLigneTitre: 'Pas de réseau.',
       horsLigneTexte: "Les missions s'afficheront dès que la connexion revient.",
@@ -65,13 +65,13 @@ export const textes = {
     detail: {
       adresseApres: 'Adresse exacte après confirmation.',
       itineraire: 'Itinéraire',
-      appeler: 'Appeler le restaurant',
-      retourAssure: 'Retour assuré par le restaurant',
+      appeler: "Appeler l'établissement",
+      retourAssure: "Retour assuré par l'établissement",
       retourAssureDetail: 'Raccompagnement ou taxi payé après le service.',
       brutDetail: 'brut, congés payés compris.',
       contrat: "Contrat d'extra à signer sur ton téléphone. Pas besoin de SIRET.",
       miLeLa: 'Mi lé la',
-      envoi: 'On prévient le restaurant',
+      envoi: "On prévient l'établissement",
       signer: 'Signer mon contrat',
       regleAbsence: `Un empêchement${NBSP}? Préviens au moins 4${NBSP}h avant. Une absence sans prévenir = exclusion.`,
       nePlusVenir: 'Je ne peux plus venir',
@@ -79,7 +79,7 @@ export const textes = {
       voirMissions: 'Voir les missions',
     },
     desistement: {
-      info: 'Le restaurant sera prévenu tout de suite.',
+      info: "L'établissement sera prévenu tout de suite.",
       confirmer: 'Confirmer',
       annuler: 'Annuler',
     },
@@ -99,9 +99,9 @@ export function legendeBrut(brutCentimes: number): string {
   return `${formatEuros(brutCentimes)} ${textes.extra.missions.congesCompris}`;
 }
 
-/** « 6 h × 12,31 € brut. Payé par le restaurant. » */
+/** « 6 h × 12,31 € brut. Payé par l'établissement. » */
 export function detailCalculExtra(minutes: number, tauxCentimes: number): string {
-  return `${formatDuree(minutes)}${fois}${formatEuros(tauxCentimes)} brut. Payé par le restaurant.`;
+  return `${formatDuree(minutes)}${fois}${formatEuros(tauxCentimes)} brut. Payé par l'établissement.`;
 }
 
 /** « 2 × 6 h × 12,31 €, + 10 % de congés payés. Versés par vous aux extras, hors charges patronales. » */

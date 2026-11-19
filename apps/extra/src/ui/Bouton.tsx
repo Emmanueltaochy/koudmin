@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    // Pas de marge latérale, comme la maquette : « Appeler le restaurant » tient sur une ligne.
+    // Pas de marge latérale, comme la maquette : « Appeler l'établissement » tient sur une ligne.
     paddingHorizontal: 4,
   },
   lien: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 20 },

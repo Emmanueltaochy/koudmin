@@ -146,7 +146,7 @@ export const textesVitrine = {
       },
       {
         titre: 'Pas de voiture ?',
-        texte: 'Les missions avec retour assuré par le restaurant passent en premier.',
+        texte: "Les missions avec retour assuré par l'établissement passent en premier.",
       },
     ],
     bouton: "Télécharger l'app",
@@ -156,7 +156,7 @@ export const textesVitrine = {
     ecranTitre: 'Missions',
     mission1Horaire: h('18 h – minuit'),
     mission1Lieu: 'Saint-Gilles · Service en salle',
-    mission1Retour: 'Retour assuré par le restaurant',
+    mission1Retour: "Retour assuré par l'établissement",
     mission2Horaire: h('11 h 30 – 15 h'),
     mission2Lieu: 'Saint-Pierre · Commis',
     mission2Retour: h('Dernier bus 20 h 15 : retour à prévoir'),

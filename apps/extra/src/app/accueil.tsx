@@ -123,7 +123,7 @@ export default function Accueil() {
         <BoutonPrincipal libelle={ta.extra} onPress={() => router.push('/bienvenue')} />
         <Pressable
           accessibilityRole="link"
-          onPress={() => void ouvrirEspacePro('/pro')}
+          onPress={() => void ouvrirEspacePro()}
           style={({ pressed }) => [styles.pro, pressed && styles.proPresse]}
         >
           <Texte variante="bouton">{ta.pro}</Texte>
