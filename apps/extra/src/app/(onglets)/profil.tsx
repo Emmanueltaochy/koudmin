@@ -136,7 +136,8 @@ export default function ProfilEcran() {
           couleur="galet"
           onPress={async () => {
             await source.deconnecter();
-            router.replace('/bienvenue');
+            // Retour à l'écran de lancement (photos et choix), pas au formulaire d'inscription.
+            router.replace('/accueil' as never);
           }}
         />
       )}
