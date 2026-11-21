@@ -51,6 +51,7 @@ jobs:
           scripts/verifier-recherche.sh
           scripts/verifier-notifications.sh
           scripts/verifier-dpae.sh
+          scripts/verifier-offres.sh
 
       - name: Scripts du serveur
         run: |

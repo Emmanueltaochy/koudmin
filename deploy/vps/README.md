@@ -212,6 +212,25 @@ Stripe et de GoCardless : ils ne passent jamais par Kivien.
   relancer ne débite jamais deux fois.
 - Passage en réel : seules les missions à partir de ce jour-là sont débitées.
 
+## Établissements qui recrutent (France Travail)
+
+Chaque jour à 6 h 40, `kivien-offres.timer` relève les offres d'emploi de La Réunion publiées sur
+France Travail dans l'hôtellerie et la restauration (API « Offres d'emploi », francetravail.io).
+Chaque établissement est rapproché d'un prospect existant (même nom, même commune) ou ajouté, avec
+l'intitulé et le lien de sa dernière offre. Dans l'espace admin, onglet Prospection, il porte la
+mention « Recrute en ce moment » (offre de moins de 30 jours), et la prospection automatique lui écrit
+en premier. Les offres anonymes (sans nom d'établissement) sont ignorées.
+
+Une fois, avec l'identifiant et la clé de l'application créée sur francetravail.io (accès à l'API
+« Offres d'emploi v2 ») ; la clé est saisie sans affichage, vérifiée, puis rangée dans `.env` :
+
+```bash
+sudo /opt/kivien/source/deploy/vps/configurer-france-travail.sh
+```
+
+Relevé à la main : `sudo kivien-offres`. Suivi : `journalctl -u kivien-offres`.
+Vérification sans Internet : `scripts/verifier-offres.sh` (faux service France Travail).
+
 ## DPAE automatique
 
 Kivien envoie à l'Urssaf les DPAE des établissements qui lui ont donné mandat (page Établissements de

@@ -398,6 +398,29 @@ AccuracySec=10s
 [Install]
 WantedBy=timers.target
 UNIT
+# Offres d'emploi de La Réunion (France Travail) : établissements qui recrutent, chaque jour à 6 h 40.
+install -m 0700 "$SOURCE/deploy/vps/offres-france-travail.sh" /usr/local/sbin/kivien-offres
+cat > /etc/systemd/system/kivien-offres.service <<'UNIT'
+[Unit]
+Description=Offres d'emploi France Travail pour la prospection Kivien
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kivien-offres
+TimeoutStartSec=20min
+UNIT
+cat > /etc/systemd/system/kivien-offres.timer <<'UNIT'
+[Unit]
+Description=Offres d'emploi France Travail, chaque jour à 6 h 40 (La Réunion)
+
+[Timer]
+OnCalendar=*-*-* 02:40:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+UNIT
 systemctl daemon-reload
 systemctl enable --now kivien-sauvegarde.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-prelevements.timer >> "$JOURNAL" 2>&1
@@ -405,6 +428,7 @@ systemctl enable --now kivien-prospection.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-recherche-prospects.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-notifications.timer >> "$JOURNAL" 2>&1
 systemctl enable --now kivien-dpae.timer >> "$JOURNAL" 2>&1
+systemctl enable --now kivien-offres.timer >> "$JOURNAL" 2>&1
 info "prochaine sauvegarde : $(systemctl show kivien-sauvegarde.timer -p NextElapseUSecRealtime --value)"
 /usr/local/sbin/kivien-sauvegarde | tee -a "$JOURNAL" || arret "la première sauvegarde a échoué."
 

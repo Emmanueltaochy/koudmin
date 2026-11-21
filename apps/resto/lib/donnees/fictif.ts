@@ -651,6 +651,14 @@ export function sourceFictive(): SourceResto {
                 desinscrit: false,
                 dernierEnvoi: null,
                 envois: 0,
+                // Démonstration : une offre d'emploi France Travail de la veille.
+                ...(f.osm_id === 'node/101'
+                  ? {
+                      recruteLe: new Date(Date.now() - 864e5).toISOString(),
+                      offreIntitule: 'Serveur / Serveuse en restauration',
+                      offreUrl: 'https://candidat.francetravail.fr/offres/recherche/detail/demo',
+                    }
+                  : {}),
               });
             }
             prospectionDemo.recherche = {
@@ -665,6 +673,10 @@ export function sourceFictive(): SourceResto {
         },
         async derniereRecherche() {
           return prospectionDemo.recherche ? { ...prospectionDemo.recherche } : null;
+        },
+        async releveOffres() {
+          const recrutent = prospectionDemo.prospects.filter((p) => p.recruteLe).length;
+          return { le: recrutent ? new Date().toISOString() : null, erreur: null, recrutent };
         },
         async prospects() {
           return prospectionDemo.prospects.map((p) => ({ ...p }));

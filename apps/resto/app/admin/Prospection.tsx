@@ -20,13 +20,21 @@ import {
 import p from '@/components/pages.module.css';
 import { Spinner } from '@/components/Spinner';
 import ui from '@/components/ui.module.css';
-import { source, type CampagneProspection, type Prospect, type RechercheProspects, type SuiviEnvoi } from '@/lib/donnees';
+import {
+  source,
+  type CampagneProspection,
+  type Prospect,
+  type RechercheProspects,
+  type ReleveOffres,
+  type SuiviEnvoi,
+} from '@/lib/donnees';
 import { ProspectionAuto } from './ProspectionAuto';
 import s from './admin.module.css';
 
 const tp = textesEcrans.resto.admin.prospection;
 const sansAccents = (x: string) => x.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const date = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { timeZone: 'Indian/Reunion' });
+const date = (iso: string) =>
+  new Date(iso).toLocaleDateString('fr-FR', { timeZone: 'Indian/Reunion' });
 
 /** Cellule e-mail : affichée, ou saisie à la main quand OpenStreetMap n'en donne pas. */
 function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifie: () => void }) {
@@ -35,7 +43,12 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
   const [erreur, setErreur] = useState(false);
   async function enregistrer(e: FormEvent) {
     e.preventDefault();
-    const r = await source().admin.prospection.modifier(x.id, { email: email.trim() || null, telephone: x.telephone, statut: x.statut, notes: x.notes });
+    const r = await source().admin.prospection.modifier(x.id, {
+      email: email.trim() || null,
+      telephone: x.telephone,
+      statut: x.statut,
+      notes: x.notes,
+    });
     if (r === 'email') return setErreur(true);
     setEdition(false);
     onModifie();
@@ -43,8 +56,19 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
   if (edition)
     return (
       <form onSubmit={enregistrer} className={s.emailForm} noValidate>
-        <input type="email" aria-label={tp.ajouterEmail} value={email} onChange={(e) => { setEmail(e.target.value); setErreur(false); }} autoFocus />
-        <button type="submit" className={ui.lien}>{tp.enregistrer}</button>
+        <input
+          type="email"
+          aria-label={tp.ajouterEmail}
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setErreur(false);
+          }}
+          autoFocus
+        />
+        <button type="submit" className={ui.lien}>
+          {tp.enregistrer}
+        </button>
         {erreur ? (
           <span className={`${ui.legende} ${ui.braise}`}>{tp.emailInvalide}</span>
         ) : (
@@ -55,20 +79,45 @@ function CelluleEmail({ prospect: x, onModifie }: { prospect: Prospect; onModifi
   if (x.email)
     return (
       <span>
-        <a href={`mailto:${x.email}`} className={ui.lienDiscret}>{x.email}</a>{' '}
-        <button type="button" className={ui.lienDiscret} onClick={() => setEdition(true)} aria-label={`${tp.modifierEmail} : ${x.nom}`}>
+        <a href={`mailto:${x.email}`} className={ui.lienDiscret}>
+          {x.email}
+        </a>{' '}
+        <button
+          type="button"
+          className={ui.lienDiscret}
+          onClick={() => setEdition(true)}
+          aria-label={`${tp.modifierEmail} : ${x.nom}`}
+        >
           {tp.modifierEmail}
         </button>
-        <span className={s.sousLigne}>{x.desinscrit ? tp.desinscrit : x.sourceEmail ? tp.sourceEmail[x.sourceEmail] : ''}</span>
+        <span className={s.sousLigne}>
+          {x.desinscrit ? tp.desinscrit : x.sourceEmail ? tp.sourceEmail[x.sourceEmail] : ''}
+        </span>
       </span>
     );
-  return <button type="button" className={ui.lienDiscret} onClick={() => setEdition(true)}>{tp.ajouterEmail}</button>;
+  return (
+    <button type="button" className={ui.lienDiscret} onClick={() => setEdition(true)}>
+      {tp.ajouterEmail}
+    </button>
+  );
 }
 
 /** Ajout d'un établissement à la main (absent d'OpenStreetMap, ou fiche d'essai). */
-function AjoutProspect({ onAjoute, onFerme }: { onAjoute: (nom: string) => void; onFerme: () => void }) {
+function AjoutProspect({
+  onAjoute,
+  onFerme,
+}: {
+  onAjoute: (nom: string) => void;
+  onFerme: () => void;
+}) {
   const tn = tp.nouveau;
-  const [f, setF] = useState({ nom: '', categorie: 'restaurant' as CategorieProspect, commune: '', telephone: '', email: '' });
+  const [f, setF] = useState({
+    nom: '',
+    categorie: 'restaurant' as CategorieProspect,
+    commune: '',
+    telephone: '',
+    email: '',
+  });
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
   async function ajouter(e: FormEvent) {
@@ -77,8 +126,11 @@ function AjoutProspect({ onAjoute, onFerme }: { onAjoute: (nom: string) => void;
     setEnvoi(true);
     const r = await source()
       .admin.prospection.ajouter({
-        nom: f.nom.trim(), categorie: f.categorie, commune: f.commune.trim() || null,
-        telephone: f.telephone.trim() || null, email: f.email.trim() || null,
+        nom: f.nom.trim(),
+        categorie: f.categorie,
+        commune: f.commune.trim() || null,
+        telephone: f.telephone.trim() || null,
+        email: f.email.trim() || null,
       })
       .catch(() => null);
     setEnvoi(false);
@@ -86,37 +138,72 @@ function AjoutProspect({ onAjoute, onFerme }: { onAjoute: (nom: string) => void;
     if (r !== 'ok') return setErreur(t.extra.missions.horsLigneTitre);
     onAjoute(f.nom.trim());
   }
-  const champ = (cle: 'nom' | 'commune' | 'telephone' | 'email', libelle: string, type = 'text', facultatif = true) => (
+  const champ = (
+    cle: 'nom' | 'commune' | 'telephone' | 'email',
+    libelle: string,
+    type = 'text',
+    facultatif = true,
+  ) => (
     <label className={s.bloc}>
       <span className={ui.corpsFort}>
-        {libelle} {facultatif && <span className={`${ui.legende} ${ui.galet}`}>· {tn.facultatif}</span>}
+        {libelle}{' '}
+        {facultatif && <span className={`${ui.legende} ${ui.galet}`}>· {tn.facultatif}</span>}
       </span>
       <span className={ui.champ}>
-        <input id={`prospect-${cle}`} type={type} value={f[cle]} onChange={(e) => { setF({ ...f, [cle]: e.target.value }); setErreur(null); }} />
+        <input
+          id={`prospect-${cle}`}
+          type={type}
+          value={f[cle]}
+          onChange={(e) => {
+            setF({ ...f, [cle]: e.target.value });
+            setErreur(null);
+          }}
+        />
       </span>
     </label>
   );
   return (
-    <form onSubmit={ajouter} className={`${s.carte} ${s.campagne}`} noValidate aria-labelledby="nouveau-prospect">
-      <h2 id="nouveau-prospect" className={ui.sousTitre}>{tn.titre}</h2>
+    <form
+      onSubmit={ajouter}
+      className={`${s.carte} ${s.campagne}`}
+      noValidate
+      aria-labelledby="nouveau-prospect"
+    >
+      <h2 id="nouveau-prospect" className={ui.sousTitre}>
+        {tn.titre}
+      </h2>
       <p className={`${ui.legende} ${ui.galet}`}>{tn.aide}</p>
       {champ('nom', tn.nom, 'text', false)}
       <label className={s.bloc}>
         <span className={ui.corpsFort}>{tn.categorie}</span>
-        <select className={s.choix} value={f.categorie} onChange={(e) => setF({ ...f, categorie: e.target.value as CategorieProspect })}>
-          {CATEGORIES_PROSPECT.map((c) => <option key={c} value={c}>{LIBELLES_CATEGORIE_PROSPECT[c]}</option>)}
+        <select
+          className={s.choix}
+          value={f.categorie}
+          onChange={(e) => setF({ ...f, categorie: e.target.value as CategorieProspect })}
+        >
+          {CATEGORIES_PROSPECT.map((c) => (
+            <option key={c} value={c}>
+              {LIBELLES_CATEGORIE_PROSPECT[c]}
+            </option>
+          ))}
         </select>
       </label>
       {champ('commune', tn.commune)}
       {champ('telephone', tn.telephone, 'tel')}
       {champ('email', tn.email, 'email')}
-      {erreur && <p className={ui.messageErreur} role="alert">{erreur}</p>}
+      {erreur && (
+        <p className={ui.messageErreur} role="alert">
+          {erreur}
+        </p>
+      )}
       <div className={s.importer}>
         <button type="submit" className={ui.boutonPrincipal} disabled={envoi}>
           {envoi && <Spinner />}
           {tn.ajouter}
         </button>
-        <button type="button" className={ui.lien} onClick={onFerme}>{tn.annuler}</button>
+        <button type="button" className={ui.lien} onClick={onFerme}>
+          {tn.annuler}
+        </button>
       </div>
     </form>
   );
@@ -125,7 +212,15 @@ function AjoutProspect({ onAjoute, onFerme }: { onAjoute: (nom: string) => void;
 /** Suivi d'une campagne, établissement par établissement. */
 function TableauSuivi({ envois }: { envois: SuiviEnvoi[] | 'chargement' }) {
   const quand = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleString('fr-FR', { timeZone: 'Indian/Reunion', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–';
+    iso
+      ? new Date(iso).toLocaleString('fr-FR', {
+          timeZone: 'Indian/Reunion',
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '–';
   if (envois === 'chargement') return <div className={p.squelette} aria-busy />;
   if (!envois.length) return <p className={`${ui.legende} ${ui.galet}`}>{tp.aucunSuivi}</p>;
   return (
@@ -156,7 +251,15 @@ function TableauSuivi({ envois }: { envois: SuiviEnvoi[] | 'chargement' }) {
                 {e.pagesVues || '–'}
                 {e.pages.length > 0 && <span className={s.sousLigne}>{e.pages.join(', ')}</span>}
               </td>
-              <td>{e.inscritLe ? <span className={s.statut} data-statut="pourvue">{tp.compteCree}</span> : '–'}</td>
+              <td>
+                {e.inscritLe ? (
+                  <span className={s.statut} data-statut="pourvue">
+                    {tp.compteCree}
+                  </span>
+                ) : (
+                  '–'
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -166,6 +269,35 @@ function TableauSuivi({ envois }: { envois: SuiviEnvoi[] | 'chargement' }) {
 }
 
 /** Prospection : établissements de l'île (OpenStreetMap ou saisie), suivi et campagnes e-mail. */
+/** Offre d'emploi France Travail de moins de 30 jours. */
+function recruteEnCeMoment(x: Prospect): boolean {
+  return !!x.recruteLe && Date.now() - new Date(x.recruteLe).getTime() < 30 * 864e5;
+}
+
+/** Bilan du dernier relevé des offres France Travail. */
+function BilanOffres() {
+  const [r, setR] = useState<ReleveOffres | null>(null);
+  useEffect(() => {
+    void source()
+      .admin.prospection.releveOffres()
+      .then(setR)
+      .catch(() => undefined);
+  }, []);
+  if (!r) return null;
+  const le = r.le
+    ? new Date(r.le).toLocaleDateString('fr-FR', {
+        timeZone: 'Indian/Reunion',
+        day: 'numeric',
+        month: 'long',
+      })
+    : null;
+  return (
+    <p className={r.erreur ? ui.messageErreur : `${ui.legende} ${ui.galet}`}>
+      {!le ? tp.releveAucun : r.erreur ? tp.releveErreur(le) : tp.releveOffres(le, r.recrutent)}
+    </p>
+  );
+}
+
 export function Prospection() {
   const [fiches, setFiches] = useState<Prospect[] | 'chargement' | 'erreur'>('chargement');
   const [campagnes, setCampagnes] = useState<CampagneProspection[]>([]);
@@ -175,9 +307,13 @@ export function Prospection() {
   const [zone, setZone] = useState<Zone | ''>('');
   const [statut, setStatut] = useState<StatutProspect | ''>('');
   const [avecEmail, setAvecEmail] = useState(false);
+  const [recrutent, setRecrutent] = useState(false);
   const [sujet, setSujet] = useState('');
   const [message, setMessage] = useState('');
-  const [envoi, setEnvoi] = useState<{ enCours: boolean; texte: string | null }>({ enCours: false, texte: null });
+  const [envoi, setEnvoi] = useState<{ enCours: boolean; texte: string | null }>({
+    enCours: false,
+    texte: null,
+  });
   const [ouverte, setOuverte] = useState<string | null>(null);
   const [ajout, setAjout] = useState(false);
   const [ajoute, setAjoute] = useState<string | null>(null);
@@ -187,7 +323,11 @@ export function Prospection() {
     if (ouverte === id) return setOuverte(null);
     setOuverte(id);
     setSuivi('chargement');
-    setSuivi(await source().admin.prospection.suiviCampagne(id).catch(() => []));
+    setSuivi(
+      await source()
+        .admin.prospection.suiviCampagne(id)
+        .catch(() => []),
+    );
   }
 
   const charger = useCallback(async () => {
@@ -215,9 +355,16 @@ export function Prospection() {
 
   // Recherche faite par le VPS : on suit son avancement, puis on recharge les fiches.
   const suivre = useCallback(async () => {
-    const r = await source().admin.prospection.derniereRecherche().catch(() => null);
+    const r = await source()
+      .admin.prospection.derniereRecherche()
+      .catch(() => null);
     setBilan((avant) => {
-      if (avant && (avant.statut === 'demandee' || avant.statut === 'en_cours') && r?.statut === 'terminee') void charger();
+      if (
+        avant &&
+        (avant.statut === 'demandee' || avant.statut === 'en_cours') &&
+        r?.statut === 'terminee'
+      )
+        void charger();
       return r;
     });
   }, [charger]);
@@ -237,7 +384,13 @@ export function Prospection() {
   }
 
   const dateHeure = (iso: string) =>
-    new Date(iso).toLocaleString('fr-FR', { timeZone: 'Indian/Reunion', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    new Date(iso).toLocaleString('fr-FR', {
+      timeZone: 'Indian/Reunion',
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
   const liste = Array.isArray(fiches) ? fiches : [];
   const filtrees = useMemo(
@@ -247,15 +400,25 @@ export function Prospection() {
           (!categorie || x.categorie === categorie) &&
           (!statut || x.statut === statut) &&
           (!avecEmail || !!x.email) &&
+          (!recrutent || recruteEnCeMoment(x)) &&
           (!zone || zoneDuLieu(x.commune, x.lat, x.lng) === zone) &&
-          sansAccents(`${x.nom} ${x.commune ?? ''} ${x.email ?? ''} ${x.telephone ?? ''}`).includes(sansAccents(recherche.trim())),
+          sansAccents(`${x.nom} ${x.commune ?? ''} ${x.email ?? ''} ${x.telephone ?? ''}`).includes(
+            sansAccents(recherche.trim()),
+          ),
       ),
-    [liste, categorie, statut, avecEmail, zone, recherche],
+    [liste, categorie, statut, avecEmail, recrutent, zone, recherche],
   );
-  const destinataires = filtrees.filter((x) => x.email && !x.desinscrit && x.statut !== 'inscrit' && x.statut !== 'pas_interesse');
+  const destinataires = filtrees.filter(
+    (x) => x.email && !x.desinscrit && x.statut !== 'inscrit' && x.statut !== 'pas_interesse',
+  );
 
   async function changerStatut(x: Prospect, nouveau: StatutProspect) {
-    await source().admin.prospection.modifier(x.id, { email: x.email, telephone: x.telephone, statut: nouveau, notes: x.notes });
+    await source().admin.prospection.modifier(x.id, {
+      email: x.email,
+      telephone: x.telephone,
+      statut: nouveau,
+      notes: x.notes,
+    });
     await charger();
   }
 
@@ -264,7 +427,11 @@ export function Prospection() {
     if (!destinataires.length || !window.confirm(tp.confirmer(destinataires.length))) return;
     setEnvoi({ enCours: true, texte: null });
     try {
-      const n = await source().admin.prospection.lancerCampagne(sujet, message, destinataires.map((x) => x.id));
+      const n = await source().admin.prospection.lancerCampagne(
+        sujet,
+        message,
+        destinataires.map((x) => x.id),
+      );
       setEnvoi({ enCours: false, texte: tp.programme(n) });
       await charger();
     } catch {
@@ -273,13 +440,19 @@ export function Prospection() {
   }
 
   if (fiches === 'chargement') return <div className={p.squelette} aria-busy />;
-  if (fiches === 'erreur') return <p className={`${ui.sousTitre} ${ui.braise}`}>{t.extra.missions.horsLigneTitre}</p>;
+  if (fiches === 'erreur')
+    return <p className={`${ui.sousTitre} ${ui.braise}`}>{t.extra.missions.horsLigneTitre}</p>;
 
   return (
     <>
       <p className={`${ui.corps} ${ui.galet}`}>{tp.intro}</p>
       <div className={s.importer}>
-        <button type="button" className={ui.boutonSecondaire} onClick={() => void chercher()} disabled={enCours}>
+        <button
+          type="button"
+          className={ui.boutonSecondaire}
+          onClick={() => void chercher()}
+          disabled={enCours}
+        >
           {enCours ? <Spinner /> : <MapPinned size={18} strokeWidth={2} aria-hidden />}
           {tp.importer}
         </button>
@@ -288,8 +461,14 @@ export function Prospection() {
             {bilan.statut === 'demandee' && tp.rechercheDemandee}
             {bilan.statut === 'en_cours' && tp.rechercheEnCours}
             {bilan.statut === 'terminee' &&
-              tp.rechercheFaite(dateHeure(bilan.finLe ?? bilan.demandeeLe), bilan.trouves ?? 0, bilan.ajoutes ?? 0, bilan.emailsTrouves ?? 0)}
-            {bilan.statut === 'echouee' && tp.rechercheEchouee(dateHeure(bilan.finLe ?? bilan.demandeeLe))}
+              tp.rechercheFaite(
+                dateHeure(bilan.finLe ?? bilan.demandeeLe),
+                bilan.trouves ?? 0,
+                bilan.ajoutes ?? 0,
+                bilan.emailsTrouves ?? 0,
+              )}
+            {bilan.statut === 'echouee' &&
+              tp.rechercheEchouee(dateHeure(bilan.finLe ?? bilan.demandeeLe))}
           </span>
         )}
         {bilan?.statut === 'echouee' && bilan.erreur && (
@@ -310,11 +489,22 @@ export function Prospection() {
         />
       ) : (
         <div className={s.importer}>
-          <button type="button" className={ui.boutonSecondaire} onClick={() => { setAjout(true); setAjoute(null); }}>
+          <button
+            type="button"
+            className={ui.boutonSecondaire}
+            onClick={() => {
+              setAjout(true);
+              setAjoute(null);
+            }}
+          >
             <Plus size={18} strokeWidth={2} aria-hidden />
             {tp.ajouterEtablissement}
           </button>
-          {ajoute && <span className={ui.corps} role="status">{ajoute}</span>}
+          {ajoute && (
+            <span className={ui.corps} role="status">
+              {ajoute}
+            </span>
+          )}
         </div>
       )}
 
@@ -322,6 +512,7 @@ export function Prospection() {
         {[
           [liste.length, tp.total],
           [liste.filter((x) => x.email).length, tp.avecEmail],
+          [liste.filter(recruteEnCeMoment).length, tp.recrutent],
           [liste.filter((x) => x.telephone).length, tp.avecTelephone],
           [liste.filter((x) => x.statut !== 'a_contacter').length, tp.contactes],
           [liste.filter((x) => x.statut === 'inscrit').length, tp.inscrits],
@@ -332,6 +523,7 @@ export function Prospection() {
           </div>
         ))}
       </div>
+      <BilanOffres />
 
       {liste.length === 0 ? (
         <p className={`${ui.corps} ${ui.galet}`}>{tp.aucun}</p>
@@ -339,23 +531,68 @@ export function Prospection() {
         <>
           <div className={s.filtres}>
             <span className={`${ui.champ} ${s.recherche}`}>
-              <input type="search" placeholder={textesEcrans.resto.admin.rechercher} aria-label={textesEcrans.resto.admin.rechercher} value={recherche} onChange={(e) => setRecherche(e.target.value)} />
+              <input
+                type="search"
+                placeholder={textesEcrans.resto.admin.rechercher}
+                aria-label={textesEcrans.resto.admin.rechercher}
+                value={recherche}
+                onChange={(e) => setRecherche(e.target.value)}
+              />
             </span>
-            <select className={s.choix} aria-label={tp.filtreCategorie} value={categorie} onChange={(e) => setCategorie(e.target.value as CategorieProspect | '')}>
+            <select
+              className={s.choix}
+              aria-label={tp.filtreCategorie}
+              value={categorie}
+              onChange={(e) => setCategorie(e.target.value as CategorieProspect | '')}
+            >
               <option value="">{tp.filtreCategorie}</option>
-              {CATEGORIES_PROSPECT.map((c) => <option key={c} value={c}>{LIBELLES_CATEGORIE_PROSPECT[c]}</option>)}
+              {CATEGORIES_PROSPECT.map((c) => (
+                <option key={c} value={c}>
+                  {LIBELLES_CATEGORIE_PROSPECT[c]}
+                </option>
+              ))}
             </select>
-            <select className={s.choix} aria-label={tp.filtreZone} value={zone} onChange={(e) => setZone(e.target.value as Zone | '')}>
+            <select
+              className={s.choix}
+              aria-label={tp.filtreZone}
+              value={zone}
+              onChange={(e) => setZone(e.target.value as Zone | '')}
+            >
               <option value="">{tp.filtreZone}</option>
-              {ZONES.map((z) => <option key={z} value={z}>{LIBELLES_ZONE[z]}</option>)}
+              {ZONES.map((z) => (
+                <option key={z} value={z}>
+                  {LIBELLES_ZONE[z]}
+                </option>
+              ))}
             </select>
-            <select className={s.choix} aria-label={tp.filtreStatut} value={statut} onChange={(e) => setStatut(e.target.value as StatutProspect | '')}>
+            <select
+              className={s.choix}
+              aria-label={tp.filtreStatut}
+              value={statut}
+              onChange={(e) => setStatut(e.target.value as StatutProspect | '')}
+            >
               <option value="">{tp.filtreStatut}</option>
-              {STATUTS_PROSPECT.map((x) => <option key={x} value={x}>{tp.statuts[x]}</option>)}
+              {STATUTS_PROSPECT.map((x) => (
+                <option key={x} value={x}>
+                  {tp.statuts[x]}
+                </option>
+              ))}
             </select>
             <label className={`${p.ligne} ${ui.corps}`}>
-              <input type="checkbox" checked={avecEmail} onChange={(e) => setAvecEmail(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={avecEmail}
+                onChange={(e) => setAvecEmail(e.target.checked)}
+              />
               {tp.avecEmailSeulement}
+            </label>
+            <label className={`${p.ligne} ${ui.corps}`}>
+              <input
+                type="checkbox"
+                checked={recrutent}
+                onChange={(e) => setRecrutent(e.target.checked)}
+              />
+              {tp.recrutentSeulement}
             </label>
           </div>
 
@@ -364,8 +601,12 @@ export function Prospection() {
               <thead>
                 <tr>
                   <th scope="col">{textesEcrans.resto.admin.colonnes.etablissement}</th>
-                  <th scope="col"><Phone size={14} aria-hidden /> {tp.colonnes.telephone}</th>
-                  <th scope="col"><Mail size={14} aria-hidden /> {tp.colonnes.email}</th>
+                  <th scope="col">
+                    <Phone size={14} aria-hidden /> {tp.colonnes.telephone}
+                  </th>
+                  <th scope="col">
+                    <Mail size={14} aria-hidden /> {tp.colonnes.email}
+                  </th>
                   <th scope="col">{tp.colonnes.statut}</th>
                   <th scope="col">{tp.colonnes.dernierEnvoi}</th>
                 </tr>
@@ -374,16 +615,72 @@ export function Prospection() {
                 {filtrees.slice(0, 500).map((x) => (
                   <tr key={x.id}>
                     <th scope="row" className={s.cellTexte}>
-                      {x.site ? <a href={x.site} target="_blank" rel="noreferrer" className={ui.lienDiscret}>{x.nom}</a> : x.nom}
+                      {x.site ? (
+                        <a
+                          href={x.site}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={ui.lienDiscret}
+                        >
+                          {x.nom}
+                        </a>
+                      ) : (
+                        x.nom
+                      )}
                       <span className={s.sousLigne}>
-                        {LIBELLES_CATEGORIE_PROSPECT[x.categorie]} · {x.commune ?? (zoneDuLieu(null, x.lat, x.lng) ? LIBELLES_ZONE[zoneDuLieu(null, x.lat, x.lng)!] : '–')}
+                        {LIBELLES_CATEGORIE_PROSPECT[x.categorie]} ·{' '}
+                        {x.commune ??
+                          (zoneDuLieu(null, x.lat, x.lng)
+                            ? LIBELLES_ZONE[zoneDuLieu(null, x.lat, x.lng)!]
+                            : '–')}
                       </span>
+                      {recruteEnCeMoment(x) && (
+                        <span className={s.recrute}>
+                          {tp.recrute}
+                          {x.offreIntitule ? ` · ${x.offreIntitule}` : ''}
+                          {x.offreUrl && (
+                            <>
+                              {' · '}
+                              <a
+                                href={x.offreUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={ui.lienDiscret}
+                              >
+                                {tp.voirOffre}
+                              </a>
+                            </>
+                          )}
+                        </span>
+                      )}
                     </th>
-                    <td>{x.telephone ? <a href={`tel:${x.telephone.replace(/\s/g, '')}`} className={ui.lienDiscret}>{x.telephone}</a> : '–'}</td>
-                    <td className={s.cellTexte}><CelluleEmail prospect={x} onModifie={() => void charger()} /></td>
                     <td>
-                      <select className={s.choix} aria-label={`Statut de ${x.nom}`} value={x.statut} onChange={(e) => void changerStatut(x, e.target.value as StatutProspect)}>
-                        {STATUTS_PROSPECT.map((v) => <option key={v} value={v}>{tp.statuts[v]}</option>)}
+                      {x.telephone ? (
+                        <a
+                          href={`tel:${x.telephone.replace(/\s/g, '')}`}
+                          className={ui.lienDiscret}
+                        >
+                          {x.telephone}
+                        </a>
+                      ) : (
+                        '–'
+                      )}
+                    </td>
+                    <td className={s.cellTexte}>
+                      <CelluleEmail prospect={x} onModifie={() => void charger()} />
+                    </td>
+                    <td>
+                      <select
+                        className={s.choix}
+                        aria-label={`Statut de ${x.nom}`}
+                        value={x.statut}
+                        onChange={(e) => void changerStatut(x, e.target.value as StatutProspect)}
+                      >
+                        {STATUTS_PROSPECT.map((v) => (
+                          <option key={v} value={v}>
+                            {tp.statuts[v]}
+                          </option>
+                        ))}
                       </select>
                     </td>
                     <td>{x.dernierEnvoi ? date(x.dernierEnvoi) : '–'}</td>
@@ -403,25 +700,48 @@ export function Prospection() {
             <p className={`${ui.legende} ${ui.galet}`}>{tp.campagneAide}</p>
             <label className={s.bloc}>
               <span className={ui.corpsFort}>{tp.sujet}</span>
-              <span className={ui.champ}><input value={sujet} maxLength={150} onChange={(e) => setSujet(e.target.value)} /></span>
+              <span className={ui.champ}>
+                <input value={sujet} maxLength={150} onChange={(e) => setSujet(e.target.value)} />
+              </span>
             </label>
             <label className={s.bloc}>
               <span className={ui.corpsFort}>{tp.message}</span>
-              <textarea className={s.zoneTexte} value={message} maxLength={5000} rows={14} onChange={(e) => setMessage(e.target.value)} />
+              <textarea
+                className={s.zoneTexte}
+                value={message}
+                maxLength={5000}
+                rows={14}
+                onChange={(e) => setMessage(e.target.value)}
+              />
             </label>
             <p className={ui.corpsFort}>{tp.destinataires(destinataires.length)}</p>
-            <button type="submit" className={ui.boutonPrincipal} disabled={envoi.enCours || destinataires.length === 0 || sujet.trim().length < 3 || message.trim().length < 20}>
+            <button
+              type="submit"
+              className={ui.boutonPrincipal}
+              disabled={
+                envoi.enCours ||
+                destinataires.length === 0 ||
+                sujet.trim().length < 3 ||
+                message.trim().length < 20
+              }
+            >
               {envoi.enCours && <Spinner />}
               {tp.envoyer(destinataires.length)}
             </button>
-            {envoi.texte && <p className={ui.corps} role="status">{envoi.texte}</p>}
+            {envoi.texte && (
+              <p className={ui.corps} role="status">
+                {envoi.texte}
+              </p>
+            )}
           </form>
         </>
       )}
 
       {campagnes.length > 0 && (
         <section className={p.section} aria-labelledby="campagnes">
-          <h2 id="campagnes" className={ui.sousTitre}>{tp.campagnes}</h2>
+          <h2 id="campagnes" className={ui.sousTitre}>
+            {tp.campagnes}
+          </h2>
           <p className={`${ui.legende} ${ui.galet}`}>{tp.suiviAide}</p>
           <ul className={p.liste}>
             {campagnes.map((c) => (
@@ -435,7 +755,12 @@ export function Prospection() {
                 <span className={ui.corpsFort}>
                   {tp.clics(c.clics)} · {tp.comptesCrees(c.inscriptions)}
                 </span>
-                <button type="button" className={`${ui.lien} ${s.voirSuivi}`} onClick={() => void basculerSuivi(c.id)} aria-expanded={ouverte === c.id}>
+                <button
+                  type="button"
+                  className={`${ui.lien} ${s.voirSuivi}`}
+                  onClick={() => void basculerSuivi(c.id)}
+                  aria-expanded={ouverte === c.id}
+                >
                   {ouverte === c.id ? tp.masquerSuivi : tp.voirSuivi}
                 </button>
                 {ouverte === c.id && <TableauSuivi envois={suivi} />}

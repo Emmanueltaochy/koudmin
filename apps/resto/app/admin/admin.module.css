@@ -490,3 +490,11 @@
 .champCourt {
   max-width: 120px;
 }
+
+/* Établissement qui recrute en ce moment (offre France Travail de moins de 30 jours). */
+.recrute {
+  display: block;
+  margin-top: 4px;
+  font: var(--k-legende-forte-font);
+  color: var(--k-vacoa);
+}

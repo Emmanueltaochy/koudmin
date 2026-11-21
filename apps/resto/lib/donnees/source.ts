@@ -167,13 +167,25 @@ export interface Prospect {
   telephone: string | null;
   email: string | null;
   /** Origine de l'e-mail : OpenStreetMap, site de l'établissement, saisie à la main. */
-  sourceEmail: 'osm' | 'site' | 'manuel' | null;
+  sourceEmail: 'osm' | 'site' | 'manuel' | 'offre' | null;
   site: string | null;
   statut: StatutProspect;
   notes: string | null;
   desinscrit: boolean;
   dernierEnvoi: string | null;
   envois: number;
+  /** Date de la dernière offre d'emploi France Travail de l'établissement (null : aucune). */
+  recruteLe?: string | null;
+  offreIntitule?: string | null;
+  offreUrl?: string | null;
+}
+
+/** Dernier relevé des offres France Travail. */
+export interface ReleveOffres {
+  le: string | null;
+  erreur: string | null;
+  /** Établissements avec une offre de moins de 30 jours. */
+  recrutent: number;
 }
 
 export interface CampagneProspection {
@@ -237,6 +249,7 @@ export interface SourceProspection {
   /** Dépose une demande : le VPS la prend dans la minute. */
   demanderRecherche(): Promise<void>;
   derniereRecherche(): Promise<RechercheProspects | null>;
+  releveOffres(): Promise<ReleveOffres>;
   prospects(): Promise<Prospect[]>;
   importer(fiches: ProspectOsm[]): Promise<{ ajoutes: number; misAJour: number }>;
   modifier(

@@ -688,6 +688,9 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
             desinscrit: boolean;
             dernier_envoi: string | null;
             envois: number;
+            recrute_le: string | null;
+            offre_intitule: string | null;
+            offre_url: string | null;
           }>((debut, fin) => client.rpc('admin_prospects').range(debut, fin));
           return l.map((p) => ({
             id: p.id,
@@ -706,7 +709,14 @@ export function sourceSupabase(url: string, cle: string): SourceResto & { client
             desinscrit: p.desinscrit,
             dernierEnvoi: p.dernier_envoi,
             envois: p.envois,
+            recruteLe: p.recrute_le,
+            offreIntitule: p.offre_intitule,
+            offreUrl: p.offre_url,
           }));
+        },
+        async releveOffres() {
+          const [r] = verifier(await client.rpc('admin_dernier_releve_offres')) as { le: string | null; erreur: string | null; recrutent: number }[];
+          return { le: r?.le ?? null, erreur: r?.erreur ?? null, recrutent: r?.recrutent ?? 0 };
         },
         async importer(fiches) {
           // Par paquets : un import de toute l'île reste sous la taille maximale d'une requête.
