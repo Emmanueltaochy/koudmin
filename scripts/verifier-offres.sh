@@ -51,8 +51,9 @@ class H(BaseHTTPRequestHandler):
         assert self.headers["Authorization"] == "Bearer JETON"
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
         assert u.path == "/partenaire/labonneboite/v2/search/", u.path
-        assert q["department_number"] == ["974"] and "G1803" in q["rome"] and len(q["rome"]) == 7, q
         page, taille = int(q["page"][0]), int(q["page_size"][0])
+        if q.get("department_number") != ["974"] or len(q.get("rome", [])) != 7:
+            return self.repondre(200, {"hits": 0, "items": []})
         items = TOUT[(page - 1) * taille: page * taille]
         self.repondre(200, {"hits": len(TOUT), "items": items})
 HTTPServer(("127.0.0.1", port), H).serve_forever()
@@ -97,6 +98,14 @@ premier=$($P -At -c "select email from prospects_a_lancer('{ouest,nord,sud,est}'
                  join prospects p on normaliser_email(p.email) = x.email where p.recrute_le is not null")" = 2 ] \
   || echec "les deux établissements à fort potentiel doivent passer en premier"
 echo "OK  priorité à ceux qui recrutent"
+
+echo "--- 3 bis. Diagnostic : chaque manière de chercher, sans rien enregistrer"
+avant=$($P -At -c "select count(*) from releves_offres")
+sortie=$(bash "$RACINE/deploy/vps/offres-france-travail.sh" --diagnostic)
+grep -q "département 974 + métiers ROME de l'hôtellerie-restauration : code 200, 104 résultat(s)" <<<"$sortie" || echec "diagnostic : $sortie"
+grep -q "département « La Réunion » + métiers ROME" <<<"$sortie" || echec "diagnostic incomplet : $sortie"
+[ "$($P -At -c "select count(*) from releves_offres")" = "$avant" ] || echec "le diagnostic a enregistré un relevé"
+echo "OK  diagnostic"
 
 echo "--- 4. Identifiants refusés : relevé noté en erreur"
 printf 'FT_CLIENT_ID=id-essai\nFT_CLIENT_SECRET=mauvais\n' > "$DIR/.env"

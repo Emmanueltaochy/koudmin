@@ -229,7 +229,8 @@ Boite v2 » ajoutée) ; la clé est saisie sans affichage, vérifiée, puis rang
 sudo /opt/kivien/source/deploy/vps/configurer-france-travail.sh
 ```
 
-Relevé à la main : `sudo kivien-offres`. Suivi : `journalctl -u kivien-offres`.
+Relevé à la main : `sudo kivien-offres`. Si rien ne sort : `sudo kivien-offres --diagnostic` (nombre de
+résultats pour chaque manière de chercher, sans rien enregistrer). Suivi : `journalctl -u kivien-offres`.
 Vérification sans Internet : `scripts/verifier-offres.sh` (faux service La Bonne Boite).
 
 ## DPAE automatique

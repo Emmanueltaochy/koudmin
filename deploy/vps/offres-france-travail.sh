@@ -9,8 +9,11 @@
 # Identifiants de l'application francetravail.io (jamais dans le dépôt) : FT_CLIENT_ID et
 # FT_CLIENT_SECRET dans /opt/kivien/supabase/.env, rangés par deploy/vps/configurer-france-travail.sh.
 # Installé en /usr/local/sbin/kivien-offres. Usage manuel : sudo kivien-offres
+#   --diagnostic : essaie chaque manière de chercher (lieu, métiers) et affiche le nombre de résultats,
+#                  sans rien enregistrer.
 # Essais : KIVIEN_PSQL (autre accès à la base) et KIVIEN_FT_URL (faux service), voir scripts/verifier-offres.sh.
 set -euo pipefail
+MODE=${1:-}
 ICI=${KIVIEN_SUPABASE:-/opt/kivien/supabase}
 lire() { grep -E "^$1=" "$ICI/.env" 2>/dev/null | tail -n1 | cut -d= -f2-; }
 
@@ -20,7 +23,7 @@ if [ -z "$(lire FT_CLIENT_SECRET || true)" ]; then
 fi
 
 FT_CLIENT_ID=$(lire FT_CLIENT_ID || true) FT_CLIENT_SECRET=$(lire FT_CLIENT_SECRET || true) \
-KIVIEN_PSQL=${KIVIEN_PSQL:-} KIVIEN_FT_URL=${KIVIEN_FT_URL:-} \
+KIVIEN_PSQL=${KIVIEN_PSQL:-} KIVIEN_FT_URL=${KIVIEN_FT_URL:-} MODE="$MODE" \
 python3 -I - <<'PY'
 import json, os, re, subprocess, time, urllib.error, urllib.parse, urllib.request
 
@@ -35,6 +38,19 @@ METIERS = {"G1602": "cuisine", "G1603": "restauration", "G1605": "plonge", "G180
            "G1803": "service en salle", "G1501": "entretien des chambres", "G1703": "réception"}
 PAR_PAGE = 100
 PAGES_MAX = 15
+DIAGNOSTIC = os.environ.get("MODE") == "--diagnostic"
+# Manières de désigner La Réunion, puis les métiers : la première qui donne des résultats est gardée.
+LIEUX = [
+    ("département 974", [("department_number", "974")]),
+    ("département « La Réunion »", [("department", "La Réunion")]),
+    ("région « La Réunion »", [("region", "La Réunion")]),
+    ("lieu « La Réunion »", [("location", "La Réunion")]),
+    ("rayon de 80 km autour du centre de l'île", [("latitude", "-21.115"), ("longitude", "55.536"), ("distance", "80")]),
+]
+ACTIVITES = [
+    ("métiers ROME de l'hôtellerie-restauration", [("rome", m) for m in METIERS]),
+    ("activités NAF 55 et 56 (hébergement, restauration)", [("naf", "55"), ("naf", "56")]),
+]
 PAUSE = float(os.environ.get("KIVIEN_FT_PAUSE") or 0.6)  # quelques appels par seconde au plus
 
 
@@ -115,18 +131,54 @@ def ligne(e, metiers):
     }
 
 
+def chercher(autorisation, lieu, activite, page, taille=PAR_PAGE):
+    parametres = urllib.parse.urlencode(activite + lieu + [("page", page), ("page_size", taille), ("sort_by", "hiring_score")])
+    return appeler(f"{URL_RECHERCHE}?{parametres}", entetes=autorisation)
+
+
+def resultats(texte):
+    try:
+        d = json.loads(texte)
+    except ValueError:
+        return None, []
+    return d.get("hits"), d.get("items") or []
+
+
+if DIAGNOSTIC:
+    autorisation = {"Authorization": "Bearer " + jeton()}
+    print("Jeton accepté. Nombre d'entreprises trouvées pour chaque manière de chercher :")
+    for nom_lieu, lieu in LIEUX:
+        for nom_activite, activite in ACTIVITES:
+            code, texte = chercher(autorisation, lieu, activite, 1, 5)
+            hits, items = resultats(texte)
+            exemple = f" ; ex. {items[0].get('company_name')} ({items[0].get('city')})" if items else ""
+            print(f"- {nom_lieu} + {nom_activite} : code {code}, {hits if hits is not None else '?'} résultat(s){exemple}")
+            if code != 200:
+                print("    réponse :", re.sub(r"\s+", " ", texte)[:300])
+            time.sleep(PAUSE)
+    raise SystemExit(0)
+
 try:
     autorisation = {"Authorization": "Bearer " + jeton()}
     entreprises = {}
     metiers = {}
-    for page in range(1, PAGES_MAX + 1):
-        parametres = urllib.parse.urlencode(
-            [("rome", m) for m in METIERS] + [("department_number", "974"), ("page", page),
-                                              ("page_size", PAR_PAGE), ("sort_by", "hiring_score")])
-        code, texte = appeler(f"{URL_RECHERCHE}?{parametres}", entetes=autorisation)
+    # Première manière de chercher qui donne des résultats.
+    lieu, activite, choix = LIEUX[0][1], ACTIVITES[0][1], None
+    for nom_lieu, l in LIEUX:
+        for nom_activite, a in ACTIVITES:
+            code, texte = chercher(autorisation, l, a, 1, 1)
+            if code == 200 and resultats(texte)[1]:
+                lieu, activite, choix = l, a, f"{nom_lieu} + {nom_activite}"
+                break
+            time.sleep(PAUSE)
+        if choix:
+            break
+    print(f"Recherche : {choix or 'aucune manière de chercher ne donne de résultat (sudo kivien-offres --diagnostic)'}")
+    for page in range(1, PAGES_MAX + 1) if choix else []:
+        code, texte = chercher(autorisation, lieu, activite, page)
         if code == 429:  # trop d'appels : on attend puis on reprend la même page une fois
             time.sleep(2)
-            code, texte = appeler(f"{URL_RECHERCHE}?{parametres}", entetes=autorisation)
+            code, texte = chercher(autorisation, lieu, activite, page)
         if code == 204 or not texte.strip():
             break
         if code != 200:
