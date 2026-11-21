@@ -212,24 +212,25 @@ Stripe et de GoCardless : ils ne passent jamais par Kivien.
   relancer ne débite jamais deux fois.
 - Passage en réel : seules les missions à partir de ce jour-là sont débitées.
 
-## Établissements qui recrutent (France Travail)
+## Établissements qui vont recruter (La Bonne Boite, France Travail)
 
-Chaque jour à 6 h 40, `kivien-offres.timer` relève les offres d'emploi de La Réunion publiées sur
-France Travail dans l'hôtellerie et la restauration (API « Offres d'emploi », francetravail.io).
-Chaque établissement est rapproché d'un prospect existant (même nom, même commune) ou ajouté, avec
-l'intitulé et le lien de sa dernière offre. Dans l'espace admin, onglet Prospection, il porte la
-mention « Recrute en ce moment » (offre de moins de 30 jours), et la prospection automatique lui écrit
-en premier. Les offres anonymes (sans nom d'établissement) sont ignorées.
+Chaque jour à 6 h 40, `kivien-offres.timer` interroge l'API « La Bonne Boite v2 » de France Travail
+(francetravail.io) : entreprises de La Réunion de l'hôtellerie et de la restauration, classées par
+potentiel d'embauche dans les 6 prochains mois (données mises à jour une fois par mois). Chaque
+établissement est rapproché d'un prospect existant (même nom, même commune) ou ajouté. Ceux à fort
+potentiel portent la mention « Va recruter » dans l'espace admin (onglet Prospection, avec un filtre),
+et la prospection automatique leur écrit en premier. La Bonne Boite ne donne ni e-mail ni téléphone :
+la recherche des e-mails sur les sites (OpenStreetMap) et la saisie à la main complètent les fiches.
 
-Une fois, avec l'identifiant et la clé de l'application créée sur francetravail.io (accès à l'API
-« Offres d'emploi v2 ») ; la clé est saisie sans affichage, vérifiée, puis rangée dans `.env` :
+Une fois, avec l'identifiant et la clé de l'application créée sur francetravail.io (API « La Bonne
+Boite v2 » ajoutée) ; la clé est saisie sans affichage, vérifiée, puis rangée dans `.env` :
 
 ```bash
 sudo /opt/kivien/source/deploy/vps/configurer-france-travail.sh
 ```
 
 Relevé à la main : `sudo kivien-offres`. Suivi : `journalctl -u kivien-offres`.
-Vérification sans Internet : `scripts/verifier-offres.sh` (faux service France Travail).
+Vérification sans Internet : `scripts/verifier-offres.sh` (faux service La Bonne Boite).
 
 ## DPAE automatique
 

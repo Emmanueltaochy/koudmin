@@ -398,11 +398,11 @@ AccuracySec=10s
 [Install]
 WantedBy=timers.target
 UNIT
-# Offres d'emploi de La Réunion (France Travail) : établissements qui recrutent, chaque jour à 6 h 40.
+# La Bonne Boite (France Travail) : établissements de La Réunion qui vont recruter, chaque jour à 6 h 40.
 install -m 0700 "$SOURCE/deploy/vps/offres-france-travail.sh" /usr/local/sbin/kivien-offres
 cat > /etc/systemd/system/kivien-offres.service <<'UNIT'
 [Unit]
-Description=Offres d'emploi France Travail pour la prospection Kivien
+Description=La Bonne Boite (France Travail) pour la prospection Kivien
 After=docker.service
 
 [Service]
@@ -412,7 +412,7 @@ TimeoutStartSec=20min
 UNIT
 cat > /etc/systemd/system/kivien-offres.timer <<'UNIT'
 [Unit]
-Description=Offres d'emploi France Travail, chaque jour à 6 h 40 (La Réunion)
+Description=La Bonne Boite (France Travail), chaque jour à 6 h 40 (La Réunion)
 
 [Timer]
 OnCalendar=*-*-* 02:40:00 UTC

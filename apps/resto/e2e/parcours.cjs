@@ -181,12 +181,12 @@ let pageCourante = null;
   if (!(await p.locator('form[aria-labelledby="campagne"] textarea').inputValue()).replace(/\s/g, ' ').includes("3,50 € HT par heure d'extra")) throw new Error('frais absents du message');
   ok('prospection : message de lancement avec les frais en vigueur');
   // Établissements qui recrutent (offres France Travail) : repérés et filtrables.
-  await p.getByText('Recrute en ce moment · Serveur / Serveuse en restauration').waitFor();
-  await p.getByLabel('Qui recrutent en ce moment').check();
+  await p.getByText("Va recruter · Fort potentiel d'embauche (cuisine, service en salle)").waitFor();
+  await p.getByLabel('Qui vont recruter (France Travail)').check();
   await p.getByText('1 établissement avec e-mail dans la sélection').waitFor();
-  await p.getByLabel('Qui recrutent en ce moment').uncheck();
+  await p.getByLabel('Qui vont recruter (France Travail)').uncheck();
   await p.getByText('4 établissements avec e-mail dans la sélection').waitFor();
-  ok('prospection : établissements qui recrutent (offre France Travail) signalés et filtrables');
+  ok('prospection : établissements qui vont recruter (La Bonne Boite) signalés et filtrables');
   // Prospection automatique : désactivée par défaut, activée par zone, avec relance.
   await p.getByRole('heading', { name: 'Prospection automatique' }).waitFor();
   await p.getByText('Désactivée : aucun e-mail ne part tout seul.').waitFor();

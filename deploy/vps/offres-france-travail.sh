@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Établissements qui recrutent en ce moment : offres d'emploi de La Réunion (974) publiées sur France
-# Travail dans l'hôtellerie et la restauration, par l'API « Offres d'emploi » (francetravail.io).
-# Chaque établissement est rapproché d'un prospect existant ou ajouté à la prospection, avec la date
-# et l'intitulé de sa dernière offre (migration 20261121090000). Le minuteur kivien-offres.timer
-# l'appelle chaque jour à 6 h 40 (La Réunion).
+# Établissements qui vont recruter : API « La Bonne Boite v2 » de France Travail (francetravail.io),
+# entreprises de La Réunion (974) à fort potentiel d'embauche dans les 6 prochains mois, pour les
+# métiers de l'hôtellerie et de la restauration. Chaque établissement est rapproché d'un prospect
+# existant (même nom, même commune) ou ajouté à la prospection (migration 20261121090000) ; ceux à
+# fort potentiel sont marqués et passent en premier. Le minuteur kivien-offres.timer l'appelle chaque
+# jour à 6 h 40 (La Réunion). Données mises à jour une fois par mois par France Travail.
 #
 # Identifiants de l'application francetravail.io (jamais dans le dépôt) : FT_CLIENT_ID et
 # FT_CLIENT_SECRET dans /opt/kivien/supabase/.env, rangés par deploy/vps/configurer-france-travail.sh.
@@ -25,12 +26,16 @@ import json, os, re, subprocess, time, urllib.error, urllib.parse, urllib.reques
 
 faux = os.environ.get("KIVIEN_FT_URL")
 URL_JETON = (faux or "https://entreprise.francetravail.fr") + "/connexion/oauth2/access_token?realm=%2Fpartenaire"
-URL_OFFRES = (faux or "https://api.francetravail.io") + "/partenaire/offresdemploi/v2/offres/search"
+URL_RECHERCHE = (faux or "https://api.francetravail.io") + "/partenaire/labonneboite/v2/search/"
+# Portée de l'API (documentation francetravail.io, La Bonne Boite v2).
+PORTEES = ("api_labonneboitev2", "api_labonneboitev2 search office")
 # Métiers (codes ROME) : cuisine, restauration polyvalente, plonge, bar, service en salle,
 # entretien des chambres, réception d'hôtel.
-METIERS = ["G1602", "G1603", "G1605", "G1801", "G1803", "G1501", "G1703"]
-PAR_PAGE = 150
-PAGES_MAX = 6
+METIERS = {"G1602": "cuisine", "G1603": "restauration", "G1605": "plonge", "G1801": "bar",
+           "G1803": "service en salle", "G1501": "entretien des chambres", "G1703": "réception"}
+PAR_PAGE = 100
+PAGES_MAX = 15
+PAUSE = float(os.environ.get("KIVIEN_FT_PAUSE") or 0.6)  # quelques appels par seconde au plus
 
 
 def sql(requete, **variables):
@@ -57,7 +62,8 @@ def appeler(url, corps=None, entetes=None):
 
 
 def jeton():
-    for portee in ("api_offresdemploiv2 o2dsoffre", "api_offresdemploiv2"):
+    code = None
+    for portee in PORTEES:
         corps = urllib.parse.urlencode({
             "grant_type": "client_credentials", "client_id": os.environ["FT_CLIENT_ID"],
             "client_secret": os.environ["FT_CLIENT_SECRET"], "scope": portee,
@@ -65,12 +71,11 @@ def jeton():
         code, texte = appeler(URL_JETON, corps, {"Content-Type": "application/x-www-form-urlencoded"})
         if code == 200:
             return json.loads(texte)["access_token"]
-    raise SystemExit(f"Identifiants refusés par France Travail (code {code}).")
+    raise SystemExit(f"Identifiants refusés par France Travail (code {code}). L'API La Bonne Boite v2 est-elle ajoutée à l'application ?")
 
 
-def categorie(o):
-    naf = (o.get("codeNAF") or "").replace(".", "")
-    rome = o.get("romeCode") or ""
+def categorie(e):
+    naf = (e.get("naf") or "").replace(".", "")
     if naf.startswith("551"):
         return "hotel"
     if naf.startswith("55"):
@@ -81,73 +86,73 @@ def categorie(o):
         return "restauration_rapide"
     if naf.startswith("56"):
         return "restaurant"
-    return {"G1501": "hotel", "G1703": "hotel", "G1801": "bar"}.get(rome, "restaurant")
+    return {"G1501": "hotel", "G1703": "hotel", "G1801": "bar"}.get(e.get("rome"), "restaurant")
 
 
-def commune(o):
-    # « 974 - ST PAUL » ou « 974 - Saint-Paul » : sans le département.
-    libelle = ((o.get("lieuTravail") or {}).get("libelle") or "").strip()
-    libelle = re.sub(r"^\s*97\d\s*-\s*", "", libelle)
-    libelle = re.sub(r"\bST\b", "SAINT", libelle, flags=re.I)
-    libelle = re.sub(r"\bSTE\b", "SAINTE", libelle, flags=re.I)
-    return libelle.title().replace(" ", "-") if libelle.isupper() else libelle
+def joli(texte):
+    """« LE BOUCAN GRILLE » devient « Le Boucan Grille » ; un nom déjà en casse mixte ne change pas."""
+    texte = (texte or "").strip()
+    return texte.title() if texte.isupper() else texte
 
 
-def ligne(o):
-    e = o.get("entreprise") or {}
-    nom = (e.get("nom") or "").strip()
-    if not nom:  # offre anonyme : pas d'établissement à contacter
+def ligne(e, metiers):
+    nom = joli(e.get("office_name")) or joli(e.get("company_name"))
+    if not nom:
         return None
-    lieu = o.get("lieuTravail") or {}
-    contact = o.get("contact") or {}
-    url = (o.get("origineOffre") or {}).get("urlOrigine") or \
-        f"https://candidat.francetravail.fr/offres/recherche/detail/{o.get('id', '')}"
+    lieu = e.get("location") or {}
+    fort = bool(e.get("is_high_potential"))
+    libelles = ", ".join(sorted({METIERS[m] for m in metiers if m in METIERS}))
     return {
         "nom": nom,
-        "categorie": categorie(o),
-        "commune": commune(o),
-        "lat": lieu.get("latitude"),
-        "lng": lieu.get("longitude"),
-        "email": contact.get("courriel"),
-        "telephone": contact.get("telephone"),
-        "site": e.get("url"),
-        "intitule": (o.get("intitule") or "")[:200],
-        "url": url,
-        "publiee_le": o.get("dateActualisation") or o.get("dateCreation"),
+        "categorie": categorie(e),
+        "commune": (e.get("city") or "").strip(),
+        "lat": lieu.get("lat"),
+        "lng": lieu.get("lon"),
+        # Seules les entreprises à fort potentiel sont marquées « recrute » (date du relevé).
+        "publiee_le": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()) if fort else None,
+        "intitule": f"Fort potentiel d'embauche ({libelles})" if fort and libelles else None,
+        "url": None,
     }
 
 
 try:
     autorisation = {"Authorization": "Bearer " + jeton()}
-    offres = {}
-    for metier in METIERS:
-        for page in range(PAGES_MAX):
-            debut = page * PAR_PAGE
-            parametres = urllib.parse.urlencode({
-                "departement": "974", "codeROME": metier, "publieeDepuis": 31,
-                "range": f"{debut}-{debut + PAR_PAGE - 1}",
-            })
-            code, texte = appeler(f"{URL_OFFRES}?{parametres}", entetes=autorisation)
-            if code == 204 or not texte.strip():
-                break
-            if code not in (200, 206):
-                raise RuntimeError(f"recherche {metier} : code {code}")
-            resultats = json.loads(texte).get("resultats") or []
-            for o in resultats:
-                offres[o.get("id")] = o
-            if code == 200 or len(resultats) < PAR_PAGE:
-                break
-            time.sleep(0.3)  # limite de débit de l'API
-    lignes = [l for l in (ligne(o) for o in offres.values()) if l]
+    entreprises = {}
+    metiers = {}
+    for page in range(1, PAGES_MAX + 1):
+        parametres = urllib.parse.urlencode(
+            [("rome", m) for m in METIERS] + [("department_number", "974"), ("page", page),
+                                              ("page_size", PAR_PAGE), ("sort_by", "hiring_score")])
+        code, texte = appeler(f"{URL_RECHERCHE}?{parametres}", entetes=autorisation)
+        if code == 429:  # trop d'appels : on attend puis on reprend la même page une fois
+            time.sleep(2)
+            code, texte = appeler(f"{URL_RECHERCHE}?{parametres}", entetes=autorisation)
+        if code == 204 or not texte.strip():
+            break
+        if code != 200:
+            raise RuntimeError(f"recherche page {page} : code {code}")
+        items = json.loads(texte).get("items") or []
+        for e in items:
+            cle = e.get("siret") or str(e.get("id"))
+            garde = entreprises.get(cle)
+            # Une même entreprise revient pour plusieurs métiers : on garde la fiche la plus favorable.
+            if not garde or (e.get("is_high_potential") and not garde.get("is_high_potential")):
+                entreprises[cle] = e
+            metiers.setdefault(cle, set()).add(e.get("rome"))
+        if len(items) < PAR_PAGE:
+            break
+        time.sleep(PAUSE)
+    lignes = [l for l in (ligne(e, metiers[k]) for k, e in entreprises.items()) if l]
     resultat = sql("select ajoutes || ' ' || rapproches from importer_offres(:'l'::jsonb);", l=json.dumps(lignes))
     ajoutes, rapproches = (int(x) for x in resultat.split())
-    noter(len(offres), ajoutes, rapproches)
-    print(f"Offres France Travail : {len(offres)} offre(s), {len(lignes)} avec un établissement nommé, "
-          f"{ajoutes} établissement(s) ajouté(s), {rapproches} déjà connu(s).")
+    forts = sum(1 for l in lignes if l["publiee_le"])
+    noter(len(entreprises), ajoutes, rapproches)
+    print(f"La Bonne Boite : {len(entreprises)} établissement(s) de La Réunion, dont {forts} à fort potentiel "
+          f"d'embauche ; {ajoutes} ajouté(s) à la prospection, {rapproches} déjà connu(s).")
 except SystemExit as fin:
     noter(erreur=str(fin))
     raise
 except Exception as err:
     noter(erreur=f"{type(err).__name__} : {err}")
-    raise SystemExit(f"Relevé des offres interrompu : {err}")
+    raise SystemExit(f"Relevé La Bonne Boite interrompu : {err}")
 PY

@@ -269,7 +269,7 @@ function TableauSuivi({ envois }: { envois: SuiviEnvoi[] | 'chargement' }) {
 }
 
 /** Prospection : établissements de l'île (OpenStreetMap ou saisie), suivi et campagnes e-mail. */
-/** Offre d'emploi France Travail de moins de 30 jours. */
+/** Fort potentiel d'embauche selon La Bonne Boite (relevé de moins de 30 jours). */
 function recruteEnCeMoment(x: Prospect): boolean {
   return !!x.recruteLe && Date.now() - new Date(x.recruteLe).getTime() < 30 * 864e5;
 }

@@ -651,12 +651,12 @@ export function sourceFictive(): SourceResto {
                 desinscrit: false,
                 dernierEnvoi: null,
                 envois: 0,
-                // Démonstration : une offre d'emploi France Travail de la veille.
+                // Démonstration : fort potentiel d'embauche selon La Bonne Boite (relevé de la veille).
                 ...(f.osm_id === 'node/101'
                   ? {
                       recruteLe: new Date(Date.now() - 864e5).toISOString(),
-                      offreIntitule: 'Serveur / Serveuse en restauration',
-                      offreUrl: 'https://candidat.francetravail.fr/offres/recherche/detail/demo',
+                      offreIntitule: "Fort potentiel d'embauche (cuisine, service en salle)",
+                      offreUrl: null,
                     }
                   : {}),
               });

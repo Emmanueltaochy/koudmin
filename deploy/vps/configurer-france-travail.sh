@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Branche le relevé des offres d'emploi (deploy/vps/offres-france-travail.sh) sur l'application
+# Branche le relevé La Bonne Boite (deploy/vps/offres-france-travail.sh) sur l'application
 # francetravail.io de Kivien. L'identifiant et la clé secrète sont demandés ici (clé saisie sans
 # affichage), vérifiés auprès de France Travail, et rangés seulement dans /opt/kivien/supabase/.env.
 #
@@ -25,7 +25,7 @@ echo
 
 if ! ID="$ID" SECRET="$SECRET" python3 -I - <<'PY'
 import os, sys, urllib.error, urllib.parse, urllib.request
-for portee in ("api_offresdemploiv2 o2dsoffre", "api_offresdemploiv2"):
+for portee in ("api_labonneboitev2", "api_labonneboitev2 search office"):
     corps = urllib.parse.urlencode({"grant_type": "client_credentials", "client_id": os.environ["ID"],
                                     "client_secret": os.environ["SECRET"], "scope": portee}).encode()
     req = urllib.request.Request("https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=%2Fpartenaire",
@@ -42,12 +42,12 @@ for portee in ("api_offresdemploiv2 o2dsoffre", "api_offresdemploiv2"):
 sys.exit(1)
 PY
 then
-  echo "Identifiants refusés : rien n'a changé. Vérifier l'identifiant, la clé, et que l'application a accès à l'API « Offres d'emploi v2 »." >&2
+  echo "Identifiants refusés : rien n'a changé. Vérifier l'identifiant, la clé, et que l'API « La Bonne Boite v2 » est ajoutée à l'application." >&2
   exit 1
 fi
 
 regler FT_CLIENT_ID "$ID"
 regler FT_CLIENT_SECRET "$SECRET"
 unset SECRET
-echo "Identifiants acceptés par France Travail. Premier relevé des offres :"
+echo "Identifiants acceptés par France Travail. Premier relevé La Bonne Boite :"
 "${KIVIEN_OFFRES:-/usr/local/sbin/kivien-offres}" || echo "Relevé à relancer : sudo kivien-offres"
